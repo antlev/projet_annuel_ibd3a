@@ -1,0 +1,18 @@
+﻿  Source.cpp
+Source.cpp(52): warning C4018: '>' : incompatibilité signed/unsigned
+Source.cpp(61): warning C4552: '+' : opérateur sans effet ; opérateur avec effet secondaire attendu
+Source.cpp(69): warning C4244: 'argument' : conversion de 'const double' en 'int', perte possible de données
+Source.cpp(69): warning C4800: 'double' : valeur forcée à la valeur booléenne 'true' ou 'false' (avertissement sur les performances)
+Source.cpp(71): warning C4805: '!=' : mélange risqué de type 'bool' et de type 'double' dans l'opération
+Source.cpp(45): warning C4297: 'linear_fit_classification_rosenblatt' : la fonction lève une exception alors qu'elle est présumée ne pas le faire
+  Source.cpp(45): note: __declspec(nothrow), throw(), noexcept(true) ou noexcept a été spécifié sur la fonction
+Source.cpp(111): warning C4800: 'int' : valeur forcée à la valeur booléenne 'true' ou 'false' (avertissement sur les performances)
+     Création de la bibliothèque C:\Projet_annuel\C++_lib\Cours1ML-280317-FirstDll\x64\Release\Cours1ML-280317-FirstDll.lib et de l'objet C:\Projet_annuel\C++_lib\Cours1ML-280317-FirstDll\x64\Release\Cours1ML-280317-FirstDll.exp
+  Génération de code en cours
+c:\projet_annuel\c++_lib\cours1ml-280317-firstdll\cours1ml-280317-firstdll\source.cpp(107): warning C4700: variable locale 'toto' non initialisée utilisée
+  24 of 24 functions (100.0%) were compiled, the rest were copied from previous compilation.
+    0 functions were new in current compilation
+    0 functions had inline decision re-evaluated but remain unchanged
+  Fin de la génération du code
+  Cours1ML-280317-FirstDll.vcxproj -> C:\Projet_annuel\C++_lib\Cours1ML-280317-FirstDll\x64\Release\Cours1ML-280317-FirstDll.dll
+  Cours1ML-280317-FirstDll.vcxproj -> C:\Projet_annuel\C++_lib\Cours1ML-280317-FirstDll\x64\Release\Cours1ML-280317-FirstDll.pdb (Full PDB)
