@@ -3,27 +3,123 @@ using System.Runtime.InteropServices;
 
 public class MainScript : MonoBehaviour {
 
+	public static System.IntPtr model;
+	public static int inputSize = 2;
+
     public static int iterationNumber = 100;
     public static int step = 1;
 
     public Transform[] baseApprentissage;
     public Transform[] baseTest;
 
-    // Use this for initialization
-    void Start()
-    {
+	public void create_model(){
+		model = LibWrapperMachineLearning.linear_create_model (inputSize);
+		Debug.Log ("Model created !");
+	}	
+	public void erase_model(){
+		if (model == null) {
+			LibWrapperMachineLearning.linear_remove_model (model);
+			Debug.Log ("Model removed !");
+		}
+	}
+	public void classify(){
+		if (model == null) {
+			Debug.Log ("Classify");
+			Debug.Log ("to be implemented");
+			double[] inputs = new double[inputSize * baseTest.Length];
+			getInputs (baseTest, inputs);
+			int i = 0;
+			foreach (var input in inputs){
+//				baseTest[i].position.y = LibWrapperMachineLearning.linear_classify (model, input, inputSize);
+				i++;
+			}
 
-    }
+		} else {
+			Debug.Log ("Aucun modèle en mémoire");
+		}
+	}
+	public void predict(){
+		if (model == null) {
+			Debug.Log ("Predict");
+			Debug.Log ("to be implemented");
+			double[] inputs = new double[inputSize * baseTest.Length];
+			getInputs (baseTest, inputs);
+			int i = 0;
+			foreach (var input in inputs){
+//				baseTest[i].position.y = LibWrapperMachineLearning.linear_predict (model, input, inputSize);
+				i++;
+			}
+		} else {
+			Debug.Log ("Aucun modèle en mémoire");
+		}
+	}
+	public void linear_fit_regression(){
+		if (model == null) {
+			Debug.Log ("linear_fit_regression");
+			Debug.Log ("to be implemented");
+			double[] inputs = new double[inputSize * baseApprentissage.Length];
+			getInputs (baseApprentissage, inputs);
 
-    // Update is called once per frame
-    void Update()
-    {
+		} else {
+			Debug.Log ("Aucun modèle en mémoire");
+		}
+	}	
 
-    }
+	public void linear_fit_classification_hebb(){
+		if (model == null) {
+			Debug.Log ("linear_fit_classification_hebb");
+			Debug.Log ("to be implemented");
+			double[] inputs = new double[inputSize * baseApprentissage.Length];
+			getInputs (baseApprentissage, inputs);
+//			LibWrapperMachineLearning.linear_fit_classification_hebb (model, inputs, inputs.Length, inputSize, iterationNumber, step);
+		} else {
+			Debug.Log ("Aucun modèle en mémoire");
+		}
+	}
 
 
     public void linear_fit_classification_rosenblatt()
     {
+		if (model == null) {
+			Debug.Log ("linear_fit_classification_rosenblatt");
+			Debug.Log ("to be implemented");
+			double[] inputs = new double[inputSize * baseApprentissage.Length];
+			double[] outputs = new double[inputSize * baseApprentissage.Length];
+			getInputsOutputs (baseApprentissage, inputs, outputs);
+
+//			LibWrapperMachineLearning.linear_fit_classification_rosenblatt (model, inputs, inputs.Length, inputSize, outputs, outputs.Length, iterationNumber, step);
+		} else {
+			Debug.Log ("Aucun modèle en mémoire");
+		}
+	}
+
+	private void getInputs(Transform[] objetUnity, double[] inputs){
+		int i = 0;
+		foreach (var data in baseApprentissage)
+		{
+			inputs[i] = data.position.x;
+			i++;
+			inputs[i] = data.position.z;
+			i++;
+		}
+	}
+
+	private void getInputsOutputs(Transform[] objetUnity, double[] inputs, double[] outputs){
+		int i = 0, j = 0;
+		foreach (var data in baseApprentissage)
+		{
+			inputs[i] = data.position.x;
+			i++;
+			inputs[i] = data.position.z;
+			i++;
+			outputs[j] = data.position.y;
+			j++;
+		}
+	}
+
+
+	public void test(){
+				
         Debug.Log("toto >" + LibWrapperMachineLearning.return42());
 
         Debug.Log("baseApprentissage >" + baseApprentissage.Length);
@@ -45,6 +141,7 @@ public class MainScript : MonoBehaviour {
             inputs[i] = data.position.z;
             i++;
             outputs[j] = data.position.y;
+			j++;
         }
         Debug.Log("DEBUG inputs >" + inputs.Length + "<");
 
@@ -86,6 +183,9 @@ public class MainScript : MonoBehaviour {
 
         //		LibWrapperMachineLearning.linear_remove_model(model);
     }
+
+
+
 }
 
 
