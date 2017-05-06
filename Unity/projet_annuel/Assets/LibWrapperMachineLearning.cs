@@ -4,7 +4,13 @@ public class LibWrapperMachineLearning
 {
 
 #if UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN
-    [DllImport("Cours1ML-280317-FirstDll")] 
+	[DllImport("test")] 
+	public static extern int test(System.IntPtr test, int testSize);
+
+	[DllImport("test")] 
+	public static extern int toto();
+
+	[DllImport("Cours1ML-280317-FirstDll")] 
     public static extern int return42();
 
     [DllImport("Cours1ML-280317-FirstDll")] 

@@ -48,36 +48,41 @@ public class MainScript : MonoBehaviour {
         }
         Debug.Log("DEBUG inputs >" + inputs.Length + "<");
 
-        int inputsSize = inputs.Length;
-        int outputsSize = outputs.Length;
 
-        System.IntPtr model = LibWrapperMachineLearning.linear_create_model(inputSize);
+		Debug.Log("DEBUG toto >" + LibWrapperMachineLearning.toto() + "<");
 
-        var gchX = default(GCHandle);
-        var gchY = default(GCHandle);
-        try
-        {
-            gchX = GCHandle.Alloc(inputs, GCHandleType.Pinned);
-            gchY = GCHandle.Alloc(outputs, GCHandleType.Pinned);
-           // LibWrapperMachineLearning.linear_fit_classification_rosenblatt(model, gchX.AddrOfPinnedObject(), inputsSize, inputSize, gchY.AddrOfPinnedObject(), outputsSize, iterationNumber, step);
-        }
-        finally
-        {
-            if (gchX.IsAllocated) gchX.Free();
-            if (gchY.IsAllocated) gchY.Free();
-        }
 
-        double[] input = new double[inputSize];
-
-        i = 0;
-        foreach (var data in baseTest)
-        {
-            input[i] = data.position.x;
-            i++;
-            input[i] = data.position.z;
-            i++;
-            //			data.position.y = LibWrapperMachineLearning.linear_classify(model, input);
-        }
+//        int inputsSize = inputs.Length;
+//        int outputsSize = outputs.Length;
+//
+//        System.IntPtr model = LibWrapperMachineLearning.linear_create_model(inputSize);
+//
+//        var gchX = default(GCHandle);
+//        var gchY = default(GCHandle);
+//        try
+//        {
+//            gchX = GCHandle.Alloc(inputs, GCHandleType.Pinned);
+//            gchY = GCHandle.Alloc(outputs, GCHandleType.Pinned);
+////			Debug.Log ("test >" + LibWrapperMachineLearning.test(gchX.AddrOfPinnedObject(), inputs.Length) + "<");
+////		    LibWrapperMachineLearning.linear_fit_classification_rosenblatt(model, gchX.AddrOfPinnedObject(), inputsSize, inputSize, gchY.AddrOfPinnedObject(), outputsSize, iterationNumber, step);
+//        }
+//        finally
+//        {
+//            if (gchX.IsAllocated) gchX.Free();
+//            if (gchY.IsAllocated) gchY.Free();
+//        }
+//
+//        double[] input = new double[inputSize];
+//
+//        i = 0;
+//        foreach (var data in baseTest)
+//        {
+//            input[i] = data.position.x;
+//            i++;
+//            input[i] = data.position.z;
+//            i++;
+//            //			data.position.y = LibWrapperMachineLearning.linear_classify(model, input);
+//        }
 
         //		LibWrapperMachineLearning.linear_remove_model(model);
     }
