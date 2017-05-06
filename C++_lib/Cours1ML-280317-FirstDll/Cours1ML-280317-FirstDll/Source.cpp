@@ -1,41 +1,41 @@
-// Ne mettre que des elements présents en C - pas de classes
-// changer en x64 en haut !!!!!
-//extern "C"
-//{
-	//prefixe necessaire sur Windows pour pouvoir utiliser fonction
-//	__declspec(dllexport) int return42() {
-//		return 92;
-//	}
-//} 
-
-
-
 #include "Header.h"
 #include <iostream>
 #include <stdlib.h>
+int test(double* test, int testSize){
+	int i(0);
+	for(i=0;i<testSize;++i){
+		std::cout << "test[" << i << "] = " << test[i] <<std::endl;
+	}
+	return 1;
+}
 
-// Génère un modèle aléatoirement en "settant" tous les poids
-// à une valeur pseudo-aléatoire entre -1 et 1
+int toto(){
+	std::cout << "toto!!!!!!!"<<std::endl;
+	return 1;
+}
+
+// Gï¿½nï¿½re un modï¿½le alï¿½atoirement en "settant" tous les poids
+// ï¿½ une valeur pseudo-alï¿½atoire entre -1 et 1
 double *linear_create_model(int inputDimension) {
-	// Création du modèle en mémoire
+	// Crï¿½ation du modï¿½le en mï¿½moire
 	double* ptr = (double *)std::malloc(sizeof(double) * inputDimension);
 	int i;
-	// On affecte les poids à une valeur entre -1 et 1
+	// On affecte les poids ï¿½ une valeur entre -1 et 1
 	for (i = 0; i<inputDimension; ++i) {
 		ptr[i] = rand() % 1 + -1;
 	}
-	// Neurone de biais initialisé à 1
+	// Neurone de biais initialisï¿½ ï¿½ 1
 	ptr[inputDimension] = 1;
 	return ptr;
 };
 
-// Supprime le model en mémoire
+// Supprime le modÃ¨le en mï¿½moire
 void linear_remove_model(double *model) {
 	free(model);
 }
 
 // ---------- APPRENTSSAGE ----------
-
+// Applique la rÃ¨gle de rosenblatt sur un perceptron avec un tableau d'inputs
 int linear_fit_classification_rosenblatt(double *model, double *inputs, int inputsSize, int inputSize, double *outputs, int outputsSize, int iterationNumber, double step) {
 	if (model == nullptr) {
 		return -1;
@@ -54,6 +54,79 @@ int linear_fit_classification_rosenblatt(double *model, double *inputs, int inpu
 			else
 				iterations++;
 
+			int error_count(0);
+			int i(0);
+			int count(0);
+			// For each data
+			for (i = 0; i<inputsSize; i+inputSize) {
+				double* unInput = (double*)malloc(sizeof(double)*inputSize);
+				int j(0);
+				// On rï¿½cupï¿½re les donnï¿½es correspondant ï¿½ l'input
+				for (j = 0; j<inputSize; ++j) {
+					unInput[j] = inputs[i + j];
+				}
+
+				double output = learn_classification_rosenblatt(model, outputs[count], unInput, inputSize, learning_rate, threshold);
+
+				if (output != outputs[i])
+					error_count++;
+				count++;
+				free(unInput);
+			}
+			// Si l'apprentisage est fini et que le perceptron renvoie la bonne sortie pour chaque input
+			if (error_count == 0)
+				break;
+		}
+		return 0;
+	}
+}
+// Applique la rÃ¨gle de rosenblatt sur un perceptron avec un input
+double learn_classification_rosenblatt(double *model, double expected_result, const double* input, int inputSize, int learning_rate, double threshold)
+{
+	// Get the result given by the Perceptron
+	double result = linear_classify(model, input, inputSize);
+
+	// If the Perceptron doesn't not return a correct response -> We modify the weights to adapt
+	// If the Perceptron return a correct response -> Nothing to do
+	if (result != expected_result) {
+		// Convert boolean to a number
+		double error = (expected_result  - result ) ;
+		int i;
+		// We adapt every weight of our Perceptron using the formula
+		for (i = 0; i < inputSize + 1; i++) {
+			model[i] += learning_rate * error * input[i];
+		}
+	}
+	return result;
+}
+//---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+int linear_fit_regression(double *model, double *inputs, int inputsSize, int inputSize, double *outputs, int outputsSize) {
+	if (model == nullptr) {
+		return -1;
+	}
+	else {
+		return 0;
+	}
+}
+
+// Applique la rÃ¨gle de hebb sur un perceptron avec un tableau d'inputs
+int linear_fit_classification_hebb(double *model, double *inputs, int inputsSize, int inputSize, int iterationNumber, double step) {
+	if (model == nullptr) {
+		return -1;
+	}
+	else {
+		if (iterationNumber == 0)
+			throw std::invalid_argument("The maximum number of iterations cannot be 0.");
+
+		unsigned int iterations(0);
+
+		while (true) {
+			if (iterations > iterationNumber)
+				break;
+			else
+				iterations++;
+
 			int error_count = 0;
 			int i(0);
 			int count(0);
@@ -61,90 +134,41 @@ int linear_fit_classification_rosenblatt(double *model, double *inputs, int inpu
 			for (i = 0; i<inputsSize; i+inputSize) {
 				double* unInput = (double*)malloc(sizeof(double)*inputSize);
 				int j(0);
-				// On récupère les données correspondant à l'input
+				// On rï¿½cupï¿½re les donnï¿½es correspondant ï¿½ l'input
 				for (j = 0; j<inputSize; ++j) {
 					unInput[j] = inputs[i + j];
 				}
-
-				bool output = learn_classification_rosenblatt(model, outputs[count], unInput, inputSize, learning_rate, threshold);
-
-				if (output != outputs[i])
-					error_count++;
-				count++;
+				learn_classification_hebb(model, unInput, inputSize, step);
+				free(unInput);
 			}
-			// Si l'apprentisage est finit et que le prerceptron renvoie la bonne sortie pour chaque input
-			if (error_count == 0)
-				break;
 		}
 		return 0;
 	}
 }
-// Modify the weights using one data
-bool learn_classification_rosenblatt(double *model, bool expected_result, const double* inputs, int inputSize, int learning_rate, double threshold)
-{
-	// Get the result given by the Perceptron
-	bool result = get_result(model, inputs, inputSize, threshold);
-
-	// If the Perceptron doesn't not return a correct response -> We modify the weights to adapt
-	// If the Perceptron return a correct response -> Nothing to do
-	if (result != expected_result) {
-		// Convert boolean to a number
-		double error = (expected_result ? 1 : 0) - (result ? 1 : 0);
-		// We adapt every weight of our Perceptron using the formula
-		for (int i = 0; i < inputSize + 1; i++) {
-			model[i] += learning_rate * error * inputs[i];
-		}
+// Applique la rÃ¨gle de hebb sur un perceptron avec un input
+int learn_classification_hebb(double *model, const double *unInput, int inputSize, double step){
+	// We adapt every weight of our Perceptron using the formula
+	double output= linear_classify(model, unInput, inputSize);
+	int i;
+	for (i = 0; i < inputSize + 1; i++) {
+		// On modifie selon la rÃ¨gle de Hebb
+		model[i] += step * output * unInput[i];
 	}
-	return result;
+	return 0;
 }
 
+//  ---------- APPLICATION ----------
 // Return the Perceptron's response considering the inputs
-bool get_result(double *model, const double* inputs, int inputSize, double threshold)
+double linear_classify(double *model, const double* input, int inputSize)
 {
 	double toto;
 	int i(0);
 	for (i = 0; i < inputSize; i++) {
-		toto += model[i] * inputs[i];
+		toto += model[i] * input[i];
 	}
-	toto += threshold;
+	toto += 1;
 
 	return (toto < 0 ? -1 : 1);
-
-	//return dot_product(inputs, inputSize, model) > threshold;
-}
-
-double dot_product(const double* inputs, int inputSize, const double* model)
-{
-	return 0;
-	//return std::inner_product(inputs[0], inputs[inputSize], model[0], 0);
-}
-
-//---------------------------------------------------------------------------------------------------------------------------------------------------------
-
-int linear_fit_regression(int *model, double *inputs, int inputsSize, int inputSize, double *outputs, int outputsSize) {
-	if (model == nullptr) {
-		return -1;
-	}
-	else {
-		return 0;
-	}
-}
-
-
-// Apprentissage NON SUPERVISE
-int linear_fit_classification_hebb(int *model, double *inputs, int inputsSize, int inputSize, int iterationNumber, double step) {
-	if (model == nullptr) {
-		return -1;
-	}
-	else {
-		return 0;
-	}
-}
-
-
-//  ---------- APPLICATION ----------
-double linear_classify(double *model, double *input, int inputSize) {
-	return 0;
 }
 
 double linear_predict(double *model, double *input, int inputSize) {
