@@ -93,9 +93,10 @@ public class MainScript : MonoBehaviour {
 		}
 	}
 
-	private void getInputs(Transform[] objetUnity, double[] inputs){
+	// Rempli le tableau inputs passé en paramètre avec les coordonnées x et y de l'objetsUnity
+	private void getInputs(Transform[] objetsUnity, double[] inputs){
 		int i = 0;
-		foreach (var data in baseApprentissage)
+		foreach (var data in objetsUnity)
 		{
 			inputs[i] = data.position.x;
 			i++;
@@ -103,10 +104,11 @@ public class MainScript : MonoBehaviour {
 			i++;
 		}
 	}
-
-	private void getInputsOutputs(Transform[] objetUnity, double[] inputs, double[] outputs){
+	// Rempli le tableau inputs passé en paramètre avec les coordonnées x et y du tableau d'objetsUnity
+	// ainsi que le tableau outputs avec les coordonées z du tableau d'objetsUnity
+	private void getInputsOutputs(Transform[] objetsUnity, double[] inputs, double[] outputs){
 		int i = 0, j = 0;
-		foreach (var data in baseApprentissage)
+		foreach (var data in objetsUnity)
 		{
 			inputs[i] = data.position.x;
 			i++;
@@ -120,10 +122,10 @@ public class MainScript : MonoBehaviour {
 
 	public void test(){
 				
-        Debug.Log("toto >" + LibWrapperMachineLearning.return42());
+		Debug.Log("DEBUG Test C++ function return 42 >" + LibWrapperMachineLearning.return42() + "<");
 
-        Debug.Log("baseApprentissage >" + baseApprentissage.Length);
-        Debug.Log("baseTest >" + baseTest.Length);
+		Debug.Log("DEBUG baseApprentissage >" + baseApprentissage.Length + "<");
+		Debug.Log("DEBUG baseTest >" + baseTest.Length + "<");
 
 
 
@@ -149,39 +151,39 @@ public class MainScript : MonoBehaviour {
 		Debug.Log("DEBUG toto >" + LibWrapperMachineLearning.toto() + "<");
 
 
-//        int inputsSize = inputs.Length;
-//        int outputsSize = outputs.Length;
-//
-//        System.IntPtr model = LibWrapperMachineLearning.linear_create_model(inputSize);
-//
-//        var gchX = default(GCHandle);
-//        var gchY = default(GCHandle);
-//        try
-//        {
-//            gchX = GCHandle.Alloc(inputs, GCHandleType.Pinned);
-//            gchY = GCHandle.Alloc(outputs, GCHandleType.Pinned);
-////			Debug.Log ("test >" + LibWrapperMachineLearning.test(gchX.AddrOfPinnedObject(), inputs.Length) + "<");
-////		    LibWrapperMachineLearning.linear_fit_classification_rosenblatt(model, gchX.AddrOfPinnedObject(), inputsSize, inputSize, gchY.AddrOfPinnedObject(), outputsSize, iterationNumber, step);
-//        }
-//        finally
-//        {
-//            if (gchX.IsAllocated) gchX.Free();
-//            if (gchY.IsAllocated) gchY.Free();
-//        }
-//
-//        double[] input = new double[inputSize];
-//
-//        i = 0;
-//        foreach (var data in baseTest)
-//        {
-//            input[i] = data.position.x;
-//            i++;
-//            input[i] = data.position.z;
-//            i++;
-//            //			data.position.y = LibWrapperMachineLearning.linear_classify(model, input);
-//        }
+        int inputsSize = inputs.Length;
+        int outputsSize = outputs.Length;
 
-        //		LibWrapperMachineLearning.linear_remove_model(model);
+        System.IntPtr model = LibWrapperMachineLearning.linear_create_model(inputSize);
+
+        var gchX = default(GCHandle);
+        var gchY = default(GCHandle);
+        try
+        {
+            gchX = GCHandle.Alloc(inputs, GCHandleType.Pinned);
+            gchY = GCHandle.Alloc(outputs, GCHandleType.Pinned);
+			Debug.Log ("DEBUG test passage d'un tableau au C++ >" + LibWrapperMachineLearning.test(gchX.AddrOfPinnedObject(), inputs.Length) + "<");
+//		    LibWrapperMachineLearning.linear_fit_classification_rosenblatt(model, gchX.AddrOfPinnedObject(), inputsSize, inputSize, gchY.AddrOfPinnedObject(), outputsSize, iterationNumber, step);
+        }
+        finally
+        {
+            if (gchX.IsAllocated) gchX.Free();
+            if (gchY.IsAllocated) gchY.Free();
+        }
+
+        double[] input = new double[inputSize];
+
+        i = 0;
+        foreach (var data in baseTest)
+        {
+            input[i] = data.position.x;
+            i++;
+            input[i] = data.position.z;
+            i++;
+            //			data.position.y = LibWrapperMachineLearning.linear_classify(model, input);
+        }
+
+		LibWrapperMachineLearning.linear_remove_model(model);
     }
 
 
