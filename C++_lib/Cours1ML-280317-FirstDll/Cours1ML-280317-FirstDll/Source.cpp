@@ -6,12 +6,12 @@ int test(double* test, int testSize){
     for(i=0;i<testSize;++i){
         std::cout << "test[" << i << "] = " << test[i] <<std::endl;
     }
-    return 0;
+    return 1;
 }
 
 int toto(){
     std::cout << "toto!!!!!!!"<<std::endl;
-    return 0;
+    return 1;
 }
 
 // G�n�re un mod�le al�atoirement en "settant" tous les poids
@@ -25,7 +25,7 @@ double *linear_create_model(int inputDimension) {
         ptr[i] = rand() % 1 + -1;
     }
     // Neurone de biais initialis� � 1
-  //  ptr[inputDimension] = 1;
+    ptr[inputDimension] = 1;
     return ptr;
 };
 
@@ -41,9 +41,12 @@ int linear_fit_classification_rosenblatt(double *model, double *inputs, int inpu
         return -1;
     }
     else {
-        int learning_rate(1);// TODO TOSET
-        int threshold(100);// TODO TOSET
-        int iterations(0);
+        if (iterationNumber == 0)
+            throw std::invalid_argument("The maximum number of iterations cannot be 0.");
+
+        const double learning_rate(1);// TODO TOSET
+        const double threshold(100);// TODO TOSET
+        unsigned int iterations(0);
 
         while (true) {
             if (iterations > iterationNumber)
@@ -55,7 +58,7 @@ int linear_fit_classification_rosenblatt(double *model, double *inputs, int inpu
             int i(0);
             int count(0);
             // For each data
-            for (i = 0; i<inputsSize; i+=inputSize) {
+            for (i = 0; i<inputsSize; i+inputSize) {
                 double* unInput = (double*)malloc(sizeof(double)*inputSize);
                 int j(0);
                 // On r�cup�re les donn�es correspondant � l'input
@@ -103,8 +106,8 @@ int linear_fit_regression(double *model, double *inputs, int inputsSize, int inp
         return -1;
     }
     else {
-        int learning_rate(1);// TODO TOSET
-        int threshold(100);// TODO TOSET
+        const double learning_rate(1);// TODO TOSET
+        const double threshold(100);// TODO TOSET
         unsigned int iterations(0);
 
         while (true) {
@@ -112,7 +115,7 @@ int linear_fit_regression(double *model, double *inputs, int inputsSize, int inp
             int i(0);
             int count(0);
             // For each data
-            for (i = 0; i < inputsSize; i += inputSize) {
+            for (i = 0; i < inputsSize; i + inputSize) {
                 double *unInput = (double *) malloc(sizeof(double) * inputSize);
                 int j(0);
                 // On r�cup�re les donn�es correspondant � l'input
@@ -157,71 +160,64 @@ double learn_regression(double *model, double expected_result, const double* inp
 }
 
 // Applique la règle de hebb sur un perceptron avec un tableau d'inputs
-int linear_fit_classification_hebb(double *model, double *inputs, int inputsSize, int inputSize, int iterationNumber, double step, double *outputs, int outputSize) {
+int linear_fit_classification_hebb(double *model, double *inputs, int inputsSize, int inputSize, int iterationNumber, double step) {
     if (model == nullptr) {
         return -1;
     }
     else {
+        if (iterationNumber == 0)
+            throw std::invalid_argument("The maximum number of iterations cannot be 0.");
 
-        int iterations(0);
-		double* unInput = (double*)malloc(sizeof(double)*inputSize);
+        unsigned int iterations(0);
 
         while (true) {
             if (iterations > iterationNumber)
                 break;
- //           else
-                //iterations++;
+            else
+                iterations++;
 
-
+            int error_count = 0;
             int i(0);
             int count(0);
-			int error(0);
             // For each data
-            for (i = 0; i<inputsSize; i+=inputSize) {
+            for (i = 0; i<inputsSize; i+inputSize) {
+                double* unInput = (double*)malloc(sizeof(double)*inputSize);
                 int j(0);
                 // On r�cup�re les donn�es correspondant � l'input
                 for (j = 0; j<inputSize; ++j) {
                     unInput[j] = inputs[i + j];
                 }
-				error += learn_classification_hebb(model, unInput, inputSize, step, outputs[i]);
-			}
-			if (error == 0) {
-				break;
-			}
-		}
-		free(unInput);
+                learn_classification_hebb(model, unInput, inputSize, step);
+                free(unInput);
+            }
+        }
         return 0;
     }
 }
 // Applique la règle de hebb sur un perceptron avec un input
-int learn_classification_hebb(double *model, const double *unInput, int inputSize, double step, double expected_output){
+int learn_classification_hebb(double *model, const double *unInput, int inputSize, double step){
     // We adapt every weight of our Perceptron using the formula
     double output= linear_classify(model, unInput, inputSize);
-	if (output != expected_output) {
-		int i;
-		for (i = 0; i < inputSize; i++) {
-			// On modifie selon la règle de Hebb
-			model[i] += step * output * unInput[i];
-		}
-		return 1;
-	}
-	else {
-		return 0;
-	}
+    int i;
+    for (i = 0; i < inputSize + 1; i++) {
+        // On modifie selon la règle de Hebb
+        model[i] += step * output * unInput[i];
+    }
+    return 0;
 }
 
 //  ---------- APPLICATION ----------
 // Return the Perceptron's response considering the inputs
 double linear_classify(double *model, const double* input, int inputSize)
 {
-    double somme_poids(0);
+    double toto;
     int i(0);
     for (i = 0; i < inputSize; i++) {
-		somme_poids += model[i] * input[i];
+        toto += model[i] * input[i];
     }
-	//somme_poids += 1;
+    toto += 1;
 
-    return (somme_poids < 0 ? -1 : 1);
+    return (toto < 0 ? -1 : 1);
 }
 
 double linear_predict(double *model, const double *input, int inputSize) {
