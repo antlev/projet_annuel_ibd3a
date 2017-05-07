@@ -14,16 +14,16 @@ public class MainScript : MonoBehaviour {
 
 	public void create_model(){
 		model = LibWrapperMachineLearning.linear_create_model (inputSize);
-		Debug.Log ("Model created !");
+		Debug.Log ("Model created !" + model);
 	}	
 	public void erase_model(){
-		if (model == null) {
+		if (model != null) {
 			LibWrapperMachineLearning.linear_remove_model (model);
 			Debug.Log ("Model removed !");
 		}
 	}
 	public void classify(){
-		if (model == null) {
+		if (model != null) {
 			Debug.Log ("Classify");
 			Debug.Log ("to be implemented");
 			double[] inputs = new double[inputSize * baseTest.Length];
@@ -39,7 +39,7 @@ public class MainScript : MonoBehaviour {
 		}
 	}
 	public void predict(){
-		if (model == null) {
+		if (model != null) {
 			Debug.Log ("Predict");
 			Debug.Log ("to be implemented");
 			double[] inputs = new double[inputSize * baseTest.Length];
@@ -54,7 +54,7 @@ public class MainScript : MonoBehaviour {
 		}
 	}
 	public void linear_fit_regression(){
-		if (model == null) {
+		if (model != null) {
 			Debug.Log ("linear_fit_regression");
 			Debug.Log ("to be implemented");
 			double[] inputs = new double[inputSize * baseApprentissage.Length];
@@ -66,7 +66,7 @@ public class MainScript : MonoBehaviour {
 	}	
 
 	public void linear_fit_classification_hebb(){
-		if (model == null) {
+		if (model != null) {
 			Debug.Log ("linear_fit_classification_hebb");
 			Debug.Log ("to be implemented");
 			double[] inputs = new double[inputSize * baseApprentissage.Length];
@@ -80,7 +80,7 @@ public class MainScript : MonoBehaviour {
 
     public void linear_fit_classification_rosenblatt()
     {
-		if (model == null) {
+		if (model != null) {
 			Debug.Log ("linear_fit_classification_rosenblatt");
 			Debug.Log ("to be implemented");
 			double[] inputs = new double[inputSize * baseApprentissage.Length];
@@ -134,10 +134,10 @@ public class MainScript : MonoBehaviour {
         double[] outputs = new double[inputSize * baseApprentissage.Length];
         int i = 0;
         int j = 0;
-        Debug.Log("DEBUG inputs >" + inputs.Length + "<");
 
         foreach (var data in baseApprentissage)
         {
+            //Debug.Log("Position x: " + data.position.x + " z : " + data.position.z);
             inputs[i] = data.position.x;
             i++;
             inputs[i] = data.position.z;
@@ -146,10 +146,6 @@ public class MainScript : MonoBehaviour {
 			j++;
         }
         Debug.Log("DEBUG inputs >" + inputs.Length + "<");
-
-
-		Debug.Log("DEBUG toto >" + LibWrapperMachineLearning.toto() + "<");
-
 
         int inputsSize = inputs.Length;
         int outputsSize = outputs.Length;
@@ -162,8 +158,10 @@ public class MainScript : MonoBehaviour {
         {
             gchX = GCHandle.Alloc(inputs, GCHandleType.Pinned);
             gchY = GCHandle.Alloc(outputs, GCHandleType.Pinned);
-			Debug.Log ("DEBUG test passage d'un tableau au C++ >" + LibWrapperMachineLearning.test(gchX.AddrOfPinnedObject(), inputs.Length) + "<");
-//		    LibWrapperMachineLearning.linear_fit_classification_rosenblatt(model, gchX.AddrOfPinnedObject(), inputsSize, inputSize, gchY.AddrOfPinnedObject(), outputsSize, iterationNumber, step);
+            //			Debug.Log ("DEBUG test passage d'un tableau au C++ >" + LibWrapperMachineLearning.test(gchX.AddrOfPinnedObject(), inputs.Length) + "<");
+            //		    LibWrapperMachineLearning.linear_fit_classification_rosenblatt(model, gchX.AddrOfPinnedObject(), inputsSize, inputSize, gchY.AddrOfPinnedObject(), outputsSize, iterationNumber, step);
+            LibWrapperMachineLearning.linear_fit_classification_hebb(model, gchX.AddrOfPinnedObject(), inputsSize, inputSize, iterationNumber, step, gchY.AddrOfPinnedObject(), outputsSize);
+
         }
         finally
         {
@@ -179,11 +177,43 @@ public class MainScript : MonoBehaviour {
             input[i] = data.position.x;
             i++;
             input[i] = data.position.z;
+
+            var ghX = default(GCHandle);
+            try
+            {
+                ghX = GCHandle.Alloc(inputs, GCHandleType.Pinned);
+                data.position.Set(data.position.x, (float) LibWrapperMachineLearning.linear_classify(model, ghX.AddrOfPinnedObject(), inputSize), data.position.z);
+                Debug.Log("Position x : " + data.position.x + " z : " + data.position.z + " y : " + data.position.y);
+            }
+            finally
+            {
+                if (gchX.IsAllocated) gchX.Free();
+                if (gchY.IsAllocated) gchY.Free();
+            }
+            i = 0;
+        }
+        foreach (var data in baseApprentissage)
+        {
+            input[i] = data.position.x;
             i++;
-            //			data.position.y = LibWrapperMachineLearning.linear_classify(model, input);
+            input[i] = data.position.z;
+
+            var ghX = default(GCHandle);
+            try
+            {
+                ghX = GCHandle.Alloc(inputs, GCHandleType.Pinned);
+                data.position.Set(data.position.x, (float)LibWrapperMachineLearning.linear_classify(model, ghX.AddrOfPinnedObject(), inputSize), data.position.z);
+                Debug.Log("Position x : "+ data.position.x + " z : " + data.position.z + " y : " + data.position.y);
+            }
+            finally
+            {
+                if (gchX.IsAllocated) gchX.Free();
+                if (gchY.IsAllocated) gchY.Free();
+            }
+            i = 0;
         }
 
-		LibWrapperMachineLearning.linear_remove_model(model);
+        LibWrapperMachineLearning.linear_remove_model(model);
     }
 
 
