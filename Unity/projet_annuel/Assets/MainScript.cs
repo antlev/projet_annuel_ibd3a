@@ -12,9 +12,13 @@ public class MainScript : MonoBehaviour {
     public Transform[] baseApprentissage;
     public Transform[] baseTest;
 
+	public Transform[] pourLeTest;
+
 	public void create_model(){
-		model = LibWrapperMachineLearning.linear_create_model (inputSize);
-		Debug.Log ("Model created !" + model);
+		if (model != null) {
+			model = LibWrapperMachineLearning.linear_create_model (inputSize);
+			Debug.Log ("Model created !" + model);
+		}
 	}	
 	public void erase_model(){
 		if (model != null) {
@@ -160,8 +164,21 @@ public class MainScript : MonoBehaviour {
             gchY = GCHandle.Alloc(outputs, GCHandleType.Pinned);
             //			Debug.Log ("DEBUG test passage d'un tableau au C++ >" + LibWrapperMachineLearning.test(gchX.AddrOfPinnedObject(), inputs.Length) + "<");
             //		    LibWrapperMachineLearning.linear_fit_classification_rosenblatt(model, gchX.AddrOfPinnedObject(), inputsSize, inputSize, gchY.AddrOfPinnedObject(), outputsSize, iterationNumber, step);
-            LibWrapperMachineLearning.linear_fit_classification_hebb(model, gchX.AddrOfPinnedObject(), inputsSize, inputSize, iterationNumber, step, gchY.AddrOfPinnedObject(), outputsSize);
-
+            
+//			int k=0;
+//			Debug.Log("Modèle non entrainé >");
+//			for(k=0; k<inputSize; k++){
+//				Debug.Log("model["+k+"] : " + *model);
+//				model++;
+//			}
+//			model -= 2;
+//			LibWrapperMachineLearning.linear_fit_classification_hebb(model, gchX.AddrOfPinnedObject(), inputsSize, inputSize, iterationNumber, step, gchY.AddrOfPinnedObject(), outputsSize);
+//			Debug.Log("Modèle entrainé >");
+//			for(k=0; k<inputSize; k++){
+//				Debug.Log("model["+k+"] : " + *model);
+//				model++;
+//			}
+//			model -= 2;
         }
         finally
         {
@@ -214,9 +231,44 @@ public class MainScript : MonoBehaviour {
         }
 
         LibWrapperMachineLearning.linear_remove_model(model);
+
+
+		generateTest (pourLeTest, 5);
     }
 
 
+
+	public void generateTest(Transform[] testObject, int separation){
+		if (testObject.Length != separation * separation) {
+			Debug.Log ("Le nombre d'objet envoyé ne correspond pas à la séparation demandée");
+		} else {
+			var x = -1.0f;
+			var z = -1.0f;
+			int count = 0;
+			foreach (var data in testObject) {
+				data.position.Set (x, data.position.y, z);
+				Debug.Log ("Boule positionnée en (" + x + ";" + data.position.y + ";" + z + ")"); 
+				if (count == 0) {
+					Debug.Log ("avant x >" + x + "<" + x.GetType());
+					x = (float)(x + (2 / separation));
+					Debug.Log ("après x >" + x + "<");
+
+					Debug.Log ("test1");
+				} else {
+					if (count % separation == 0) {
+						Debug.Log ("test2");
+						x = -1;
+						z += 2 / separation;
+					} else {
+						x += 2 / separation;
+						Debug.Log ("test3");
+					}
+				}
+				count++;
+			}
+			Debug.Log ("Les boules de test sont placé selon une sépartion de " + separation + "x" + separation + " sur les axes (x;z)");
+		}
+	}
 
 }
 
