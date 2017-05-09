@@ -134,6 +134,8 @@ public class MainScript : MonoBehaviour {
 
 	public void test(){
 
+		LibWrapperMachineLearning.return42 ();
+
 		Debug.Log("LAUNCHING TEST FUNCTION");
 		Debug.Log("DEBUG Test C++ function return 42 >" + LibWrapperMachineLearning.return42() + "<");
 		Debug.Log("DEBUG baseApprentissage >" + baseApprentissage.Length + "<");
@@ -159,50 +161,51 @@ public class MainScript : MonoBehaviour {
 		// Create model
 		create_model();
 
-//		// Création des poiteurs
-//		var inputsPtr = default(GCHandle);
-//		var outputsPtr = default(GCHandle);
-//        try
-//        {
-//            inputsPtr = GCHandle.Alloc(inputs, GCHandleType.Pinned);
-//            outputsPtr = GCHandle.Alloc(outputs, GCHandleType.Pinned);
-//			// Learn rosenblatt to model
-//
-////			Debug.Log("Learning Rosenblatt to model ! step > "  + step);
-////		    LibWrapperMachineLearning.linear_fit_classification_rosenblatt(model, gchX.AddrOfPinnedObject(), inputsSize, inputSize, gchY.AddrOfPinnedObject(), outputsSize, iterationNumber, step);
-//			Debug.Log("Learning hebb to model ! step > "  + step);
-//		    LibWrapperMachineLearning.linear_fit_classification_hebb(model, inputsPtr.AddrOfPinnedObject(), inputsSize, inputSize,1000,1, outputsPtr.AddrOfPinnedObject(), outputsSize);
-//		}
-//        finally
-//        {
-//            if (inputsPtr.IsAllocated) inputsPtr.Free();
-//            if (outputsPtr.IsAllocated) outputsPtr.Free();
-//        }
-//
-//		Debug.Log("Generating testBase !");        
-//        double[] input = new double[inputSize];
-//		generateBaseTest (baseTest, 5);
-//
-//        i = 0;
-//		foreach (var data in baseTest)
-//        {
-//            input[i] = data.position.x;
-//            i++;
-//            input[i] = data.position.z;
-//			var inputsPtr2 = default(GCHandle);
-//            try
-//			{
-//                inputsPtr2 = GCHandle.Alloc(inputs, GCHandleType.Pinned);
-//				data.position = new Vector3(data.position.x, (float) LibWrapperMachineLearning.linear_classify(model, inputsPtr2.AddrOfPinnedObject(), inputSize), data.position.z);
-//                Debug.Log("Position x : " + data.position.x + " z : " + data.position.z + " y : " + data.position.y);
-//            }
-//            finally
-//            {
-//                if (inputsPtr2.IsAllocated) inputsPtr2.Free();
-//                if (outputsPtr.IsAllocated) outputsPtr.Free();
-//            }
-//            i = 0;
-//        }
+		// Création des poiteurs
+		var inputsPtr = default(GCHandle);
+		var outputsPtr = default(GCHandle);
+        try
+        {
+            inputsPtr = GCHandle.Alloc(inputs, GCHandleType.Pinned);
+            outputsPtr = GCHandle.Alloc(outputs, GCHandleType.Pinned);
+
+//			Debug.Log("Learning Rosenblatt to model ! step > "  + step);
+//		    LibWrapperMachineLearning.linear_fit_classification_rosenblatt(model, gchX.AddrOfPinnedObject(), inputsSize, inputSize, gchY.AddrOfPinnedObject(), outputsSize, iterationNumber, step);
+			Debug.Log("Learning hebb to model ! step > "  + step);
+		    LibWrapperMachineLearning.linear_fit_classification_hebb(model, inputsPtr.AddrOfPinnedObject(), inputsSize, inputSize,1000,1, outputsPtr.AddrOfPinnedObject(), outputsSize);
+		}
+        finally
+        {
+            if (inputsPtr.IsAllocated) inputsPtr.Free();
+            if (outputsPtr.IsAllocated) outputsPtr.Free();
+        }
+
+		Debug.Log("Generating testBase !");        
+        double[] input = new double[inputSize];
+		generateBaseTest (baseTest, 5);
+
+        i = 0;
+		foreach (var data in baseTest)
+        {
+            input[i] = data.position.x;
+            i++;
+            input[i] = data.position.z;
+			var inputsPtr2 = default(GCHandle);
+            try
+			{
+                inputsPtr2 = GCHandle.Alloc(inputs, GCHandleType.Pinned);
+				data.position = new Vector3(data.position.x, (float) LibWrapperMachineLearning.linear_classify(model, inputsPtr2.AddrOfPinnedObject(), inputSize), data.position.z);
+                Debug.Log("Position x : " + data.position.x + " z : " + data.position.z + " y : " + data.position.y);
+            }
+            finally
+            {
+                if (inputsPtr2.IsAllocated) inputsPtr2.Free();
+                if (outputsPtr.IsAllocated) outputsPtr.Free();
+            }
+            i = 0;
+        }
+
+// Test avec la base d'apprentissage a nouveau
 //        foreach (var data in baseApprentissage)
 //        {
 //            input[i] = data.position.x;

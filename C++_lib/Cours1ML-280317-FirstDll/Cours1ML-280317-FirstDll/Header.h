@@ -29,5 +29,6 @@ __declspec(dllexport) double linear_predict(double *model, const double *input, 
 int learn_classification_hebb(double *model, const double *unInput, int inputSize, double step, double expected_output);
 
 double learn_regression(double *model, double expected_result, const double* input, int inputSize, int learning_rate, double threshold);
+void showModel(double* model, int inputDimension);
 
 }

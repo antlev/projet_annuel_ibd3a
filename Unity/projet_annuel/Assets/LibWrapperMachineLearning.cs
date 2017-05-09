@@ -4,9 +4,11 @@ public class LibWrapperMachineLearning
 {
 
 #if UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN
+	[DllImport("cygtoto.dll")] 
+	public static extern int return42();
 
-	[DllImport("Cours1ML-280317-FirstDll")] 
-    public static extern int return42();
+//	[DllImport("Cours1ML-280317-FirstDll")] 
+//    public static extern int return42();
 
     [DllImport("Cours1ML-280317-FirstDll")] 
     public static extern System.IntPtr linear_create_model(int inputDimension);
