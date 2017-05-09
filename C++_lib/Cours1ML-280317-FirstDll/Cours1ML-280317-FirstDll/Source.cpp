@@ -1,6 +1,13 @@
 #include "Header.h"
 #include <iostream>
 #include <stdlib.h>
+
+int main() {
+    std::cout << "Hello, World!" << std::endl;
+    return 0;
+}
+
+
 int test(double* test, int testSize){
     int i(0);
     for(i=0;i<testSize;++i){
@@ -25,7 +32,7 @@ double *linear_create_model(int inputDimension) {
         ptr[i] = rand() % 1 + -1;
     }
     // Neurone de biais initialis� � 1
-  //  ptr[inputDimension] = 1;
+    //  ptr[inputDimension] = 1;
     return ptr;
 };
 
@@ -164,18 +171,18 @@ int linear_fit_classification_hebb(double *model, double *inputs, int inputsSize
     else {
 
         int iterations(0);
-		double* unInput = (double*)malloc(sizeof(double)*inputSize);
+        double* unInput = (double*)malloc(sizeof(double)*inputSize);
 
         while (true) {
+/*
             if (iterations > iterationNumber)
                 break;
- //           else
-                //iterations++;
-
-
+            //           else
+            //iterations++;
+*/
             int i(0);
             int count(0);
-			int error(0);
+            int error(0);
             // For each data
             for (i = 0; i<inputsSize; i+=inputSize) {
                 int j(0);
@@ -183,13 +190,13 @@ int linear_fit_classification_hebb(double *model, double *inputs, int inputsSize
                 for (j = 0; j<inputSize; ++j) {
                     unInput[j] = inputs[i + j];
                 }
-				error += learn_classification_hebb(model, unInput, inputSize, step, outputs[i]);
-			}
-			if (error == 0) {
-				break;
-			}
-		}
-		free(unInput);
+                error += learn_classification_hebb(model, unInput, inputSize, step, outputs[i]);
+            }
+            if (error == 0) {
+                break;
+            }
+        }
+        free(unInput);
         return 0;
     }
 }
@@ -197,30 +204,27 @@ int linear_fit_classification_hebb(double *model, double *inputs, int inputsSize
 int learn_classification_hebb(double *model, const double *unInput, int inputSize, double step, double expected_output){
     // We adapt every weight of our Perceptron using the formula
     double output= linear_classify(model, unInput, inputSize);
-	if (output != expected_output) {
-		int i;
-		for (i = 0; i < inputSize; i++) {
-			// On modifie selon la règle de Hebb
-			model[i] += step * output * unInput[i];
-		}
-		return 1;
-	}
-	else {
-		return 0;
-	}
+    if (output != expected_output) {
+        int i;
+        for (i = 0; i < inputSize; i++) {
+            // On modifie selon la règle de Hebb
+            model[i] += step * expected_output * unInput[i];
+        }
+        return 1;
+    }
+    else {
+        return 0;
+    }
 }
 
 //  ---------- APPLICATION ----------
 // Return the Perceptron's response considering the inputs
-double linear_classify(double *model, const double* input, int inputSize)
-{
+double linear_classify(double *model, const double* input, int inputSize) {
     double somme_poids(0);
-    int i(0);
+    int i;
     for (i = 0; i < inputSize; i++) {
-		somme_poids += model[i] * input[i];
+        somme_poids += model[i] * input[i];
     }
-	//somme_poids += 1;
-
     return (somme_poids < 0 ? -1 : 1);
 }
 
