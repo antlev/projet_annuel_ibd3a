@@ -23,7 +23,7 @@ public class LibWrapperMachineLearning
     public static extern int linear_fit_regression(System.IntPtr model, System.IntPtr inputs, int inputsSize, int inputSize, System.IntPtr outputs, int outputsSize);
 
     [DllImport("Cours1ML-280317-FirstDll")]
-    public static extern int linear_fit_classification_hebb(System.IntPtr model, System.IntPtr inputs, int inputsSize, int inputSize, int iterationNumber, double step);
+	public static extern int linear_fit_classification_hebb(System.IntPtr model, System.IntPtr inputs, int inputsSize, int inputSize , System.IntPtr outputs, int outputsSize,  int iterationNumber, double step);
 
     [DllImport("Cours1ML-280317-FirstDll")]
     public static extern int linear_fit_classification_rosenblatt(System.IntPtr model, System.IntPtr inputs, int inputsSize, int inputSize, System.IntPtr outputs, int outputsSize, int iterationNumber, double step);
