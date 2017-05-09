@@ -37,11 +37,4 @@ public class LibWrapperMachineLearning
 
 #endif
 
-    //lib pour par recoder l'inversion de matrice eigen
-
-    //inputDimension -> pointeur sur un tableau de x paramétre plus 1 (x, y, neurones de biais)
-    //inputSize -> taille du tableau nombre de caractere passée 
-    //outpsSize -> taille du tableau de sortie 
-    //iterationNumber -> le nombre d'iiteration a effectuér
-    //step -> 
 }
