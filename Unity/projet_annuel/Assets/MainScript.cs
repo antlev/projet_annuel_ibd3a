@@ -13,8 +13,6 @@ public class MainScript : MonoBehaviour {
     public Transform[] baseApprentissage;
     public Transform[] baseTest;
 
-	public Transform[] pourLeTest;
-
 	public void create_model(){
 		if (model != null) {
 			model = LibWrapperMachineLearning.linear_create_model (inputSize);
@@ -131,7 +129,6 @@ public class MainScript : MonoBehaviour {
 
 		Debug.Log("DEBUG baseApprentissage >" + baseApprentissage.Length + "<");
 		Debug.Log("DEBUG baseTest >" + baseTest.Length + "<");
-		Debug.Log("DEBUG pourLeTest >" + pourLeTest.Length + "<");
 
 
 
@@ -175,10 +172,10 @@ public class MainScript : MonoBehaviour {
         }
 
         double[] input = new double[inputSize];
-		generateTest (pourLeTest, 5);
+		generateTest (baseTest, 5);
 
         i = 0;
-		foreach (var data in pourLeTest)
+		foreach (var data in baseTest)
         {
             input[i] = data.position.x;
             i++;
