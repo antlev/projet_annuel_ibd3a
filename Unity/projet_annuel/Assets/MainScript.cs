@@ -7,7 +7,7 @@ public class MainScript : MonoBehaviour {
 	public static System.IntPtr model;
 	public static int inputSize = 2;
 
-    public static int iterationNumber = 100;
+    public static int iterationNumber = 10000;
     public static int step = 1;
 
     public Transform[] baseApprentissage;
@@ -160,43 +160,43 @@ public class MainScript : MonoBehaviour {
 		// Create model
 		create_model();
 
-		// Création des pointeurs
-		var inputsPtr = default(GCHandle);
-		var outputsPtr = default(GCHandle);
-        try
-        {
-            inputsPtr = GCHandle.Alloc(inputs, GCHandleType.Pinned);
-            outputsPtr = GCHandle.Alloc(outputs, GCHandleType.Pinned);
-
-//			Debug.Log("Learning Rosenblatt to model ! step > "  + step);
-//		    LibWrapperMachineLearning.linear_fit_classification_rosenblatt(model, gchX.AddrOfPinnedObject(), inputsSize, inputSize, gchY.AddrOfPinnedObject(), outputsSize, iterationNumber, step);
-			Debug.Log("Learning hebb to model ! step > "  + step);
-			LibWrapperMachineLearning.linear_fit_classification_hebb(model, inputsPtr.AddrOfPinnedObject(), inputsSize, inputSize, outputsPtr.AddrOfPinnedObject(), outputsSize, 1000, 1);
-		}
-        finally
-        {
-            if (inputsPtr.IsAllocated) inputsPtr.Free();
-            if (outputsPtr.IsAllocated) outputsPtr.Free();
-        }
-
-		Debug.Log("Generating testBase !");        
-        double[] input = new double[inputSize];
-		generateBaseTest (baseTest, 5);
-
-		foreach (var data in baseTest)
-        {
-			getInputs (data, input);
-            try
-			{
-                inputsPtr = GCHandle.Alloc(inputs, GCHandleType.Pinned);
-				data.position = new Vector3(data.position.x, (float) LibWrapperMachineLearning.linear_classify(model, inputsPtr.AddrOfPinnedObject(), inputSize), data.position.z);
-                Debug.Log("Position x : " + data.position.x + " z : " + data.position.z + " y : " + data.position.y);
-            }
-            finally
-            {
-                if (inputsPtr.IsAllocated) inputsPtr.Free();
-            }
-        }
+//		// Création des pointeurs
+//		var inputsPtr = default(GCHandle);
+//		var outputsPtr = default(GCHandle);
+//        try
+//        {
+//            inputsPtr = GCHandle.Alloc(inputs, GCHandleType.Pinned);
+//            outputsPtr = GCHandle.Alloc(outputs, GCHandleType.Pinned);
+//
+////			Debug.Log("Learning Rosenblatt to model ! step > "  + step);
+////		    LibWrapperMachineLearning.linear_fit_classification_rosenblatt(model, gchX.AddrOfPinnedObject(), inputsSize, inputSize, gchY.AddrOfPinnedObject(), outputsSize, iterationNumber, step);
+//			Debug.Log("Learning hebb to model ! step > "  + step);
+//			LibWrapperMachineLearning.linear_fit_classification_hebb(model, inputsPtr.AddrOfPinnedObject(), inputsSize, inputSize, outputsPtr.AddrOfPinnedObject(), outputsSize, iterationNumber, step);
+//		}
+//        finally
+//        {
+//            if (inputsPtr.IsAllocated) inputsPtr.Free();
+//            if (outputsPtr.IsAllocated) outputsPtr.Free();
+//        }
+//
+//		Debug.Log("Generating testBase !");        
+//        double[] input = new double[inputSize];
+//		generateBaseTest (baseTest, 5);
+//
+//		foreach (var data in baseTest)
+//        {
+//			getInputs (data, input);
+//            try
+//			{
+//                inputsPtr = GCHandle.Alloc(inputs, GCHandleType.Pinned);
+//				data.position = new Vector3(data.position.x, (float) LibWrapperMachineLearning.linear_classify(model, inputsPtr.AddrOfPinnedObject(), inputSize), data.position.z);
+//                Debug.Log("Position x : " + data.position.x + " z : " + data.position.z + " y : " + data.position.y);
+//            }
+//            finally
+//            {
+//                if (inputsPtr.IsAllocated) inputsPtr.Free();
+//            }
+//        }
 
 // Test avec la base d'apprentissage a nouveau
 
