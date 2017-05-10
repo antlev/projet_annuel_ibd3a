@@ -34,7 +34,7 @@ public class MainScript : MonoBehaviour {
 			Debug.Log ("Classify");
 			double[] input = new double[inputSize];
 			foreach(var unityObject in UnitytObjects){
-				getInputs (baseTest, input);
+				getInputs (unityObject, input);
 				var inputPtr = default(GCHandle);
 				try
 				{
@@ -52,6 +52,7 @@ public class MainScript : MonoBehaviour {
 	}
 //	public void predict(){
 //		if (model != null) {
+
 //			Debug.Log ("Predict");
 //			Debug.Log ("to be implemented");
 //			double[] inputs = new double[inputSize * baseTest.Length];
@@ -67,6 +68,7 @@ public class MainScript : MonoBehaviour {
 //	}
 //	public void linear_fit_regression(){
 //		if (model != null) {
+
 //			Debug.Log ("linear_fit_regression");
 //			Debug.Log ("to be implemented");
 //			double[] inputs = new double[inputSize * baseApprentissage.Length];
@@ -79,6 +81,7 @@ public class MainScript : MonoBehaviour {
 //
 //	public void linear_fit_classification_hebb(){
 //		if (model != null) {
+
 //			Debug.Log ("linear_fit_classification_hebb");
 //			Debug.Log ("to be implemented");
 //			double[] inputs = new double[inputSize * baseApprentissage.Length];
@@ -106,30 +109,24 @@ public class MainScript : MonoBehaviour {
 //	}
 
 	// Rempli le tableau inputs passé en paramètre avec les coordonnées x et y de l'objetsUnity
-	private void getInputs(Transform[] objetsUnity, double[] inputs){
-		int i = 0;
-		foreach (var data in objetsUnity)
-		{
-			inputs[i] = data.position.x;
-			i++;
-			inputs[i] = data.position.z;
-			i++;
-		}
+	private void getInputs(Transform objetsUnity, double[] input){
+		input[0] = objetsUnity.position.x;
+		input[1] = objetsUnity.position.z;
 	}
-	// Rempli le tableau inputs passé en paramètre avec les coordonnées x et y du tableau d'objetsUnity
-	// ainsi que le tableau outputs avec les coordonées z du tableau d'objetsUnity
-	private void getInputsOutputs(Transform[] objetsUnity, double[] inputs, double[] outputs){
-		int i = 0, j = 0;
-		foreach (var data in objetsUnity)
-		{
-			inputs[i] = data.position.x;
-			i++;
-			inputs[i] = data.position.z;
-			i++;
-			outputs[j] = data.position.y;
-			j++;
-		}
-	}
+//	// Rempli le tableau inputs passé en paramètre avec les coordonnées x et y du tableau d'objetsUnity
+//	// ainsi que le tableau outputs avec les coordonées z du tableau d'objetsUnity
+//	private void getInputsOutputs(Transform[] objetsUnity, double[] inputs, double[] outputs){
+//		int i = 0, j = 0;
+//		foreach (var data in objetsUnity)
+//		{
+//			inputs[i] = data.position.x;
+//			i++;
+//			inputs[i] = data.position.z;
+//			i++;
+//			outputs[j] = data.position.y;
+//			j++;
+//		}
+//	}
 
 
 	public void test(){
@@ -145,6 +142,7 @@ public class MainScript : MonoBehaviour {
         double[] outputs = new double[inputSize * baseApprentissage.Length];
         int i = 0;
         int j = 0;
+
 		// Remplissage input output
         foreach (var data in baseApprentissage)
         {
@@ -155,6 +153,7 @@ public class MainScript : MonoBehaviour {
             outputs[j] = data.position.y;
 			j++;
         }
+
         int inputsSize = inputs.Length;
         int outputsSize = outputs.Length;
 
@@ -172,7 +171,7 @@ public class MainScript : MonoBehaviour {
 //			Debug.Log("Learning Rosenblatt to model ! step > "  + step);
 //		    LibWrapperMachineLearning.linear_fit_classification_rosenblatt(model, gchX.AddrOfPinnedObject(), inputsSize, inputSize, gchY.AddrOfPinnedObject(), outputsSize, iterationNumber, step);
 			Debug.Log("Learning hebb to model ! step > "  + step);
-		    LibWrapperMachineLearning.linear_fit_classification_hebb(model, inputsPtr.AddrOfPinnedObject(), inputsSize, inputSize,1000,1, outputsPtr.AddrOfPinnedObject(), outputsSize);
+			LibWrapperMachineLearning.linear_fit_classification_hebb(model, inputsPtr.AddrOfPinnedObject(), inputsSize, inputSize, outputsPtr.AddrOfPinnedObject(), outputsSize, 1000, 1);
 		}
         finally
         {
@@ -206,6 +205,7 @@ public class MainScript : MonoBehaviour {
         }
 
 // Test avec la base d'apprentissage a nouveau
+
 //        foreach (var data in baseApprentissage)
 //        {
 //            input[i] = data.position.x;
@@ -227,11 +227,8 @@ public class MainScript : MonoBehaviour {
 //            }
 //            i = 0;
 //        }
-
-        LibWrapperMachineLearning.linear_remove_model(model);
+		erase_model();
 		Debug.Log ("Test Function finished !");
-
-
     }
 
 	public void generateBaseTest(Transform[] testObject, int separation){
@@ -258,38 +255,3 @@ public class MainScript : MonoBehaviour {
 	}
 
 }
-
-
-
-    //	public void linear_classify(){
-    //
-    //	}
-    //
-
-    //	double *linear_create_model(int inputDimension);
-    //
-    //	void linear_remove_model(double *model);
-    //
-    //
-    //	int linear_fit_regression(int *model ,double *inputs, int inputsSize,int inputSize,double *outputs,int outputsSize);
-    //
-    //
-    //	int linear_fit_classification_hebb(int *model, double *inputs, int inputsSize,int inputSize,int iterationNumber, double step);
-    //
-    //
-    //	int linear_fit_classification_rosenblatt(int *model, double *inputs, int inputsSize, int inputSize,double *outputs, int outputsSize,int iterationNumber, double step);
-    //
-    //	bool learn_classification_rosenblatt(int *model, bool expected_result, const double* inputs, int inputSize, int learning_rate);
-    //	bool get_result(int *model, const double* inputs, int inputSize);
-    //
-    //	double dot_product(const std::vector<double> &v1,
-    //		const std::vector<double> &v2);
-    //
-    //
-    //	double linear_classify(double *model, double *input, int inputSize);
-    //
-    //	double linear_predict(double *model, double *input, int inputSize);
-    //
-
-
-
