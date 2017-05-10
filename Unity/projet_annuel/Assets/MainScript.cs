@@ -189,7 +189,7 @@ public class MainScript : MonoBehaviour {
             try
 			{
                 inputsPtr = GCHandle.Alloc(inputs, GCHandleType.Pinned);
-				data.position = new Vector3(data.position.x, (float) LibWrapperMachineLearning.linear_classify(model, inputsPtrr.AddrOfPinnedObject(), inputSize), data.position.z);
+				data.position = new Vector3(data.position.x, (float) LibWrapperMachineLearning.linear_classify(model, inputsPtr.AddrOfPinnedObject(), inputSize), data.position.z);
                 Debug.Log("Position x : " + data.position.x + " z : " + data.position.z + " y : " + data.position.y);
             }
             finally
