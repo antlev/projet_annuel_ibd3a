@@ -14,15 +14,15 @@ public class MainScript : MonoBehaviour {
     public Transform[] baseTest;
 
 	public void create_model(){
-		if (model == null) {
+		if (model == System.IntPtr.Zero) {
 			model = LibWrapperMachineLearning.linear_create_model (inputSize);
 			Debug.Log ("Model created !" + model);
 		} else {
-			Debug.Log ("A model has been created, please delete it if you want to create another one" + model);
+			Debug.Log ("A model has been created, please delete it if you want to create another one ");
 		}
 	}	
 	public void erase_model(){
-		if (model != null) {
+		if (model != System.IntPtr.Zero) {
 			LibWrapperMachineLearning.linear_remove_model (model);
 			Debug.Log ("Model removed !");
 		} else {
@@ -30,7 +30,7 @@ public class MainScript : MonoBehaviour {
 		}
 	}
 	public void classify(Transform[] UnitytObjects){
-		if (model != null) {
+		if (model != System.IntPtr.Zero) {
 			Debug.Log ("Classify");
 			double[] input = new double[inputSize];
 			foreach(var unityObject in UnitytObjects){
@@ -51,7 +51,7 @@ public class MainScript : MonoBehaviour {
 		}
 	}
 //	public void predict(){
-//		if (model != null) {
+//		if (model != System.IntPtr.Zero) {
 
 //			Debug.Log ("Predict");
 //			Debug.Log ("to be implemented");
@@ -67,7 +67,7 @@ public class MainScript : MonoBehaviour {
 //		}
 //	}
 //	public void linear_fit_regression(){
-//		if (model != null) {
+//		if (model != System.IntPtr.Zero) {
 
 //			Debug.Log ("linear_fit_regression");
 //			Debug.Log ("to be implemented");
@@ -80,7 +80,7 @@ public class MainScript : MonoBehaviour {
 //	}	
 //
 //	public void linear_fit_classification_hebb(){
-//		if (model != null) {
+//		if (model != System.IntPtr.Zero) {
 
 //			Debug.Log ("linear_fit_classification_hebb");
 //			Debug.Log ("to be implemented");
@@ -95,7 +95,7 @@ public class MainScript : MonoBehaviour {
 //
 //    public void linear_fit_classification_rosenblatt()
 //    {
-//		if (model != null) {
+//		if (model != System.IntPtr.Zero) {
 //			Debug.Log ("linear_fit_classification_rosenblatt");
 //			Debug.Log ("to be implemented");
 //			double[] inputs = new double[inputSize * baseApprentissage.Length];
@@ -108,7 +108,7 @@ public class MainScript : MonoBehaviour {
 //		}
 //	}
 
-	// Rempli le tableau inputs passé en paramètre avec les coordonnées x et y de l'objetsUnity
+	// Rempli le tableau input passé en paramètre avec les coordonnées x et y de l'objetsUnity
 	private void getInputs(Transform objetsUnity, double[] input){
 		input[0] = objetsUnity.position.x;
 		input[1] = objetsUnity.position.z;
@@ -160,7 +160,7 @@ public class MainScript : MonoBehaviour {
 		// Create model
 		create_model();
 
-		// Création des poiteurs
+		// Création des pointeurs
 		var inputsPtr = default(GCHandle);
 		var outputsPtr = default(GCHandle);
         try
@@ -183,25 +183,19 @@ public class MainScript : MonoBehaviour {
         double[] input = new double[inputSize];
 		generateBaseTest (baseTest, 5);
 
-        i = 0;
 		foreach (var data in baseTest)
         {
-            input[i] = data.position.x;
-            i++;
-            input[i] = data.position.z;
-			var inputsPtr2 = default(GCHandle);
+			getInputs (data, input);
             try
 			{
-                inputsPtr2 = GCHandle.Alloc(inputs, GCHandleType.Pinned);
-				data.position = new Vector3(data.position.x, (float) LibWrapperMachineLearning.linear_classify(model, inputsPtr2.AddrOfPinnedObject(), inputSize), data.position.z);
+                inputsPtr = GCHandle.Alloc(inputs, GCHandleType.Pinned);
+				data.position = new Vector3(data.position.x, (float) LibWrapperMachineLearning.linear_classify(model, inputsPtrr.AddrOfPinnedObject(), inputSize), data.position.z);
                 Debug.Log("Position x : " + data.position.x + " z : " + data.position.z + " y : " + data.position.y);
             }
             finally
             {
-                if (inputsPtr2.IsAllocated) inputsPtr2.Free();
-                if (outputsPtr.IsAllocated) outputsPtr.Free();
+                if (inputsPtr.IsAllocated) inputsPtr.Free();
             }
-            i = 0;
         }
 
 // Test avec la base d'apprentissage a nouveau
@@ -241,7 +235,7 @@ public class MainScript : MonoBehaviour {
 			foreach (var data in testObject) {
 				data.position = new Vector3(x,data.position.y, z);
 				count++;
-				Debug.Log ("Boule positionnée en (" + x + ";" + data.position.y + ";" + z + ")"); 
+//				Debug.Log ("Boule positionnée en (" + x + ";" + data.position.y + ";" + z + ")"); 
 				if (count % separation == 0) {
 					x = -1.0f;
 					z += 2.0f / separation;
