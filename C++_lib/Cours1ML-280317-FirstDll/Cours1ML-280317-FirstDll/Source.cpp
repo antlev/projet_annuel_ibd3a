@@ -122,14 +122,14 @@ int toto() {
 // � une valeur pseudo-al�atoire entre -1 et 1
 double *linear_create_model(int inputDimension) {
 	// Cr�ation du mod�le en m�moire
-	double* ptr = (double *)std::malloc(sizeof(double) * inputDimension);
+	double* ptr = (double *)std::malloc(sizeof(double) * (inputDimension));
 	int i;
 	// On affecte les poids � une valeur entre -1 et 1
 	for (i = 0; i<inputDimension; ++i) {
 		ptr[i] = rand() % 10000 / 5000. - 1.;
 	}
 	// Neurone de biais initialis� � 1
-	//  ptr[inputDimension] = 1;
+	//ptr[inputDimension] = 1;
 
 	return ptr;
 };
@@ -147,6 +147,7 @@ double linear_classify(double *model, const double* input, int inputSize) {
 	for (i = 0; i < inputSize; i++) {
 		somme_poids += model[i] * input[i];
 	}
+	//somme_poids += 1; // neusronne de biais
 	return (somme_poids < 0 ? -1 : 1);
 }
 
@@ -205,8 +206,8 @@ int learn_classification_hebb(double *model, double *unInput, double expected_ou
 			std::cout << "modifying weight " << model[i] << std::endl;
 			model[i] += step * expected_output * unInput[i];
 			std::cout << "weight now " << model[i] << std::endl;
-
 		}
+
 		return 1;
 	}
 	else {

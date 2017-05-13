@@ -7,7 +7,7 @@ public class MainScript : MonoBehaviour {
 	public static System.IntPtr model;
 	public static int inputSize = 2;
 
-    public static int iterationNumber = 10000;
+    public static int iterationNumber = 100000;
     public static int step = 1;
 
     public Transform[] baseApprentissage;
@@ -21,6 +21,7 @@ public class MainScript : MonoBehaviour {
 			Debug.Log ("A model has been created, please delete it if you want to create another one ");
 		}
 	}	
+
 	public void erase_model(){
 		if (model != System.IntPtr.Zero) {
 			LibWrapperMachineLearning.linear_remove_model (model);
@@ -29,11 +30,13 @@ public class MainScript : MonoBehaviour {
 			Debug.Log ("There is no model in memory");
 		}
 	}
-	public void classify(Transform[] UnitytObjects){
+	public void classify(){
 		if (model != System.IntPtr.Zero) {
+			generateBaseTest (baseTest, 5);
+			Debug.Log ("génère une base de test de 5x5 boules");
 			Debug.Log ("Classify");
 			double[] input = new double[inputSize];
-			foreach(var unityObject in UnitytObjects){
+			foreach(var unityObject in baseTest){
 				getInputs (unityObject, input);
 				var inputPtr = default(GCHandle);
 				try
@@ -50,9 +53,10 @@ public class MainScript : MonoBehaviour {
 			Debug.Log ("Aucun modèle en mémoire");
 		}
 	}
+//
 //	public void predict(){
 //		if (model != System.IntPtr.Zero) {
-
+//
 //			Debug.Log ("Predict");
 //			Debug.Log ("to be implemented");
 //			double[] inputs = new double[inputSize * baseTest.Length];
@@ -68,7 +72,7 @@ public class MainScript : MonoBehaviour {
 //	}
 //	public void linear_fit_regression(){
 //		if (model != System.IntPtr.Zero) {
-
+//
 //			Debug.Log ("linear_fit_regression");
 //			Debug.Log ("to be implemented");
 //			double[] inputs = new double[inputSize * baseApprentissage.Length];
@@ -78,21 +82,34 @@ public class MainScript : MonoBehaviour {
 //			Debug.Log ("Aucun modèle en mémoire");
 //		}
 //	}	
-//
-//	public void linear_fit_classification_hebb(){
-//		if (model != System.IntPtr.Zero) {
 
-//			Debug.Log ("linear_fit_classification_hebb");
-//			Debug.Log ("to be implemented");
-//			double[] inputs = new double[inputSize * baseApprentissage.Length];
-//			getInputs (baseApprentissage, inputs);
-////			LibWrapperMachineLearning.linear_fit_classification_hebb (model, inputs, inputs.Length, inputSize, iterationNumber, step);
-//		} else {
-//			Debug.Log ("Aucun modèle en mémoire");
-//		}
-//	}
-//
-//
+	public void linear_fit_classification_hebb(){
+		if (model != System.IntPtr.Zero) {
+
+			Debug.Log ("linear_fit_classification_hebb");
+			double[] inputs = new double[inputSize * baseApprentissage.Length];
+			double[] outputs = new double[baseApprentissage.Length];
+			getInputsOutputs (baseApprentissage, inputs, outputs);
+			// Création des pointeurs
+			var inputsPtr = default(GCHandle);
+			var outputsPtr = default(GCHandle);
+			try
+			{
+				inputsPtr = GCHandle.Alloc(inputs, GCHandleType.Pinned);
+				outputsPtr = GCHandle.Alloc(outputs, GCHandleType.Pinned);
+				LibWrapperMachineLearning.linear_fit_classification_hebb(model, inputsPtr.AddrOfPinnedObject(), inputSize * baseApprentissage.Length, inputSize, outputsPtr.AddrOfPinnedObject(), baseApprentissage.Length, iterationNumber, step);
+			}
+			finally
+			{
+				if (inputsPtr.IsAllocated) inputsPtr.Free();
+				if (outputsPtr.IsAllocated) outputsPtr.Free();
+			}
+		} else {
+			Debug.Log ("Aucun modèle en mémoire");
+		}
+	}
+
+
 //    public void linear_fit_classification_rosenblatt()
 //    {
 //		if (model != System.IntPtr.Zero) {
@@ -115,18 +132,18 @@ public class MainScript : MonoBehaviour {
 	}
 //	// Rempli le tableau inputs passé en paramètre avec les coordonnées x et y du tableau d'objetsUnity
 //	// ainsi que le tableau outputs avec les coordonées z du tableau d'objetsUnity
-//	private void getInputsOutputs(Transform[] objetsUnity, double[] inputs, double[] outputs){
-//		int i = 0, j = 0;
-//		foreach (var data in objetsUnity)
-//		{
-//			inputs[i] = data.position.x;
-//			i++;
-//			inputs[i] = data.position.z;
-//			i++;
-//			outputs[j] = data.position.y;
-//			j++;
-//		}
-//	}
+	private void getInputsOutputs(Transform[] objetsUnity, double[] inputs, double[] outputs){
+		int i = 0, j = 0;
+		foreach (var data in objetsUnity)
+		{
+			inputs[i] = data.position.x;
+			i++;
+			inputs[i] = data.position.z;
+			i++;
+			outputs[j] = data.position.y;
+			j++;
+		}
+	}
 
 	private static void DebugMethod(string message)
 	{
@@ -149,7 +166,7 @@ public class MainScript : MonoBehaviour {
 		Debug.Log("DEBUG baseTest >" + baseTest.Length + "<");
 
 		double[] inputs = new double[inputSize * baseApprentissage.Length];
-        double[] outputs = new double[inputSize * baseApprentissage.Length];
+        double[] outputs = new double[baseApprentissage.Length];
         int i = 0;
         int j = 0;
 
