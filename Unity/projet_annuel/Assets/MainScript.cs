@@ -128,8 +128,18 @@ public class MainScript : MonoBehaviour {
 //		}
 //	}
 
+	private static void DebugMethod(string message)
+	{
+		Debug.Log("debug c++: " + message);
+	}
+//	public delegate void DebugCallback(string message);
 
 	public void test(){
+
+//		LibWrapperMachineLearning.RegisterDebugCallback(new LibWrapperMachineLearning.DebugCallback(DebugMethod));
+
+
+
 
 		LibWrapperMachineLearning.return42 ();
 
@@ -168,10 +178,10 @@ public class MainScript : MonoBehaviour {
             inputsPtr = GCHandle.Alloc(inputs, GCHandleType.Pinned);
             outputsPtr = GCHandle.Alloc(outputs, GCHandleType.Pinned);
 
-//			Debug.Log("Learning Rosenblatt to model ! step > "  + step);
-//		    LibWrapperMachineLearning.linear_fit_classification_rosenblatt(model, gchX.AddrOfPinnedObject(), inputsSize, inputSize, gchY.AddrOfPinnedObject(), outputsSize, iterationNumber, step);
-//			Debug.Log("Learning hebb to model ! step > "  + step);
-//			LibWrapperMachineLearning.linear_fit_classification_hebb(model, inputsPtr.AddrOfPinnedObject(), inputsSize, inputSize, outputsPtr.AddrOfPinnedObject(), outputsSize, iterationNumber, step);
+////			Debug.Log("Learning Rosenblatt to model ! step > "  + step);
+			////		    LibWrapperMachineLearning.linear_fit_classification_rosenblatt(model, inputsPtr.AddrOfPinnedObject(), inputsSize, inputSize, outputsPtr.AddrOfPinnedObject(), outputsSize, iterationNumber, step);
+			Debug.Log("Learning hebb to model ! step > "  + step);
+			LibWrapperMachineLearning.linear_fit_classification_hebb(model, inputsPtr.AddrOfPinnedObject(), inputsSize, inputSize, outputsPtr.AddrOfPinnedObject(), outputsSize, iterationNumber, step);
 		}
         finally
         {
@@ -185,16 +195,17 @@ public class MainScript : MonoBehaviour {
 
 		foreach (var data in baseTest)
         {
+			var inputPtr = default(GCHandle);
 			getInputs (data, input);
             try
 			{
-                inputsPtr = GCHandle.Alloc(inputs, GCHandleType.Pinned);
-				data.position = new Vector3(data.position.x, (float) LibWrapperMachineLearning.linear_classify(model, inputsPtr.AddrOfPinnedObject(), inputSize), data.position.z);
+				inputPtr = GCHandle.Alloc(input, GCHandleType.Pinned);
+				data.position = new Vector3(data.position.x, (float) LibWrapperMachineLearning.linear_classify(model, inputPtr.AddrOfPinnedObject(), inputSize), data.position.z);
                 Debug.Log("Position x : " + data.position.x + " z : " + data.position.z + " y : " + data.position.y);
             }
             finally
             {
-                if (inputsPtr.IsAllocated) inputsPtr.Free();
+                if (inputPtr.IsAllocated) inputPtr.Free();
             }
         }
 

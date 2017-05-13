@@ -2,6 +2,20 @@
 // changer en x64 en haut !!!!!
 extern "C"
 {
+
+
+
+	//typedef void(__stdcall * DebugCallback) (const char * str);
+	//DebugCallback gDebugCallback;
+
+	//__declspec(dllexport) void RegisterDebugCallback(DebugCallback callback)
+	//{
+	//	if (callback)
+	//	{
+	//		gDebugCallback = callback;
+	//	}
+	//}
+
 	// Functions called from C#
 	//prefixe necessaire sur Windows pour pouvoir utiliser fonction
 	__declspec(dllexport) int return42() { return 42; }

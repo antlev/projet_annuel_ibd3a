@@ -4,6 +4,11 @@ public class LibWrapperMachineLearning
 {
 
 #if UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN
+	public delegate void DebugCallback(string message);
+
+	[DllImport("Cours1ML-280317-FirstDll")]
+	public static extern void RegisterDebugCallback(DebugCallback callback);
+
 	[DllImport("Cours1ML-280317-FirstDll")] 
     public static extern int return42();
 

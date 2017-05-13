@@ -1,52 +1,69 @@
 #include "Header.h"
 #include <iostream>
 #include <stdlib.h>
+#include <time.h>
+
+
 void baseTest(double* inputs, double* expected_outputs, int inputSize) {
-	inputs = (double*)malloc(inputSize * sizeof(double) * 20);
-	expected_outputs = (double*)malloc(sizeof(double) * 20);
+
 	int i;
-	for (i = 0; i<10; i++) {
+	for (i = 0; i<20; i += 2) {
 		// x entre -1 et 1
-		*inputs = rand() % 10000 / 5000. - 1.;
+		inputs[i] = rand() % 10000 / 5000. - 1.;
+		/*
 		inputs++;
+		*/
 		// z entre 0 et 1
-		*inputs = rand() % 10000 / 10000.;
+		inputs[i + 1] = rand() % 10000 / 10000.;
+		/*
 		inputs++;
+		*/
 	}
-	for (i = 0; i<10; i++) {
+	for (i = 20; i<40; i += 2) {
 		// x entre -1 et 1
-		*inputs = rand() % 10000 / 5000. - 1.;
-		inputs++;
+		inputs[i] = rand() % 10000 / 5000. - 1.;
 		// z entre -1 et 0
-		*inputs = rand() % 10000 / 10000. - 1.;
-		inputs++;
+		inputs[i + 1] = rand() % 10000 / 10000. - 1.;
 	}
 	for (i = 0; i<10; i++) {
 		// y = 1
-		*expected_outputs = 1;
-		expected_outputs++;
+		expected_outputs[i] = 1;
 	}
-	for (i = 0; i<10; i++) {
+	for (i = 10; i<20; i++) {
 		// y = -1
-		*expected_outputs = -1;
-		expected_outputs++;
+		expected_outputs[i] = -1;
+	}
+}
+
+void showInputs(double* inputs, int inputsSize) {
+	int i;
+	for (int i = 0; i<inputsSize; ++i) {
+		std::cout << "DEBUG inputs[" << i << "] >" << inputs[i] << "< " << std::endl;
 	}
 }
 int main() {
 
+	time_t now;
+	time(&now);
+	srand((unsigned int)now);
+
 	int inputSize = 2;
 	double step(1);
 
-	double* model = linear_create_model(2);
+
+	double* model = linear_create_model(inputSize);
 
 	showModel(model);
 
-	double* inputs;
-	double* expected_outputs;
+	double* inputs = (double*)malloc(inputSize * sizeof(double) * 20);
+	double* expected_outputs = (double*)malloc(sizeof(double) * 20);
 	int i;
 
-
+	// BASE APPRENTISSAGE
 	baseTest(inputs, expected_outputs, inputSize);
+	/*
+	showInputs(inputs, inputSize*20);
+	*/
 
 	std::cout << "Learning hebb !" << std::endl;
 
@@ -56,12 +73,23 @@ int main() {
 	inputs+=2;
 	expected_outputs++;
 	}*/
-	linear_fit_classification_hebb(model, inputs, 40, inputSize, expected_outputs, 1000, 1);
-	baseTest(inputs, expected_outputs, inputSize);
+	linear_fit_classification_hebb(model, inputs, 40, inputSize, expected_outputs, 200, 1);
 
-	for (i = 0; i<20; i++) {
-		std::cout << "res :" << linear_classify(model, inputs, inputSize) << std::endl;
-		inputs += 2;
+	// BASE TEST ICI ON S EN BAT LES COUILLES DE L'OUTPUT
+	baseTest(inputs, expected_outputs, inputSize);
+	int k(0);
+	double* unInput = (double*)malloc(sizeof(double)*inputSize);
+
+	// For each data
+	for (i = 0; i<40; i += inputSize) {
+		int j(0);
+		// On r�cup�re les donn�es correspondant � l'input
+		for (j = 0; j<inputSize; ++j) {
+			unInput[j] = inputs[i + j];
+		}
+		std::cout << "res :" << linear_classify(model, unInput, inputSize) << "Expected : " << expected_outputs[k] << std::endl;
+
+		k++;
 	}
 
 	showModel(model);
@@ -144,10 +172,8 @@ int linear_fit_classification_hebb(double *model, double *inputs, int inputsSize
 			int count(0);
 			int error(0);
 			int k(0);
-
 			// For each data
 			for (i = 0; i<inputsSize; i += inputSize) {
-				double* unInput = (double*)malloc(sizeof(double)*inputSize);
 				int j(0);
 				// On r�cup�re les donn�es correspondant � l'input
 				for (j = 0; j<inputSize; ++j) {
@@ -170,7 +196,7 @@ int learn_classification_hebb(double *model, double *unInput, double expected_ou
 	// We adapt every weight of our Perceptron using the formula
 
 	double output = linear_classify(model, unInput, inputSize);
-	std::cout << "classify of >" << unInput[0] << " " << unInput[1] << "< returned >" << output << "<" << std::endl;
+	std::cout << "classify of >" << unInput[0] << " " << unInput[1] << "< returned >" << output << "<" << "expected output >" << expected_output << "<" << std::endl;
 
 	if (output != expected_output) {
 		int i;
@@ -205,9 +231,10 @@ int linear_fit_classification_rosenblatt(double *model, double *inputs, int inpu
 			int error_count(0);
 			int i(0);
 			int count(0);
+			double* unInput = (double*)malloc(sizeof(double)*inputSize);
+
 			// For each data
 			for (i = 0; i<inputsSize; i += inputSize) {
-				double* unInput = (double*)malloc(sizeof(double)*inputSize);
 				int j(0);
 				// On r�cup�re les donn�es correspondant � l'input
 				for (j = 0; j<inputSize; ++j) {
