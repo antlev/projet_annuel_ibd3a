@@ -14,6 +14,11 @@ public class MainScript : MonoBehaviour {
     public Transform[] baseApprentissage;
     public Transform[] baseTest;
 
+	public Color marblecolor;
+	public Color blue = Color.blue;
+	public Color red = Color.red;
+	public Color green = Color.green;
+
 	public void create_model(){
 		if (model == System.IntPtr.Zero) {
 			model = LibWrapperMachineLearning.linear_create_model (inputSize);
@@ -89,7 +94,7 @@ public class MainScript : MonoBehaviour {
 			Debug.Log ("linear_fit_classification_hebb");
 			double[] inputs = new double[inputSize * baseApprentissage.Length];
 			double[] outputs = new double[baseApprentissage.Length];
-			getInputsOutputs (baseApprentissage, inputs, outputs);
+			getInputsOutputs (baseApprentissage, inputs, outputs, false);
 			// Création des pointeurs
 			var inputsPtr = default(GCHandle);
 			var outputsPtr = default(GCHandle);
@@ -123,7 +128,7 @@ public class MainScript : MonoBehaviour {
 			Debug.Log ("linear_fit_classification_rosenblatt");
 			double[] inputs = new double[inputSize * baseApprentissage.Length];
 			double[] outputs = new double[baseApprentissage.Length];
-			getInputsOutputs (baseApprentissage, inputs, outputs);
+			getInputsOutputs (baseApprentissage, inputs, outputs, false);
 			// Création des pointeurs
 			var inputsPtr = default(GCHandle);
 			var outputsPtr = default(GCHandle);
@@ -157,7 +162,7 @@ public class MainScript : MonoBehaviour {
 	}
 //	// Rempli le tableau inputs passé en paramètre avec les coordonnées x et y du tableau d'objetsUnity
 //	// ainsi que le tableau outputs avec les coordonées z du tableau d'objetsUnity
-	private void getInputsOutputs(Transform[] objetsUnity, double[] inputs, double[] outputs){
+	private void getInputsOutputs(Transform[] objetsUnity, double[] inputs, double[] outputs, bool color){
 		int i = 0, j = 0;
 		foreach (var data in objetsUnity)
 		{
@@ -165,7 +170,15 @@ public class MainScript : MonoBehaviour {
 			i++;
 			inputs[i] = data.position.z;
 			i++;
-			outputs[j] = data.position.y;
+			if (color) {
+				if (data.GetComponent<Renderer> ().material.color == blue) {
+					outputs [j] = -1;
+				} else {
+					outputs [j] = 1 ;
+				}
+			} else {
+				outputs [j] = data.position.y;
+			}
 			j++;
 		}
 	}
@@ -174,69 +187,54 @@ public class MainScript : MonoBehaviour {
 		Debug.Log("LAUNCHING TEST FUNCTION");
 		generateLinear ();
 
-//		LibWrapperMachineLearning.return42 ();
-//		Debug.Log("DEBUG Test C++ function return 42 >" + LibWrapperMachineLearning.return42() + "<");
-//		Debug.Log("DEBUG baseApprentissage >" + baseApprentissage.Length + "<");
-//		Debug.Log("DEBUG baseTest >" + baseTest.Length + "<");
-//
-//		double[] inputs = new double[inputSize * baseApprentissage.Length];
-//        double[] outputs = new double[baseApprentissage.Length];
-//        int i = 0;
-//        int j = 0;
-//
-//		// Remplissage input output
-//        foreach (var data in baseApprentissage)
-//        {
-//            inputs[i] = data.position.x;
-//            i++;
-//            inputs[i] = data.position.z;
-//            i++;
-//            outputs[j] = data.position.y;
-//			j++;
-//        }
-//
-//        int inputsSize = inputs.Length;
-//        int outputsSize = outputs.Length;
-//
-//		// Create model
-//		create_model();
-//
-////		// Création des pointeurs
-//		var inputsPtr = default(GCHandle);
-//		var outputsPtr = default(GCHandle);
-//        try
-//        {
-//            inputsPtr = GCHandle.Alloc(inputs, GCHandleType.Pinned);
-//            outputsPtr = GCHandle.Alloc(outputs, GCHandleType.Pinned);
-//			Debug.Log("Learning hebb to model ! step > "  + step);
-//			LibWrapperMachineLearning.linear_fit_classification_hebb(model, inputsPtr.AddrOfPinnedObject(), inputsSize, inputSize, outputsPtr.AddrOfPinnedObject(), iterationNumber, step);
-//		}
-//        finally
-//        {
-//            if (inputsPtr.IsAllocated) inputsPtr.Free();
-//            if (outputsPtr.IsAllocated) outputsPtr.Free();
-//        }
-//
-//		Debug.Log("Generating testBase !");        
-//        double[] input = new double[inputSize];
-//		generateBaseTest (baseTest, 10);
-//
-//		foreach (var data in baseTest)
-//        {
-//			var inputPtr = default(GCHandle);
-//			getInputs (data, input);
-//            try
-//			{
-//				inputPtr = GCHandle.Alloc(input, GCHandleType.Pinned);
-//				data.position = new Vector3(data.position.x, (float) LibWrapperMachineLearning.linear_classify(model, inputPtr.AddrOfPinnedObject(), inputSize), data.position.z);
-//                Debug.Log("Position x : " + data.position.x + " z : " + data.position.z + " y : " + data.position.y);
-//            }
-//            finally
-//            {
-//                if (inputPtr.IsAllocated) inputPtr.Free();
-//            }
-//        }
-//		erase_model();
+		Debug.Log("DEBUG baseApprentissage >" + baseApprentissage.Length + "<");
+		Debug.Log("DEBUG baseTest >" + baseTest.Length + "<");
+
+		double[] inputs = new double[inputSize * baseApprentissage.Length];
+        double[] outputs = new double[baseApprentissage.Length];
+
+		getInputsOutputs (baseApprentissage, inputs, outputs, false);
+
+        int inputsSize = inputs.Length;
+
+		// Create model
+		create_model();
+
+//		// Création des pointeurs
+		var inputsPtr = default(GCHandle);
+		var outputsPtr = default(GCHandle);
+        try
+        {
+            inputsPtr = GCHandle.Alloc(inputs, GCHandleType.Pinned);
+            outputsPtr = GCHandle.Alloc(outputs, GCHandleType.Pinned);
+			Debug.Log("Learning hebb to model ! step > "  + step);
+			LibWrapperMachineLearning.linear_fit_classification_hebb(model, inputsPtr.AddrOfPinnedObject(), inputsSize, inputSize, outputsPtr.AddrOfPinnedObject(), iterationNumber, step);
+		}
+        finally
+        {
+            if (inputsPtr.IsAllocated) inputsPtr.Free();
+            if (outputsPtr.IsAllocated) outputsPtr.Free();
+        }
+
+		Debug.Log("Generating testBase !");        
+        double[] input = new double[inputSize];
+		generateBaseTest (baseTest, 10);
+
+		foreach (var data in baseTest)
+        {
+			var inputPtr = default(GCHandle);
+			getInputs (data, input);
+            try
+			{
+				inputPtr = GCHandle.Alloc(input, GCHandleType.Pinned);
+				data.position = new Vector3(data.position.x, (float) LibWrapperMachineLearning.linear_classify(model, inputPtr.AddrOfPinnedObject(), inputSize), data.position.z);
+            }
+            finally
+            {
+                if (inputPtr.IsAllocated) inputPtr.Free();
+            }
+        }
+		erase_model();
 		Debug.Log ("Test Function finished !");
     }
 	// Place a square with equally reparted marbles 
@@ -273,8 +271,10 @@ public class MainScript : MonoBehaviour {
 			var z = generateRdm (-1, 1);
 			if (z < 0) {
 				data.position = new Vector3(generateRdm(-1,1), -1, z);
+				data.GetComponent<Renderer> ().material.color = blue;
 			} else {
 				data.position = new Vector3(generateRdm(-1,1), 1, z);
+				data.GetComponent<Renderer> ().material.color = red;
 			}
 		}
 	}
