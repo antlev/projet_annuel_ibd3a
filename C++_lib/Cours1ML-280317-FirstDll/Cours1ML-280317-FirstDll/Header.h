@@ -4,7 +4,7 @@ extern "C" {
 	//prefixe necessaire sur Windows pour pouvoir utiliser fonction
 	__declspec(dllexport) int return42() { return 42; }
 
-	__declspec(dllexport) double *linear_create_model(int inputDimension);
+	__declspec(dllexport) double *linear_create_model(int nbCouches, int inputDimension);
 
 	__declspec(dllexport) void linear_remove_model(double *model);
 

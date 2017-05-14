@@ -75,14 +75,24 @@ public class MainScript : MonoBehaviour {
 	public void create_model(){
 		_isRunning = true;
 		if (model == System.IntPtr.Zero) {
-			model = LibWrapperMachineLearning.linear_create_model (inputSize);
+			model = LibWrapperMachineLearning.linear_create_model (1, inputSize);
 			Debug.Log ("Model created !" + model);
 		} else {
 			Debug.Log ("A model has been created, please delete it if you want to create another one ");
 		}
 		_isRunning = false;
-
 	}	
+
+	public void create_model(int nbCouche){
+		_isRunning = true;
+		if (model == System.IntPtr.Zero) {
+			model = LibWrapperMachineLearning.linear_create_model (nbCouche, inputSize);
+			Debug.Log ("Model created !" + model);
+		} else {
+			Debug.Log ("A model has been created, please delete it if you want to create another one ");
+		}
+		_isRunning = false;
+	}
 
 	public void erase_model(){
 		_isRunning = true;

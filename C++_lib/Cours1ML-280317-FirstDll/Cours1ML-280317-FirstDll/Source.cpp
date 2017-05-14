@@ -120,14 +120,17 @@ int toto() {
 
 // G�n�re un mod�le al�atoirement en "settant" tous les poids
 // � une valeur pseudo-al�atoire entre -1 et 1
-double *linear_create_model(int inputDimension) {
+double *linear_create_model(int nbCouches, int inputDimension) {
 	// Cr�ation du mod�le en m�moire
-	double* ptr = (double *)std::malloc(sizeof(double) * (inputDimension));
-	int i;
+	double* ptr = (double *)std::malloc(sizeof(double) * (inputDimension) * nbCouches);
+	int i,j;
 	// On affecte les poids � une valeur entre -1 et 1
-	for (i = 0; i<inputDimension; ++i) {
-		ptr[i] = rand() % 10000 / 5000. - 1.;
+	for (i = 0; i < nbCouches; ++i) {
+		for (j = 0; j<inputDimension; ++j) {
+			ptr[i] = rand() % 10000 / 5000. - 1.;
+		}
 	}
+
 	// Neurone de biais initialis� � 1
 	//ptr[inputDimension] = 1;
 

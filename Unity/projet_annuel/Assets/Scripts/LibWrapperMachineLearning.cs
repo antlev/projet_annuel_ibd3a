@@ -9,7 +9,7 @@ public class LibWrapperMachineLearning
     public static extern int return42();
 
     [DllImport("Cours1ML-280317-FirstDll")] 
-    public static extern System.IntPtr linear_create_model(int inputDimension);
+    public static extern System.IntPtr linear_create_model(int nbCouches, int inputDimension);
 
     [DllImport("Cours1ML-280317-FirstDll")]
     public static extern void linear_remove_model(System.IntPtr model);
