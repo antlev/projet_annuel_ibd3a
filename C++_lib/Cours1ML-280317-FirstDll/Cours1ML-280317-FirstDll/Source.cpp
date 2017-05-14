@@ -242,7 +242,7 @@ int linear_fit_classification_rosenblatt(double *model, double *inputs, int inpu
 					unInput[j] = inputs[i + j];
 				}
 
-				double output = learn_classification_rosenblatt(model, outputs[count], unInput, inputSize, learning_rate, threshold);
+				double output = learn_classification_rosenblatt(model, unInput, inputSize, outputs[count], step);
 
 				if (output != outputs[i])
 					error_count++;
@@ -257,8 +257,7 @@ int linear_fit_classification_rosenblatt(double *model, double *inputs, int inpu
 	}
 }
 // Applique la règle de rosenblatt sur un perceptron avec un input
-double learn_classification_rosenblatt(double *model, double expected_result, double* input, int inputSize, double learning_rate, double threshold)
-{
+double learn_classification_rosenblatt(double *model, double* input, int inputSize, double expected_result, double step){
 	// Get the result given by the Perceptron
 	double result = linear_classify(model, input, inputSize);
 
@@ -270,14 +269,14 @@ double learn_classification_rosenblatt(double *model, double expected_result, do
 		int i;
 		// We adapt every weight of our Perceptron using the formula
 		for (i = 0; i < inputSize + 1; i++) {
-			model[i] += learning_rate * error * input[i];
+			model[i] += step * error * input[i];
 		}
 	}
 	return result;
 }
 //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-int linear_fit_regression(double *model, double *inputs, int inputsSize, int inputSize, double *outputs, int outputsSize) {
+int linear_fit_regression(double *model, double *inputs, int inputsSize, int inputSize, double *outputs){
 	if (model == nullptr) {
 		return -1;
 	}

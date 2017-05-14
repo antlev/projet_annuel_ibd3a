@@ -97,7 +97,7 @@ public class MainScript : MonoBehaviour {
 			{
 				inputsPtr = GCHandle.Alloc(inputs, GCHandleType.Pinned);
 				outputsPtr = GCHandle.Alloc(outputs, GCHandleType.Pinned);
-				LibWrapperMachineLearning.linear_fit_classification_hebb(model, inputsPtr.AddrOfPinnedObject(), inputSize * baseApprentissage.Length, inputSize, outputsPtr.AddrOfPinnedObject(), baseApprentissage.Length, iterationNumber, step);
+				LibWrapperMachineLearning.linear_fit_classification_hebb(model, inputsPtr.AddrOfPinnedObject(), inputSize * baseApprentissage.Length, inputSize, outputsPtr.AddrOfPinnedObject(), iterationNumber, step);
 			}
 			finally
 			{
@@ -198,7 +198,7 @@ public class MainScript : MonoBehaviour {
 ////			Debug.Log("Learning Rosenblatt to model ! step > "  + step);
 			////		    LibWrapperMachineLearning.linear_fit_classification_rosenblatt(model, inputsPtr.AddrOfPinnedObject(), inputsSize, inputSize, outputsPtr.AddrOfPinnedObject(), outputsSize, iterationNumber, step);
 			Debug.Log("Learning hebb to model ! step > "  + step);
-			LibWrapperMachineLearning.linear_fit_classification_hebb(model, inputsPtr.AddrOfPinnedObject(), inputsSize, inputSize, outputsPtr.AddrOfPinnedObject(), outputsSize, iterationNumber, step);
+			LibWrapperMachineLearning.linear_fit_classification_hebb(model, inputsPtr.AddrOfPinnedObject(), inputsSize, inputSize, outputsPtr.AddrOfPinnedObject(), iterationNumber, step);
 		}
         finally
         {
@@ -208,7 +208,7 @@ public class MainScript : MonoBehaviour {
 
 		Debug.Log("Generating testBase !");        
         double[] input = new double[inputSize];
-		generateBaseTest (baseTest, 5);
+		generateBaseTest (baseTest, 10);
 
 		foreach (var data in baseTest)
         {

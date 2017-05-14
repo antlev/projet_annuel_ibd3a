@@ -4,10 +4,6 @@ public class LibWrapperMachineLearning
 {
 
 #if UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN
-	public delegate void DebugCallback(string message);
-
-	[DllImport("Cours1ML-280317-FirstDll")]
-	public static extern void RegisterDebugCallback(DebugCallback callback);
 
 	[DllImport("Cours1ML-280317-FirstDll")] 
     public static extern int return42();
@@ -19,13 +15,13 @@ public class LibWrapperMachineLearning
     public static extern void linear_remove_model(System.IntPtr model);
 
     [DllImport("Cours1ML-280317-FirstDll")]
-    public static extern int linear_fit_regression(System.IntPtr model, System.IntPtr inputs, int inputsSize, int inputSize, System.IntPtr outputs, int outputsSize);
+    public static extern int linear_fit_regression(System.IntPtr model, System.IntPtr inputs, int inputsSize, int inputSize, System.IntPtr outputs);
 
     [DllImport("Cours1ML-280317-FirstDll")]
-	public static extern int linear_fit_classification_hebb(System.IntPtr model, System.IntPtr inputs, int inputsSize, int inputSize , System.IntPtr outputs, int outputsSize,  int iterationNumber, double step);
+	public static extern int linear_fit_classification_hebb(System.IntPtr model, System.IntPtr inputs, int inputsSize, int inputSize , System.IntPtr outputs,  int iterationNumber, double step);
 
     [DllImport("Cours1ML-280317-FirstDll")]
-    public static extern int linear_fit_classification_rosenblatt(System.IntPtr model, System.IntPtr inputs, int inputsSize, int inputSize, System.IntPtr outputs, int outputsSize, int iterationNumber, double step);
+    public static extern int linear_fit_classification_rosenblatt(System.IntPtr model, System.IntPtr inputs, int inputsSize, int inputSize, System.IntPtr outputs, int iterationNumber, double step);
 
     [DllImport("Cours1ML-280317-FirstDll")]
     public static extern double linear_classify(System.IntPtr model, System.IntPtr input, int inputSize);
