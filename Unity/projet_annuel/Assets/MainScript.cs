@@ -32,9 +32,9 @@ public class MainScript : MonoBehaviour {
 	}
 	public void classify(){
 		if (model != System.IntPtr.Zero) {
-			generateBaseTest (baseTest, 5);
-			Debug.Log ("génère une base de test de 5x5 boules");
-			Debug.Log ("Classify");
+			generateBaseTest (baseTest, 10);
+			Debug.Log ("génère une base de test de 10x10 boules");
+			Debug.Log ("Classify baseTest");
 			double[] input = new double[inputSize];
 			foreach(var unityObject in baseTest){
 				getInputs (unityObject, input);
@@ -85,7 +85,6 @@ public class MainScript : MonoBehaviour {
 
 	public void linear_fit_classification_hebb(){
 		if (model != System.IntPtr.Zero) {
-
 			Debug.Log ("linear_fit_classification_hebb");
 			double[] inputs = new double[inputSize * baseApprentissage.Length];
 			double[] outputs = new double[baseApprentissage.Length];
@@ -93,11 +92,19 @@ public class MainScript : MonoBehaviour {
 			// Création des pointeurs
 			var inputsPtr = default(GCHandle);
 			var outputsPtr = default(GCHandle);
+			int learningResponse;
 			try
 			{
 				inputsPtr = GCHandle.Alloc(inputs, GCHandleType.Pinned);
 				outputsPtr = GCHandle.Alloc(outputs, GCHandleType.Pinned);
-				LibWrapperMachineLearning.linear_fit_classification_hebb(model, inputsPtr.AddrOfPinnedObject(), inputSize * baseApprentissage.Length, inputSize, outputsPtr.AddrOfPinnedObject(), iterationNumber, step);
+				learningResponse = LibWrapperMachineLearning.linear_fit_classification_hebb(model, inputsPtr.AddrOfPinnedObject(), inputSize * baseApprentissage.Length, inputSize, outputsPtr.AddrOfPinnedObject(), iterationNumber, step);
+				if(learningResponse == -1){
+					Debug.Log("C++ >Aucun modèle en mémoire<");
+				}else if(learningResponse == 0){
+					Debug.Log("Leaning stop by iterations");
+				} else{
+					Debug.Log("Learning stop beacause all case were correctly classified");
+				}
 			}
 			finally
 			{
@@ -110,21 +117,38 @@ public class MainScript : MonoBehaviour {
 	}
 
 
-//    public void linear_fit_classification_rosenblatt()
-//    {
-//		if (model != System.IntPtr.Zero) {
-//			Debug.Log ("linear_fit_classification_rosenblatt");
-//			Debug.Log ("to be implemented");
-//			double[] inputs = new double[inputSize * baseApprentissage.Length];
-//			double[] outputs = new double[inputSize * baseApprentissage.Length];
-//			getInputsOutputs (baseApprentissage, inputs, outputs);
-//
-////			LibWrapperMachineLearning.linear_fit_classification_rosenblatt (model, inputs, inputs.Length, inputSize, outputs, outputs.Length, iterationNumber, step);
-//		} else {
-//			Debug.Log ("Aucun modèle en mémoire");
-//		}
-//	}
-
+	public void linear_fit_classification_rosenblatt(){
+		if (model != System.IntPtr.Zero) {
+			Debug.Log ("linear_fit_classification_rosenblatt");
+			double[] inputs = new double[inputSize * baseApprentissage.Length];
+			double[] outputs = new double[baseApprentissage.Length];
+			getInputsOutputs (baseApprentissage, inputs, outputs);
+			// Création des pointeurs
+			var inputsPtr = default(GCHandle);
+			var outputsPtr = default(GCHandle);
+			int learningResponse;
+			try
+			{
+				inputsPtr = GCHandle.Alloc(inputs, GCHandleType.Pinned);
+				outputsPtr = GCHandle.Alloc(outputs, GCHandleType.Pinned);
+				learningResponse = LibWrapperMachineLearning.linear_fit_classification_rosenblatt(model, inputsPtr.AddrOfPinnedObject(), inputSize * baseApprentissage.Length, inputSize, outputsPtr.AddrOfPinnedObject(), iterationNumber, step);
+				if(learningResponse == -1){
+					Debug.Log("C++ >Aucun modèle en mémoire<");
+				}else if(learningResponse == 0){
+					Debug.Log("Leaning stop by iterations");
+				} else{
+					Debug.Log("Learning stop beacause all case were correctly classified");
+				}
+			}
+			finally
+			{
+				if (inputsPtr.IsAllocated) inputsPtr.Free();
+				if (outputsPtr.IsAllocated) outputsPtr.Free();
+			}
+		} else {
+			Debug.Log ("Aucun modèle en mémoire");
+		}
+	}
 	// Rempli le tableau input passé en paramètre avec les coordonnées x et y de l'objetsUnity
 	private void getInputs(Transform objetsUnity, double[] input){
 		input[0] = objetsUnity.position.x;
@@ -144,23 +168,10 @@ public class MainScript : MonoBehaviour {
 			j++;
 		}
 	}
-
-	private static void DebugMethod(string message)
-	{
-		Debug.Log("debug c++: " + message);
-	}
-//	public delegate void DebugCallback(string message);
-
+	// TEST FUNCTION		
 	public void test(){
-
-//		LibWrapperMachineLearning.RegisterDebugCallback(new LibWrapperMachineLearning.DebugCallback(DebugMethod));
-
-
-
-
-		LibWrapperMachineLearning.return42 ();
-
 		Debug.Log("LAUNCHING TEST FUNCTION");
+		LibWrapperMachineLearning.return42 ();
 		Debug.Log("DEBUG Test C++ function return 42 >" + LibWrapperMachineLearning.return42() + "<");
 		Debug.Log("DEBUG baseApprentissage >" + baseApprentissage.Length + "<");
 		Debug.Log("DEBUG baseTest >" + baseTest.Length + "<");
@@ -194,9 +205,6 @@ public class MainScript : MonoBehaviour {
         {
             inputsPtr = GCHandle.Alloc(inputs, GCHandleType.Pinned);
             outputsPtr = GCHandle.Alloc(outputs, GCHandleType.Pinned);
-
-////			Debug.Log("Learning Rosenblatt to model ! step > "  + step);
-			////		    LibWrapperMachineLearning.linear_fit_classification_rosenblatt(model, inputsPtr.AddrOfPinnedObject(), inputsSize, inputSize, outputsPtr.AddrOfPinnedObject(), outputsSize, iterationNumber, step);
 			Debug.Log("Learning hebb to model ! step > "  + step);
 			LibWrapperMachineLearning.linear_fit_classification_hebb(model, inputsPtr.AddrOfPinnedObject(), inputsSize, inputSize, outputsPtr.AddrOfPinnedObject(), iterationNumber, step);
 		}
@@ -225,34 +233,11 @@ public class MainScript : MonoBehaviour {
                 if (inputPtr.IsAllocated) inputPtr.Free();
             }
         }
-
-// Test avec la base d'apprentissage a nouveau
-
-//        foreach (var data in baseApprentissage)
-//        {
-//            input[i] = data.position.x;
-//            i++;
-//            input[i] = data.position.z;
-//
-//            var ghX = default(GCHandle);
-//            try
-//            {
-//                ghX = GCHandle.Alloc(inputs, GCHandleType.Pinned);
-////				data.position.Set(data.position.x, (float)LibWrapperMachineLearning.linear_classify(model, ghX.AddrOfPinnedObject(), inputSize), data.position.z);
-//				data.position = new Vector3(data.position.x, (float)LibWrapperMachineLearning.linear_classify(model, ghX.AddrOfPinnedObject(), inputSize), data.position.z);
-//                Debug.Log("Position x : "+ data.position.x + " z : " + data.position.z + " y : " + data.position.y);
-//            }
-//            finally
-//            {
-//                if (gchX.IsAllocated) gchX.Free();
-//                if (gchY.IsAllocated) gchY.Free();
-//            }
-//            i = 0;
-//        }
 		erase_model();
 		Debug.Log ("Test Function finished !");
     }
-
+	// Place a square with equally reparted marbles 
+	// separation gives the number of marble by size f the square
 	public void generateBaseTest(Transform[] testObject, int separation){
 		if (testObject.Length != separation * separation) {
 			Debug.Log ("Le nombre d'objet envoyé ne correspond pas à la séparation demandée");
@@ -272,8 +257,6 @@ public class MainScript : MonoBehaviour {
 				}
 			}
 			Debug.Log ("Les boules de test sont placé selon une sépartion de " + separation + "x" + separation + " sur les axes (x;z)");
-
 		}
 	}
-
 }

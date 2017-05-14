@@ -154,6 +154,9 @@ double linear_classify(double *model, const double* input, int inputSize) {
 // ---------- APPRENTSSAGE ----------
 // Applique la règle de rosenblatt sur un perceptron avec un tableau d'inputs
 // Applique la règle de hebb sur un perceptron avec un tableau d'inputs
+// Retourne -1 si le model n'existe pas
+// Retourne 0 si l'erreur est à 0
+// Retourne 1 si le nombre d'iterations à stopper l'apprentissage
 int linear_fit_classification_hebb(double *model, double *inputs, int inputsSize, int inputSize, double* outputs, int iterationNumber, double step) {
 	if (model == nullptr) {
 		return -1;
@@ -164,9 +167,10 @@ int linear_fit_classification_hebb(double *model, double *inputs, int inputsSize
 
 		while (true) {
 
-			if (iterations > iterationNumber)
-				break;
-			else
+			if (iterations > iterationNumber) {
+				free(unInput);
+				return 1;
+			} else
 				iterations++;
 
 			int i(0);
@@ -180,20 +184,20 @@ int linear_fit_classification_hebb(double *model, double *inputs, int inputsSize
 				for (j = 0; j<inputSize; ++j) {
 					unInput[j] = inputs[i + j];
 				}
-				error += learn_classification_hebb(model, unInput, outputs[k], inputSize, step);
+				error += learn_classification_hebb(model, unInput, inputSize, outputs[k], step);
 				k++;
 			}
 			if (error == 0) {
-				break;
+				free(unInput);
+				return 0;
 			}
 			error = 0;
 		}
-		free(unInput);
-		return 0;
+
 	}
 }
 // Applique la règle de hebb sur un perceptron avec un input
-int learn_classification_hebb(double *model, double *unInput, double expected_output, int inputSize, double step) {
+int learn_classification_hebb(double *model, double *unInput, int inputSize, double expected_output, double step) {
 	// We adapt every weight of our Perceptron using the formula
 
 	double output = linear_classify(model, unInput, inputSize);
@@ -214,26 +218,27 @@ int learn_classification_hebb(double *model, double *unInput, double expected_ou
 		return 0;
 	}
 }
-int linear_fit_classification_rosenblatt(double *model, double *inputs, int inputsSize, int inputSize, double *outputs, int outputsSize, int iterationNumber, double step) {
+int linear_fit_classification_rosenblatt(double *model, double *inputs, int inputsSize, int inputSize, double *outputs, int iterationNumber, double step) {
 	if (model == nullptr) {
 		return -1;
 	}
 	else {
-		double learning_rate(1);// TODO TOSET
-		double threshold(100);// TODO TOSET
 		int iterations(0);
+		double* unInput = (double*)malloc(sizeof(double)*inputSize);
 
 		while (true) {
-			if (iterations > iterationNumber)
-				break;
+
+			if (iterations > iterationNumber) {
+				free(unInput);
+				return 1;
+			}
 			else
 				iterations++;
 
-			int error_count(0);
 			int i(0);
 			int count(0);
-			double* unInput = (double*)malloc(sizeof(double)*inputSize);
-
+			int error(0);
+			int k(0);
 			// For each data
 			for (i = 0; i<inputsSize; i += inputSize) {
 				int j(0);
@@ -241,25 +246,21 @@ int linear_fit_classification_rosenblatt(double *model, double *inputs, int inpu
 				for (j = 0; j<inputSize; ++j) {
 					unInput[j] = inputs[i + j];
 				}
-
-				double output = learn_classification_rosenblatt(model, unInput, inputSize, outputs[count], step);
-
-				if (output != outputs[i])
-					error_count++;
-				count++;
-				free(unInput);
+				error += learn_classification_rosenblatt(model, unInput, outputs[k], inputSize, step);
+				k++;
 			}
-			// Si l'apprentisage est fini et que le perceptron renvoie la bonne sortie pour chaque input
-			if (error_count == 0)
-				break;
+			if (error == 0) {
+				free(unInput);
+				return 0;
+			}
+			error = 0;
 		}
-		return 0;
 	}
 }
 // Applique la règle de rosenblatt sur un perceptron avec un input
-double learn_classification_rosenblatt(double *model, double* input, int inputSize, double expected_result, double step){
+double learn_classification_rosenblatt(double *model, double* unInput, int inputSize, double expected_result, double step){
 	// Get the result given by the Perceptron
-	double result = linear_classify(model, input, inputSize);
+	double result = linear_classify(model, unInput, inputSize);
 
 	// If the Perceptron doesn't not return a correct response -> We modify the weights to adapt
 	// If the Perceptron return a correct response -> Nothing to do
@@ -269,7 +270,7 @@ double learn_classification_rosenblatt(double *model, double* input, int inputSi
 		int i;
 		// We adapt every weight of our Perceptron using the formula
 		for (i = 0; i < inputSize + 1; i++) {
-			model[i] += step * error * input[i];
+			model[i] += step * error * unInput[i];
 		}
 	}
 	return result;
