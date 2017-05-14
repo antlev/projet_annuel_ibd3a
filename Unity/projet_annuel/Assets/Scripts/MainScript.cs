@@ -19,24 +19,83 @@ public class MainScript : MonoBehaviour {
 	public Color red = Color.red;
 	public Color green = Color.green;
 
+	/// <summary>
+	/// Indique si un algorithme est en cours d'exécution
+	/// </summary>
+	private bool _isRunning = false;
+
+	/// <summary>
+	/// Méthode utilisée pour gérer les informations et 
+	/// boutons de l'interface utilisateur
+	/// </summary>
+	public void OnGUI()
+	{
+		// Démarrage d'une liste de composants visuels verticale
+		GUILayout.BeginVertical();
+
+		if (GUILayout.Button("Create Model")) {
+			if (!_isRunning) {
+				create_model();
+			}
+		}
+		if (GUILayout.Button("Erase Model")) {
+			if (!_isRunning) {
+				erase_model();
+			}
+		}
+		if (GUILayout.Button("Classify")) {
+			if (!_isRunning)
+			{
+				classify();
+			}
+		}
+		if (GUILayout.Button("Linear_fit_classification_hebb")){
+			if (!_isRunning)
+			{
+				linear_fit_classification_hebb();
+			}
+		}
+
+		if (GUILayout.Button("Linear_fit_classification_rosenblatt")) {
+			if (!_isRunning) {
+				StartCoroutine ("linear_fit_classification_rosenblatt");
+			}
+		}
+
+		if (GUILayout.Button("Test")) {
+			if (!_isRunning)
+			{
+				StartCoroutine("test");
+			}
+		}
+		// Fin de la liste de composants visuels verticale
+		GUILayout.EndVertical();
+	}
+
 	public void create_model(){
+		_isRunning = true;
 		if (model == System.IntPtr.Zero) {
 			model = LibWrapperMachineLearning.linear_create_model (inputSize);
 			Debug.Log ("Model created !" + model);
 		} else {
 			Debug.Log ("A model has been created, please delete it if you want to create another one ");
 		}
+		_isRunning = false;
+
 	}	
 
 	public void erase_model(){
+		_isRunning = true;
 		if (model != System.IntPtr.Zero) {
 			LibWrapperMachineLearning.linear_remove_model (model);
 			Debug.Log ("Model removed !");
 		} else {
 			Debug.Log ("There is no model in memory");
 		}
+		_isRunning = false;
 	}
 	public void classify(){
+		_isRunning = true;
 		if (model != System.IntPtr.Zero) {
 			generateBaseTest (baseTest, 10);
 			Debug.Log ("génère une base de test de 10x10 boules");
@@ -58,6 +117,7 @@ public class MainScript : MonoBehaviour {
 		} else {
 			Debug.Log ("Aucun modèle en mémoire");
 		}
+		_isRunning = false;
 	}
 //
 //	public void predict(){
@@ -90,6 +150,7 @@ public class MainScript : MonoBehaviour {
 //	}	
 
 	public void linear_fit_classification_hebb(){
+		_isRunning = true;
 		if (model != System.IntPtr.Zero) {
 			Debug.Log ("linear_fit_classification_hebb");
 			double[] inputs = new double[inputSize * baseApprentissage.Length];
@@ -120,10 +181,12 @@ public class MainScript : MonoBehaviour {
 		} else {
 			Debug.Log ("Aucun modèle en mémoire");
 		}
+		_isRunning = false;
 	}
 
 
 	public void linear_fit_classification_rosenblatt(){
+		_isRunning = true;
 		if (model != System.IntPtr.Zero) {
 			Debug.Log ("linear_fit_classification_rosenblatt");
 			double[] inputs = new double[inputSize * baseApprentissage.Length];
@@ -154,6 +217,7 @@ public class MainScript : MonoBehaviour {
 		} else {
 			Debug.Log ("Aucun modèle en mémoire");
 		}
+		_isRunning = false;
 	}
 	// Rempli le tableau input passé en paramètre avec les coordonnées x et y de l'objetsUnity
 	private void getInputs(Transform objetsUnity, double[] input){
@@ -184,8 +248,11 @@ public class MainScript : MonoBehaviour {
 	}
 	// TEST FUNCTION		
 	public void test(){
+		_isRunning = true;
 		Debug.Log("LAUNCHING TEST FUNCTION");
 		generateLinear ();
+		Debug.Log ("sleeping 2sec...");
+//		Thread.Sleep (2000);
 
 		Debug.Log("DEBUG baseApprentissage >" + baseApprentissage.Length + "<");
 		Debug.Log("DEBUG baseTest >" + baseTest.Length + "<");
@@ -236,6 +303,7 @@ public class MainScript : MonoBehaviour {
         }
 		erase_model();
 		Debug.Log ("Test Function finished !");
+		_isRunning = false;
     }
 	// Place a square with equally reparted marbles 
 	// separation gives the number of marble by size f the square
@@ -277,5 +345,15 @@ public class MainScript : MonoBehaviour {
 				data.GetComponent<Renderer> ().material.color = red;
 			}
 		}
+	}
+
+	// Transforme les inputs pour certains cas non linérement séparable mais séparables par leur carré
+	public void transformInputs(double[] inputs){
+		for (int i = 0; i < inputs.Length; i++) {
+			inputs[i] *= inputs[i];
+		}
+//		foreach(var input in inputs){
+//			input *= input;
+//		}
 	}
 }

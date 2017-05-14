@@ -46,8 +46,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-     <Compile Include="Assets\LibWrapperMachineLearning.cs" />
-     <Compile Include="Assets\MainScript.cs" />
+     <Compile Include="Assets\Scripts\LibWrapperMachineLearning.cs" />
+     <Compile Include="Assets\Scripts\MainScript.cs" />
  <Reference Include="UnityEngine.Advertisements">
  <HintPath>C:/Program Files/Unity/Editor/Data/UnityExtensions/Unity/Advertisements/UnityEngine.Advertisements.dll</HintPath>
  </Reference>
