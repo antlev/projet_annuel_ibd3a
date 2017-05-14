@@ -51,7 +51,7 @@ int main() {
 	double step(1);
 
 
-	double* model = linear_create_model(inputSize);
+	double* model = linear_create_model(1, inputSize);
 
 	showModel(model);
 

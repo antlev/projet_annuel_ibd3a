@@ -260,58 +260,79 @@ public class MainScript : MonoBehaviour {
 	public void test(){
 		_isRunning = true;
 		Debug.Log("LAUNCHING TEST FUNCTION");
-		generateLinear ();
-		Debug.Log ("sleeping 2sec...");
-//		Thread.Sleep (2000);
 
-		Debug.Log("DEBUG baseApprentissage >" + baseApprentissage.Length + "<");
-		Debug.Log("DEBUG baseTest >" + baseTest.Length + "<");
+		double[] test1 = {1,2,2,3,3,4};
+		serialiseInputs (test1);
+		double[] test2 = {2,3,4,5,6,7,8,9};
+		serialiseInputs (test2);
+		double[] test3 = {-12,0,24,3};
+		serialiseInputs (test3);
 
-		double[] inputs = new double[inputSize * baseApprentissage.Length];
-        double[] outputs = new double[baseApprentissage.Length];
-
-		getInputsOutputs (baseApprentissage, inputs, outputs, false);
-
-        int inputsSize = inputs.Length;
-
-		// Create model
-		create_model();
-
-//		// Création des pointeurs
-		var inputsPtr = default(GCHandle);
-		var outputsPtr = default(GCHandle);
-        try
-        {
-            inputsPtr = GCHandle.Alloc(inputs, GCHandleType.Pinned);
-            outputsPtr = GCHandle.Alloc(outputs, GCHandleType.Pinned);
-			Debug.Log("Learning hebb to model ! step > "  + step);
-			LibWrapperMachineLearning.linear_fit_classification_hebb(model, inputsPtr.AddrOfPinnedObject(), inputsSize, inputSize, outputsPtr.AddrOfPinnedObject(), iterationNumber, step);
+		Debug.Log ("Test 1");
+		foreach (var test in test1) {
+			Debug.Log (">" + test + "<");
 		}
-        finally
-        {
-            if (inputsPtr.IsAllocated) inputsPtr.Free();
-            if (outputsPtr.IsAllocated) outputsPtr.Free();
-        }
+		Debug.Log ("Test 2");
+		foreach (var test in test2) {
+			Debug.Log (">" + test + "<");
+		}
+		Debug.Log ("Test 2");
+		foreach (var test in test3) {
+			Debug.Log (">" + test + "<");
+		}
 
-		Debug.Log("Generating testBase !");        
-        double[] input = new double[inputSize];
-		generateBaseTest (baseTest, 10);
-
-		foreach (var data in baseTest)
-        {
-			var inputPtr = default(GCHandle);
-			getInputs (data, input);
-            try
-			{
-				inputPtr = GCHandle.Alloc(input, GCHandleType.Pinned);
-				data.position = new Vector3(data.position.x, (float) LibWrapperMachineLearning.linear_classify(model, inputPtr.AddrOfPinnedObject(), inputSize), data.position.z);
-            }
-            finally
-            {
-                if (inputPtr.IsAllocated) inputPtr.Free();
-            }
-        }
-		erase_model();
+//		generateLinear ();
+//		Debug.Log ("sleeping 2sec...");
+////		Thread.Sleep (2000);
+//
+//		Debug.Log("DEBUG baseApprentissage >" + baseApprentissage.Length + "<");
+//		Debug.Log("DEBUG baseTest >" + baseTest.Length + "<");
+//
+//		double[] inputs = new double[inputSize * baseApprentissage.Length];
+//        double[] outputs = new double[baseApprentissage.Length];
+//
+//		getInputsOutputs (baseApprentissage, inputs, outputs, false);
+//
+//        int inputsSize = inputs.Length;
+//
+//		// Create model
+//		create_model();
+//
+////		// Création des pointeurs
+//		var inputsPtr = default(GCHandle);
+//		var outputsPtr = default(GCHandle);
+//        try
+//        {
+//            inputsPtr = GCHandle.Alloc(inputs, GCHandleType.Pinned);
+//            outputsPtr = GCHandle.Alloc(outputs, GCHandleType.Pinned);
+//			Debug.Log("Learning hebb to model ! step > "  + step);
+//			LibWrapperMachineLearning.linear_fit_classification_hebb(model, inputsPtr.AddrOfPinnedObject(), inputsSize, inputSize, outputsPtr.AddrOfPinnedObject(), iterationNumber, step);
+//		}
+//        finally
+//        {
+//            if (inputsPtr.IsAllocated) inputsPtr.Free();
+//            if (outputsPtr.IsAllocated) outputsPtr.Free();
+//        }
+//
+//		Debug.Log("Generating testBase !");        
+//        double[] input = new double[inputSize];
+//		generateBaseTest (baseTest, 10);
+//
+//		foreach (var data in baseTest)
+//        {
+//			var inputPtr = default(GCHandle);
+//			getInputs (data, input);
+//            try
+//			{
+//				inputPtr = GCHandle.Alloc(input, GCHandleType.Pinned);
+//				data.position = new Vector3(data.position.x, (float) LibWrapperMachineLearning.linear_classify(model, inputPtr.AddrOfPinnedObject(), inputSize), data.position.z);
+//            }
+//            finally
+//            {
+//                if (inputPtr.IsAllocated) inputPtr.Free();
+//            }
+//        }
+//		erase_model();
 		Debug.Log ("Test Function finished !");
 		_isRunning = false;
     }
@@ -366,4 +387,28 @@ public class MainScript : MonoBehaviour {
 //			input *= input;
 //		}
 	}
+
+	// Use the min / max method to serialise inputs
+	public int serialiseInputs(double[] inputs){
+		double minX = inputs[0], maxX = inputs[0];
+		double minZ = inputs[1], maxZ = inputs[1];
+		for (int i = 2; i < inputs.Length; i += 2) {
+			if(inputs[i] < minX) { minX = inputs[i]; }
+			if(inputs[i] > maxX) { maxX = inputs[i]; }
+		}
+		for (int i = 3; i < inputs.Length; i += 2) {
+			if(inputs[i] < minZ) { minZ = inputs[i]; }
+			if(inputs[i] > maxZ) { maxZ = inputs[i]; }
+		}
+		for (int i = 2; i < inputs.Length; i += 2) {
+			inputs[i] = -1 + 2 * (inputs [i] - minX) / (maxX - minX);
+		}
+		for (int i = 3; i < inputs.Length; i += 2) {
+			inputs[i] = -1 + 2 * (inputs [i] - minZ) / (maxZ - minZ);
+		}
+		return 0;
+	}
+
+
+
 }
