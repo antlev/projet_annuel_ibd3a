@@ -73,6 +73,12 @@ public class MainScript : MonoBehaviour {
 				predict();
 			}
 		}
+		if (GUILayout.Button("Clean")) {
+			if (!_isRunning)
+			{
+				clean();
+			}
+		}
 		if (GUILayout.Button("Test")) {
 			if (!_isRunning)
 			{
@@ -82,7 +88,11 @@ public class MainScript : MonoBehaviour {
 		// Fin de la liste de composants visuels verticale
 		GUILayout.EndVertical();
 	}
-
+	void clean(){
+		foreach (var data in baseTest) {
+			data.position = new Vector3(data.position.x, 5, data.position.z);
+		}
+	}
 	public void create_model(){
 		_isRunning = true;
 		if (model == System.IntPtr.Zero) {
@@ -109,7 +119,8 @@ public class MainScript : MonoBehaviour {
 		_isRunning = true;
 		if (model != System.IntPtr.Zero) {
 			LibWrapperMachineLearning.linear_remove_model (model);
-			Debug.Log ("Model removed !");
+			model = System.IntPtr.Zero;
+			Debug.Log ("Model removed !" + model);
 		} else {
 			Debug.Log ("There is no model in memory");
 		}
