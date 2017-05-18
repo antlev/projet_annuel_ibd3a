@@ -9,7 +9,7 @@ public class MainScript : MonoBehaviour {
 	public static int inputSize = 2;
 
     public static int iterationNumber = 100000;
-    public static int step = 1;
+    public static double step = 0.1;
 
     public Transform[] baseApprentissage;
     public Transform[] baseTest;
@@ -43,12 +43,6 @@ public class MainScript : MonoBehaviour {
 				erase_model();
 			}
 		}
-		if (GUILayout.Button("Classify")) {
-			if (!_isRunning)
-			{
-				classify();
-			}
-		}
 		if (GUILayout.Button("Linear_fit_classification_hebb")){
 			if (!_isRunning)
 			{
@@ -61,7 +55,24 @@ public class MainScript : MonoBehaviour {
 				StartCoroutine ("linear_fit_classification_rosenblatt");
 			}
 		}
-
+		if (GUILayout.Button("Classify")) {
+			if (!_isRunning)
+			{
+				classify();
+			}
+		}
+		if (GUILayout.Button("Linear_fit_regression")) {
+			if (!_isRunning)
+			{
+				linear_fit_regression();
+			}
+		}
+		if (GUILayout.Button("Predict")) {
+			if (!_isRunning)
+			{
+				predict();
+			}
+		}
 		if (GUILayout.Button("Test")) {
 			if (!_isRunning)
 			{
@@ -112,7 +123,7 @@ public class MainScript : MonoBehaviour {
 			Debug.Log ("Classify baseTest");
 			double[] input = new double[inputSize];
 			foreach(var unityObject in baseTest){
-				getInputs (unityObject, input);
+				getInput (unityObject, input);
 				var inputPtr = default(GCHandle);
 				try
 				{
@@ -129,35 +140,68 @@ public class MainScript : MonoBehaviour {
 		}
 		_isRunning = false;
 	}
-//
-//	public void predict(){
-//		if (model != System.IntPtr.Zero) {
-//
-//			Debug.Log ("Predict");
-//			Debug.Log ("to be implemented");
-//			double[] inputs = new double[inputSize * baseTest.Length];
-//			getInputs (baseTest, inputs);
-//			int i = 0;
-//			foreach (var input in inputs){
-////				baseTest[i].position.y = LibWrapperMachineLearning.linear_predict (model, input, inputSize);
-//				i++;
-//			}
-//		} else {
-//			Debug.Log ("Aucun modèle en mémoire");
-//		}
-//	}
-//	public void linear_fit_regression(){
-//		if (model != System.IntPtr.Zero) {
-//
-//			Debug.Log ("linear_fit_regression");
-//			Debug.Log ("to be implemented");
-//			double[] inputs = new double[inputSize * baseApprentissage.Length];
-//			getInputs (baseApprentissage, inputs);
-//
-//		} else {
-//			Debug.Log ("Aucun modèle en mémoire");
-//		}
-//	}	
+
+	public void predict(){
+		_isRunning = true;
+		if (model != System.IntPtr.Zero) {
+			generateBaseTest (baseTest, 10);
+			double[] input = new double[inputSize];
+			Debug.Log ("Starting predicting outputs of baseTest...");
+			foreach (var data in baseTest){
+				getInput (data, input);
+
+				var inputPtr = default(GCHandle);
+				try
+				{
+					inputPtr = GCHandle.Alloc(input, GCHandleType.Pinned);
+					data.position = new Vector3(data.position.x, (float) LibWrapperMachineLearning.linear_predict (model, inputPtr.AddrOfPinnedObject(), inputSize), data.position.z);
+				}
+				finally
+				{
+					if (inputPtr.IsAllocated) inputPtr.Free();
+				}
+			}
+		} else {
+			Debug.Log ("Aucun modèle en mémoire");
+		}
+		_isRunning = false;
+	}
+	public void linear_fit_regression(){
+		_isRunning = true;
+		if (model != System.IntPtr.Zero) {
+
+			Debug.Log ("linear_fit_regression");
+			double[] inputs = new double[inputSize * baseApprentissage.Length];
+			double[] outputs = new double[baseApprentissage.Length];
+			getInputsOutputs (baseApprentissage, inputs, outputs, false);
+			// Création des pointeurs
+			var inputsPtr = default(GCHandle);
+			var outputsPtr = default(GCHandle);
+			int learningResponse;
+			try
+			{
+				inputsPtr = GCHandle.Alloc(inputs, GCHandleType.Pinned);
+				outputsPtr = GCHandle.Alloc(outputs, GCHandleType.Pinned);
+				Debug.Log("Start learning regression with baseApprentissage...");
+				learningResponse = LibWrapperMachineLearning.linear_fit_classification_hebb(model, inputsPtr.AddrOfPinnedObject(), inputSize * baseApprentissage.Length, inputSize, outputsPtr.AddrOfPinnedObject(), iterationNumber, step);
+				if(learningResponse == -1){
+					Debug.Log("C++ >Aucun modèle en mémoire<");
+				}else if(learningResponse == 0){
+					Debug.Log("Learning stop by iterations");
+				} else{
+					Debug.Log("Learning stop beacause all case were correctly classified");
+				}
+			}
+			finally
+			{
+				if (inputsPtr.IsAllocated) inputsPtr.Free();
+				if (outputsPtr.IsAllocated) outputsPtr.Free();
+			}
+		} else {
+			Debug.Log ("Aucun modèle en mémoire");
+		}
+		_isRunning = false;
+	}	
 
 	public void linear_fit_classification_hebb(){
 		_isRunning = true;
@@ -174,11 +218,12 @@ public class MainScript : MonoBehaviour {
 			{
 				inputsPtr = GCHandle.Alloc(inputs, GCHandleType.Pinned);
 				outputsPtr = GCHandle.Alloc(outputs, GCHandleType.Pinned);
+				Debug.Log("Start learning classification hebb with baseApprentissage...");
 				learningResponse = LibWrapperMachineLearning.linear_fit_classification_hebb(model, inputsPtr.AddrOfPinnedObject(), inputSize * baseApprentissage.Length, inputSize, outputsPtr.AddrOfPinnedObject(), iterationNumber, step);
 				if(learningResponse == -1){
 					Debug.Log("C++ >Aucun modèle en mémoire<");
 				}else if(learningResponse == 0){
-					Debug.Log("Leaning stop by iterations");
+					Debug.Log("Learning stop by iterations");
 				} else{
 					Debug.Log("Learning stop beacause all case were correctly classified");
 				}
@@ -229,10 +274,22 @@ public class MainScript : MonoBehaviour {
 		}
 		_isRunning = false;
 	}
+
+	private void getInput(Transform objetUnity, double[] input){
+		input[0] = objetUnity.position.x;
+		input[1] = objetUnity.position.z;
+	}
 	// Rempli le tableau input passé en paramètre avec les coordonnées x et y de l'objetsUnity
-	private void getInputs(Transform objetsUnity, double[] input){
-		input[0] = objetsUnity.position.x;
-		input[1] = objetsUnity.position.z;
+	private void getInputs(Transform[] objetsUnity, double[] inputs){
+		if (inputs.Length < objetsUnity.Length * 2) {
+			Debug.Log ("Error : the array inputs given to the function isn't big enough");
+		} else {
+			int i;
+			for(i=0; i<objetsUnity.Length*2; i+=2) {
+				inputs [i] = objetsUnity[i/2].position.x;
+				inputs [i+1] = objetsUnity[i/2].position.z;
+			}
+		}
 	}
 //	// Rempli le tableau inputs passé en paramètre avec les coordonnées x et y du tableau d'objetsUnity
 //	// ainsi que le tableau outputs avec les coordonées z du tableau d'objetsUnity
