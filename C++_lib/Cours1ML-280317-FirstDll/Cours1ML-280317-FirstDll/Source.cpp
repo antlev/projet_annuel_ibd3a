@@ -3,7 +3,6 @@
 #include <stdlib.h>
 #include <time.h>
 
-
 void baseTest(double* inputs, double* expected_outputs, int inputSize) {
 
 	int i;
@@ -318,7 +317,6 @@ int linear_fit_regression(double *model, double *inputs, int inputsSize, int inp
 }
 double learn_regression(double *model, double expected_result, const double* input, int inputSize, double learning_rate, double threshold) {
 
-	// TODO
 	// Get the result given by the Perceptron
 	double result = linear_predict(model, input, inputSize);
 
@@ -336,6 +334,11 @@ double learn_regression(double *model, double expected_result, const double* inp
 	return result;
 }
 double linear_predict(double *model, const double *input, int inputSize) {
-	// TODO
-	return 0;
+	double somme_poids_inputs(0);
+	int i;
+	for (i = 0; i < inputSize; i++) {
+		somme_poids_inputs += model[i] * input[i];
+	}
+	//somme_poids += 1; // neusronne de biais
+	return somme_poids_inputs;
 }

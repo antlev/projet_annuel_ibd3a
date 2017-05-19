@@ -1,10 +1,10 @@
 ﻿  Source.cpp
-Source.cpp(39): warning C4101: 'i': unreferenced local variable
-Source.cpp(252): warning C4244: 'argument': conversion from 'double' to 'int', possible loss of data
-Source.cpp(252): warning C4244: '+=': conversion from 'double' to 'int', possible loss of data
+Source.cpp(38): warning C4101: 'i': unreferenced local variable
+Source.cpp(251): warning C4244: 'argument': conversion from 'double' to 'int', possible loss of data
+Source.cpp(251): warning C4244: '+=': conversion from 'double' to 'int', possible loss of data
      Creating library D:\git\projet_annuel_ibd3a\C++_lib\Cours1ML-280317-FirstDll\x64\Release\Cours1ML-280317-FirstDll.lib and object D:\git\projet_annuel_ibd3a\C++_lib\Cours1ML-280317-FirstDll\x64\Release\Cours1ML-280317-FirstDll.exp
   Generating code
-  3 of 21 functions (14.3%) were compiled, the rest were copied from previous compilation.
+  4 of 21 functions (19.0%) were compiled, the rest were copied from previous compilation.
     0 functions were new in current compilation
     2 functions had inline decision re-evaluated but remain unchanged
   Finished generating code
