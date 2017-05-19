@@ -8,13 +8,16 @@ public class MainScript : MonoBehaviour {
 	public static System.IntPtr model;
 	public static int inputSize = 2;
 
+    //Modifiable pour tests
     public static int iterationNumber = 1000000;
     public static double step = 0.5;
+    public static bool testWithColor = false;
+    public static bool squareValues = true;
+
 
     public Transform[] baseApprentissage;
     public Transform[] baseTest;
 
-    public static bool testWithColor = true;
     public static string colorButtonString = "Use height";
     public Color marblecolor;
 	public Color blue = Color.blue;
@@ -341,11 +344,21 @@ public class MainScript : MonoBehaviour {
 //	// ainsi que le tableau outputs avec les coordonées z du tableau d'objetsUnity
 	private void getInputsOutputs(Transform[] objetsUnity, double[] inputs, double[] outputs){
 		int i = 0, j = 0;
+        float xPos, zPos;
+
 		foreach (var data in objetsUnity)
-		{
-			inputs[i] = data.position.x;
+        {
+            if (squareValues) {
+                xPos = data.position.x * data.position.x;
+                zPos = data.position.z * data.position.z;
+            } else {
+                xPos = data.position.x;
+                zPos = data.position.z;
+            }
+            Debug.Log("AVANT : " + data.position.x + "APRES " + xPos);
+            inputs[i] = xPos;
 			i++;
-			inputs[i] = data.position.z;
+			inputs[i] = zPos;
 			i++;
 			if (testWithColor) {
 				if (data.GetComponent<Renderer> ().material.color == blue) {
