@@ -209,6 +209,9 @@ public class MainScript : MonoBehaviour {
 			Debug.Log ("Starting predicting outputs of baseTest...");
 			foreach (var data in baseTest){
 				getInput (data, input);
+				if (transformInput) {
+					transformInputs (input);
+				}
 
 				var inputPtr = default(GCHandle);
 				try
@@ -234,6 +237,9 @@ public class MainScript : MonoBehaviour {
 			double[] inputs = new double[inputSize * baseApprentissage.Length];
 			double[] outputs = new double[baseApprentissage.Length];
 			getInputsOutputs (baseApprentissage, inputs, outputs);
+			if (transformInput) {
+				transformInputs (inputs);
+			}
 			// Création des pointeurs
 			var inputsPtr = default(GCHandle);
 			var outputsPtr = default(GCHandle);
@@ -310,7 +316,9 @@ public class MainScript : MonoBehaviour {
 			double[] inputs = new double[inputSize * baseApprentissage.Length];
 			double[] outputs = new double[baseApprentissage.Length];
 			getInputsOutputs (baseApprentissage, inputs, outputs);
-
+			if (transformInput) {
+				transformInputs (inputs);
+			}
 			// Création des pointeurs
 			var inputsPtr = default(GCHandle);
 			var outputsPtr = default(GCHandle);
