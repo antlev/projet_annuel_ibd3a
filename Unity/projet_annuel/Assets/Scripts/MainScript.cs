@@ -21,6 +21,10 @@ public class MainScript : MonoBehaviour {
 	public Color red = Color.red;
 	public Color green = Color.green;
 
+	public static bool transformInput = false;
+	public static string transformButtonString = "Use Transformation";
+
+
 	/// <summary>
 	/// Indique si un algorithme est en cours d'exécution
 	/// </summary>
@@ -97,12 +101,20 @@ public class MainScript : MonoBehaviour {
                 }
             }
         }
-        if (GUILayout.Button("Clean"))
+		if (GUILayout.Button(transformButtonString))
         {
             if (!_isRunning)
             {
-                clean();
-            }
+				if (transformInput)
+				{
+					transformInput = false;
+					transformButtonString = "Use Transformation";
+				}
+				else
+				{
+					transformInput = true;
+					transformButtonString = "Don't Use Transformation";
+				}            }
         }
         if (GUILayout.Button("Test")) {
 			if (!_isRunning)
@@ -160,15 +172,17 @@ public class MainScript : MonoBehaviour {
 			double[] input = new double[inputSize];
 			foreach(var unityObject in baseTest){
 				getInput (unityObject, input);
-				var inputPtr = default(GCHandle);
+				if (transformInput) {
+					transformInputs (input);
+				}				var inputPtr = default(GCHandle);
 				try
 				{
 					inputPtr = GCHandle.Alloc(input, GCHandleType.Pinned);
                     if (testWithColor) {
                         if((float)LibWrapperMachineLearning.linear_classify(model, inputPtr.AddrOfPinnedObject(), inputSize) == 1) {
-                            unityObject.GetComponent<Renderer>().material.color = red;
+							unityObject.GetComponent<Renderer>().material.color = UnityEngine.Color.red;
                         } else {
-                            unityObject.GetComponent<Renderer>().material.color = blue;
+							unityObject.GetComponent<Renderer>().material.color = UnityEngine.Color.blue;
                         }
                         unityObject.position = new Vector3(unityObject.position.x, 0, unityObject.position.z);
                     }
@@ -256,6 +270,9 @@ public class MainScript : MonoBehaviour {
 			double[] inputs = new double[inputSize * baseApprentissage.Length];
 			double[] outputs = new double[baseApprentissage.Length];
 			getInputsOutputs (baseApprentissage, inputs, outputs);
+			if (transformInput) {
+				transformInputs (inputs);
+			}
 			// Création des pointeurs
 			var inputsPtr = default(GCHandle);
 			var outputsPtr = default(GCHandle);
@@ -293,6 +310,7 @@ public class MainScript : MonoBehaviour {
 			double[] inputs = new double[inputSize * baseApprentissage.Length];
 			double[] outputs = new double[baseApprentissage.Length];
 			getInputsOutputs (baseApprentissage, inputs, outputs);
+
 			// Création des pointeurs
 			var inputsPtr = default(GCHandle);
 			var outputsPtr = default(GCHandle);
@@ -348,7 +366,7 @@ public class MainScript : MonoBehaviour {
 			inputs[i] = data.position.z;
 			i++;
 			if (testWithColor) {
-				if (data.GetComponent<Renderer> ().material.color == blue) {
+				if (data.GetComponent<Renderer> ().material.color == UnityEngine.Color.blue) {
 					outputs [j] = -1;
 				} else {
 					outputs [j] = 1 ;
@@ -364,27 +382,7 @@ public class MainScript : MonoBehaviour {
 		_isRunning = true;
 		Debug.Log("LAUNCHING TEST FUNCTION");
 
-		double[] test1 = {1,2,2,3,3,4};
-		serialiseInputs (test1);
-		double[] test2 = {2,3,4,5,6,7,8,9};
-		serialiseInputs (test2);
-		double[] test3 = {-12,0,24,3};
-		serialiseInputs (test3);
-
-		Debug.Log ("Test 1");
-		foreach (var test in test1) {
-			Debug.Log (">" + test + "<");
-		}
-		Debug.Log ("Test 2");
-		foreach (var test in test2) {
-			Debug.Log (">" + test + "<");
-		}
-		Debug.Log ("Test 2");
-		foreach (var test in test3) {
-			Debug.Log (">" + test + "<");
-		}
-
-//		generateLinear ();
+		//		generateLinear ();
 //		Debug.Log ("sleeping 2sec...");
 ////		Thread.Sleep (2000);
 //

@@ -119,12 +119,15 @@ int toto() {
 
 // G�n�re un mod�le al�atoirement en "settant" tous les poids
 // � une valeur pseudo-al�atoire entre -1 et 1
-double *linear_create_model(int nbCouches, int inputDimension) {
+double *linear_create_model(int nbHidenLayer, int inputDimension) {
 	// Cr�ation du mod�le en m�moire
-	double* ptr = (double *)std::malloc(sizeof(double) * (inputDimension) * nbCouches);
+	double* ptr = (double *) std::malloc(sizeof(double) * ( inputDimension +  (inputDimension * inputDimension * nbHidenLayer)));
 	int i,j;
+	for (i = 0; i<inputDimension; ++i) {
+		ptr[i] = rand() % 10000 / 5000. - 1.;
+	}
 	// On affecte les poids � une valeur entre -1 et 1
-	for (i = 0; i < nbCouches; ++i) {
+	for (i = 0; i < nbHidenLayer; ++i) {
 		for (j = 0; j<inputDimension; ++j) {
 			ptr[i] = rand() % 10000 / 5000. - 1.;
 		}
