@@ -8,14 +8,15 @@ public class MainScript : MonoBehaviour {
 	public static System.IntPtr model;
 	public static int inputSize = 2;
 
-    public static int iterationNumber = 10000000;
+    public static int iterationNumber = 1000000;
     public static double step = 0.5;
 
     public Transform[] baseApprentissage;
     public Transform[] baseTest;
 
     public static bool testWithColor = true;
-	public Color marblecolor;
+    public static string colorButtonString = "Use height";
+    public Color marblecolor;
 	public Color blue = Color.blue;
 	public Color red = Color.red;
 	public Color green = Color.green;
@@ -80,7 +81,30 @@ public class MainScript : MonoBehaviour {
 				clean();
 			}
 		}
-		if (GUILayout.Button("Test")) {
+        if (GUILayout.Button(colorButtonString))
+        {
+            if (!_isRunning)
+            {
+                if (testWithColor)
+                {
+                    testWithColor = false;
+                    colorButtonString = "Use color";
+                }
+                else
+                {
+                    testWithColor = true;
+                    colorButtonString = "Use height";
+                }
+            }
+        }
+        if (GUILayout.Button("Clean"))
+        {
+            if (!_isRunning)
+            {
+                clean();
+            }
+        }
+        if (GUILayout.Button("Test")) {
 			if (!_isRunning)
 			{
 				StartCoroutine("test");
@@ -195,7 +219,7 @@ public class MainScript : MonoBehaviour {
 			Debug.Log ("linear_fit_regression");
 			double[] inputs = new double[inputSize * baseApprentissage.Length];
 			double[] outputs = new double[baseApprentissage.Length];
-			getInputsOutputs (baseApprentissage, inputs, outputs, false);
+			getInputsOutputs (baseApprentissage, inputs, outputs);
 			// Création des pointeurs
 			var inputsPtr = default(GCHandle);
 			var outputsPtr = default(GCHandle);
