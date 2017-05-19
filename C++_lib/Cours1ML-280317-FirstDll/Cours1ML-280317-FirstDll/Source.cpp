@@ -8,7 +8,120 @@
 #include "Eigen/Core"
 #include "Eigen/Dense"
 
-	
+
+
+double new_pmc_model(double* model, double* input, int inputSize, int nbHiddenLayers) {
+	return 0;
+}
+
+double pmc_linear_classify(double* model, double* input, int inputSize) {
+	return 0;
+}
+void mlp_update_weight(double &weight, double &learningRate, double &output, double &error) {
+	weight = weight - learningRate * output * error;
+}
+
+
+double *add_bias_input(double *inputs, int inputsSize) {
+	double *inputsWithBias = new double[inputsSize + 1];
+	for (int i = 0; i < inputsSize; ++i) {
+		inputsWithBias[i] = inputs[i];
+	}
+	inputsWithBias[inputsSize] = 1;
+	return inputsWithBias;
+}
+
+double activation(double &x) {
+	return tanh(x);
+}
+
+
+
+void mlp_classification_back_propagate(double ***model, int *modelStruct, int modelStructSize, double *inputs,
+		int inputsSize, double **outputs, int *desiredOutputs, double &learningRate) {
+		double **errors = new double *[modelStructSize];
+
+		int lastLayer = modelStructSize - 1;
+		errors[lastLayer] = new double[modelStruct[lastLayer]];
+		for (int i = 0; i < modelStruct[lastLayer]; ++i) {
+			errors[lastLayer][i] = (1 - pow(outputs[lastLayer][i], 2)) * (outputs[lastLayer][i] - desiredOutputs[i]);
+		}
+
+		for (int i = lastLayer - 1; i >= 0; --i) {
+			errors[i] = new double[modelStruct[i]];
+			for (int j = 0; j < modelStruct[i]; ++j) {
+				int error = 0;
+				for (int k = 0; k < modelStruct[i + 1]; ++k) {
+					error += model[i + 1][k][j] * errors[i + 1][k];
+				}
+				errors[i][j] = (1 - pow(outputs[i][j], 2)) * error;
+			}
+		}
+
+		for (int i = 0; i < modelStructSize; ++i) {
+			for (int j = 0; j < modelStruct[i]; ++j) {
+				if (i == 0) {
+					for (int k = 0; k < inputsSize; ++k) {
+						mlp_update_weight(model[i][j][k], learningRate, inputs[k], errors[i][j]);
+					}
+				}
+				else {
+					for (int k = 0; k < modelStruct[i - 1]; ++k) {
+						mlp_update_weight(model[i][j][k], learningRate, outputs[i - 1][k], errors[i][j]);
+					}
+				}
+			}
+		}
+	}
+
+double **mlp_classification_feed_forward(double ***model, int *modelStruct, int modelStructSize, double *inputs,
+	int inputsSize) {
+	double **outputs = new double *[modelStructSize];
+	double *inputsWithBias = add_bias_input(inputs, inputsSize);
+	inputsSize += 1;
+	for (int i = 0; i < modelStructSize - 1; ++i) {
+		outputs[i] = new double[modelStruct[i]]{ 0 };
+		for (int j = 0; j < modelStruct[i] - 1; ++j) {
+			if (i == 0) {
+				for (int k = 0; k < inputsSize; ++k) {
+					outputs[i][j] += inputsWithBias[k] * model[i][j][k];
+				}
+			}
+			else {
+				for (int k = 0; k < modelStruct[i - 1]; ++k) {
+					outputs[i][j] += outputs[i - 1][k] * model[i][j][k];
+				}
+			}
+			outputs[i][j] = activation(outputs[i][j]);
+		}
+		outputs[i][modelStruct[i] - 1] = 1;
+	}
+
+	outputs[modelStructSize - 1] = new double[modelStruct[modelStructSize - 1]];
+	outputs[modelStructSize - 1][0] = 0;
+	for (int i = 0; i < modelStruct[modelStructSize - 2]; ++i) {
+		outputs[modelStructSize - 1][0] += outputs[modelStructSize - 2][i] * model[modelStructSize - 1][0][i];
+	}
+
+	outputs[modelStructSize - 1][0] = activation(outputs[modelStructSize - 1][0]);
+	return outputs;
+}
+
+//double pmc_fit_linear_classification(double* model, double* inputs, int inputsSize, int inputSize, double* outputs, int iterationNumber, double learningRate) {
+void mlp_classification_fit(double ***model, int *modelStruct, int modelStructSize, double *inputs, int inputsSize,
+	int *desiredOutput, double learningRate) {
+	double **outputs = mlp_classification_feed_forward(model, modelStruct, modelStructSize, inputs, inputsSize);
+	mlp_classification_back_propagate(model, modelStruct, modelStructSize, inputs, inputsSize, outputs, desiredOutput,
+		learningRate);
+}
+
+double pmc_linear_predict(double* model, double* input, int inputSize) {
+	return 0;
+}
+
+double pmc_fit_linear_regression(double* model, double* input, int inputSize, double learningRate){
+	return 0;
+}
 
 
 

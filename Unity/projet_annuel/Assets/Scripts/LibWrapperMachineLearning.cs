@@ -26,8 +26,23 @@ public class LibWrapperMachineLearning
     [DllImport("Cours1ML-280317-FirstDll")]
     public static extern double linear_classify(System.IntPtr model, System.IntPtr input, int inputSize);
     
+	[DllImport("Cours1ML-280317-FirstDll")]
+	public static extern double new_pmc_model(System.IntPtr model, System.IntPtr input, int inputSize, int nbHiddenLayers);
+
+	[DllImport("Cours1ML-280317-FirstDll")]
+	public static extern double linear_predict(System.IntPtr model, System.IntPtr input, int inputSize);
+
     [DllImport("Cours1ML-280317-FirstDll")]
-    public static extern double linear_predict(System.IntPtr model, System.IntPtr input, int inputSize);
+    public static extern double pmc_linear_classify(System.IntPtr model, System.IntPtr input, int inputSize);
+
+	[DllImport("Cours1ML-280317-FirstDll")]
+	public static extern double pmc_fit_linear_classification(System.IntPtr model, System.IntPtr inputs, int inputsSize, int inputSize, System.IntPtr outputs, int iterationNumber, double learningRate);
+
+	[DllImport("Cours1ML-280317-FirstDll")]
+	public static extern double pmc_linear_predict(System.IntPtr model, System.IntPtr input, int inputSize);
+
+	[DllImport("Cours1ML-280317-FirstDll")]
+	public static extern double pmc_fit_linear_regression(System.IntPtr model, System.IntPtr input, int inputSize, double learningRate);
 
     [DllImport("Cours1ML-280317-FirstDll")]
     public static extern int test();

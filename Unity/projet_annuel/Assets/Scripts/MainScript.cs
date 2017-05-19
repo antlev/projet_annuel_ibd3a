@@ -73,6 +73,36 @@ public class MainScript : MonoBehaviour {
 				predict();
 			}
 		}
+		if (GUILayout.Button("pmc_create_model")) {
+			if (!_isRunning)
+			{
+				pmc_create_model();
+			}
+		}
+		if (GUILayout.Button("pmc_fit_classification")) {
+			if (!_isRunning)
+			{
+				pmc_fit_classification();
+			}
+		}
+		if (GUILayout.Button("pmc_fit_regression")) {
+			if (!_isRunning)
+			{
+				pmc_fit_regression();
+			}
+		}
+		if (GUILayout.Button("pmc_classify")) {
+			if (!_isRunning)
+			{
+				pmc_classify();
+			}
+		}
+		if (GUILayout.Button("pmc_predict")) {
+			if (!_isRunning)
+			{
+				pmc_predict();
+			}
+		}
 		if (GUILayout.Button("Clean")) {
 			if (!_isRunning)
 			{
@@ -88,6 +118,22 @@ public class MainScript : MonoBehaviour {
 		// Fin de la liste de composants visuels verticale
 		GUILayout.EndVertical();
 	}
+	void pmc_create_model(){
+
+	}
+	void pmc_fit_classification(){
+		
+	}
+	void pmc_fit_regression(){
+		
+	}
+	void pmc_classify(){
+		
+	}
+	void pmc_predict(){
+
+	}
+
 	void clean(){
 		foreach (var data in baseTest) {
 			data.position = new Vector3(data.position.x, 5, data.position.z);
