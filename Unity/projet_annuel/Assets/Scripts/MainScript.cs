@@ -14,6 +14,7 @@ public class MainScript : MonoBehaviour {
     public Transform[] baseApprentissage;
     public Transform[] baseTest;
 
+    public static bool testWithColor = true;
 	public Color marblecolor;
 	public Color blue = Color.blue;
 	public Color red = Color.red;
@@ -117,8 +118,18 @@ public class MainScript : MonoBehaviour {
 				try
 				{
 					inputPtr = GCHandle.Alloc(input, GCHandleType.Pinned);
-					unityObject.position = new Vector3 (unityObject.position.x, (float) LibWrapperMachineLearning.linear_classify (model, inputPtr.AddrOfPinnedObject(), inputSize), unityObject.position.z);
-				}
+                    if (testWithColor) {
+                        if((float)LibWrapperMachineLearning.linear_classify(model, inputPtr.AddrOfPinnedObject(), inputSize) == 1) {
+                            unityObject.GetComponent<Renderer>().material.color = red;
+                        } else {
+                            unityObject.GetComponent<Renderer>().material.color = blue;
+                        }
+                        unityObject.position = new Vector3(unityObject.position.x, 0, unityObject.position.z);
+                    }
+                    else {
+                        unityObject.position = new Vector3(unityObject.position.x, (float)LibWrapperMachineLearning.linear_classify(model, inputPtr.AddrOfPinnedObject(), inputSize), unityObject.position.z);
+                    }
+                }
 				finally
 				{
 					if (inputPtr.IsAllocated) inputPtr.Free();
@@ -165,7 +176,7 @@ public class MainScript : MonoBehaviour {
 			Debug.Log ("linear_fit_classification_hebb");
 			double[] inputs = new double[inputSize * baseApprentissage.Length];
 			double[] outputs = new double[baseApprentissage.Length];
-			getInputsOutputs (baseApprentissage, inputs, outputs, false);
+			getInputsOutputs (baseApprentissage, inputs, outputs);
 			// Création des pointeurs
 			var inputsPtr = default(GCHandle);
 			var outputsPtr = default(GCHandle);
@@ -201,7 +212,7 @@ public class MainScript : MonoBehaviour {
 			Debug.Log ("linear_fit_classification_rosenblatt");
 			double[] inputs = new double[inputSize * baseApprentissage.Length];
 			double[] outputs = new double[baseApprentissage.Length];
-			getInputsOutputs (baseApprentissage, inputs, outputs, false);
+			getInputsOutputs (baseApprentissage, inputs, outputs);
 			// Création des pointeurs
 			var inputsPtr = default(GCHandle);
 			var outputsPtr = default(GCHandle);
@@ -236,7 +247,7 @@ public class MainScript : MonoBehaviour {
 	}
 //	// Rempli le tableau inputs passé en paramètre avec les coordonnées x et y du tableau d'objetsUnity
 //	// ainsi que le tableau outputs avec les coordonées z du tableau d'objetsUnity
-	private void getInputsOutputs(Transform[] objetsUnity, double[] inputs, double[] outputs, bool color){
+	private void getInputsOutputs(Transform[] objetsUnity, double[] inputs, double[] outputs){
 		int i = 0, j = 0;
 		foreach (var data in objetsUnity)
 		{
@@ -244,7 +255,7 @@ public class MainScript : MonoBehaviour {
 			i++;
 			inputs[i] = data.position.z;
 			i++;
-			if (color) {
+			if (testWithColor) {
 				if (data.GetComponent<Renderer> ().material.color == blue) {
 					outputs [j] = -1;
 				} else {
