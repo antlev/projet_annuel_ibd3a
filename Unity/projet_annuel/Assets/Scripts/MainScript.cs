@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Runtime.InteropServices;
 using System.Threading;
-
+using System;
 
 public class MainScript : MonoBehaviour {
 
@@ -344,13 +344,13 @@ public class MainScript : MonoBehaviour {
 //	// ainsi que le tableau outputs avec les coordonées z du tableau d'objetsUnity
 	private void getInputsOutputs(Transform[] objetsUnity, double[] inputs, double[] outputs){
 		int i = 0, j = 0;
-        float xPos, zPos;
-
-		foreach (var data in objetsUnity)
+        foreach (var data in objetsUnity)
         {
+            bool squareValues = true;
+            double xPos, zPos;
             if (squareValues) {
-                xPos = data.position.x * data.position.x;
-                zPos = data.position.z * data.position.z;
+                xPos = Math.Sqrt(data.position.x);
+                zPos = Math.Sqrt(data.position.z);
             } else {
                 xPos = data.position.x;
                 zPos = data.position.z;
