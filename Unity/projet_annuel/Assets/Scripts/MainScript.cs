@@ -172,9 +172,7 @@ public class MainScript : MonoBehaviour {
 			double[] input = new double[inputSize];
 			foreach(var unityObject in baseTest){
 				getInput (unityObject, input);
-				if (transformInput) {
-					transformInputs (input);
-				}				var inputPtr = default(GCHandle);
+				var inputPtr = default(GCHandle);
 				try
 				{
 					inputPtr = GCHandle.Alloc(input, GCHandleType.Pinned);
@@ -209,9 +207,6 @@ public class MainScript : MonoBehaviour {
 			Debug.Log ("Starting predicting outputs of baseTest...");
 			foreach (var data in baseTest){
 				getInput (data, input);
-				if (transformInput) {
-					transformInputs (input);
-				}
 
 				var inputPtr = default(GCHandle);
 				try
@@ -237,9 +232,6 @@ public class MainScript : MonoBehaviour {
 			double[] inputs = new double[inputSize * baseApprentissage.Length];
 			double[] outputs = new double[baseApprentissage.Length];
 			getInputsOutputs (baseApprentissage, inputs, outputs);
-			if (transformInput) {
-				transformInputs (inputs);
-			}
 			// Création des pointeurs
 			var inputsPtr = default(GCHandle);
 			var outputsPtr = default(GCHandle);
@@ -316,9 +308,6 @@ public class MainScript : MonoBehaviour {
 			double[] inputs = new double[inputSize * baseApprentissage.Length];
 			double[] outputs = new double[baseApprentissage.Length];
 			getInputsOutputs (baseApprentissage, inputs, outputs);
-			if (transformInput) {
-				transformInputs (inputs);
-			}
 			// Création des pointeurs
 			var inputsPtr = default(GCHandle);
 			var outputsPtr = default(GCHandle);
@@ -350,6 +339,9 @@ public class MainScript : MonoBehaviour {
 	private void getInput(Transform objetUnity, double[] input){
 		input[0] = objetUnity.position.x;
 		input[1] = objetUnity.position.z;
+		if (transformInput) {
+			transformInputs (input);
+		}
 	}
 	// Rempli le tableau input passé en paramètre avec les coordonnées x et y de l'objetsUnity
 	private void getInputs(Transform[] objetsUnity, double[] inputs){
@@ -361,6 +353,9 @@ public class MainScript : MonoBehaviour {
 				inputs [i] = objetsUnity[i/2].position.x;
 				inputs [i+1] = objetsUnity[i/2].position.z;
 			}
+		}
+		if (transformInput) {
+			transformInputs (inputs);
 		}
 	}
 //	// Rempli le tableau inputs passé en paramètre avec les coordonnées x et y du tableau d'objetsUnity
@@ -383,6 +378,9 @@ public class MainScript : MonoBehaviour {
 				outputs [j] = data.position.y;
 			}
 			j++;
+		}
+		if (transformInput) {
+			transformInputs (inputs);
 		}
 	}
 	// TEST FUNCTION		
