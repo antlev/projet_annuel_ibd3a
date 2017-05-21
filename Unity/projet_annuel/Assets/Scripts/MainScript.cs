@@ -134,7 +134,7 @@ public class MainScript : MonoBehaviour {
 	public void create_model(){
 		_isRunning = true;
 		if (model == System.IntPtr.Zero) {
-			model = LibWrapperMachineLearning.linear_create_model (1, inputSize);
+			model = LibWrapperMachineLearning.linear_create_model (inputSize);
 			Debug.Log ("Model created !" + model);
 		} else {
 			Debug.Log ("A model has been created, please delete it if you want to create another one ");
@@ -145,7 +145,7 @@ public class MainScript : MonoBehaviour {
 	public void create_model(int nbCouche){
 		_isRunning = true;
 		if (model == System.IntPtr.Zero) {
-			model = LibWrapperMachineLearning.linear_create_model (nbCouche, inputSize);
+			model = LibWrapperMachineLearning.linear_create_model (inputSize);
 			Debug.Log ("Model created !" + model);
 		} else {
 			Debug.Log ("A model has been created, please delete it if you want to create another one ");
@@ -240,8 +240,9 @@ public class MainScript : MonoBehaviour {
 			try
 			{
 				inputsPtr = GCHandle.Alloc(inputs, GCHandleType.Pinned);
+				outputsPtr = GCHandle.Alloc(outputs, GCHandleType.Pinned);
 				Debug.Log("Start learning regression with baseApprentissage...");
-				learningResponse = LibWrapperMachineLearning.linear_fit_regression(model, inputsPtr.AddrOfPinnedObject(), inputSize * baseApprentissage.Length, inputSize, outputsPtr.AddrOfPinnedObject(), learning_rate);
+				learningResponse = LibWrapperMachineLearning.linear_fit_regression(model, inputsPtr.AddrOfPinnedObject(), inputSize * baseApprentissage.Length, inputSize, outputsPtr.AddrOfPinnedObject(), iterationNumber, learning_rate);
 				if(learningResponse == -1){
 					Debug.Log("C++ >Aucun modèle en mémoire<");
 				}else if(learningResponse == 0){
@@ -274,8 +275,14 @@ public class MainScript : MonoBehaviour {
 			{
 				inputsPtr = GCHandle.Alloc(inputs, GCHandleType.Pinned);
 				Debug.Log("Start learning classification hebb with baseApprentissage...");
-				LibWrapperMachineLearning.linear_fit_classification_hebb(model, inputsPtr.AddrOfPinnedObject(), inputSize * baseApprentissage.Length, inputSize, iterationNumber, step);
-
+				learningResponse = LibWrapperMachineLearning.linear_fit_classification_hebb(model, inputsPtr.AddrOfPinnedObject(), inputSize * baseApprentissage.Length, inputSize, iterationNumber, step);
+				if(learningResponse == -1){
+					Debug.Log("C++ >Aucun modèle en mémoire<");
+				}else if(learningResponse == 0){
+					Debug.Log("Learning stop by iterations");
+				} else{
+					Debug.Log("Learning stop beacause all case were correctly classified");
+				}
 
 			}
 			finally

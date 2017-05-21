@@ -35,7 +35,6 @@ void baseTest(double* inputs, double* expected_outputs, int inputSize) {
 }
 
 void showInputs(double* inputs, int inputsSize) {
-	int i;
 	for (int i = 0; i<inputsSize; ++i) {
 		std::cout << "DEBUG inputs[" << i << "] >" << inputs[i] << "< " << std::endl;
 	}
@@ -50,12 +49,13 @@ int main() {
 	double step(1);
 
 
-	double* model = linear_create_model(1, inputSize);
+	double* model = linear_create_model(inputSize);
 
 	showModel(model);
 
-	double* inputs = (double*)malloc(inputSize * sizeof(double) * 20);
-	double* expected_outputs = (double*)malloc(sizeof(double) * 20);
+	double* inputs = new double[inputSize * 20];
+	double* expected_outputs = new double[20];
+
 	int i;
 
 	// BASE APPRENTISSAGE
@@ -77,7 +77,7 @@ int main() {
 	// BASE TEST ICI ON S EN BAT LES COUILLES DE L'OUTPUT
 	baseTest(inputs, expected_outputs, inputSize);
 	int k(0);
-	double* unInput = (double*)malloc(sizeof(double)*inputSize);
+	double* unInput = new double[inputSize];
 
 	// For each data
 	for (i = 0; i<40; i += inputSize) {
@@ -92,9 +92,6 @@ int main() {
 	}
 
 	showModel(model);
-	free(inputs);
-	free(expected_outputs);
-
 
 	return 0;
 }
@@ -119,29 +116,18 @@ int toto() {
 
 // G�n�re un mod�le al�atoirement en "settant" tous les poids
 // � une valeur pseudo-al�atoire entre -1 et 1
-double *linear_create_model(int nbHidenLayer, int inputDimension) {
+double *linear_create_model(int inputDimension) {
 	// Cr�ation du mod�le en m�moire
-	double* ptr = (double *) std::malloc(sizeof(double) * ( inputDimension +  (inputDimension * inputDimension * nbHidenLayer)));
-	int i,j;
-	for (i = 0; i<inputDimension; ++i) {
+	double* ptr = new double[inputDimension];
+	// On affecte les poids � une valeur entre -1 et 1
+	for (int i = 0; i<inputDimension; ++i) {
 		ptr[i] = rand() % 10000 / 5000. - 1.;
 	}
-	// On affecte les poids � une valeur entre -1 et 1
-	for (i = 0; i < nbHidenLayer; ++i) {
-		for (j = 0; j<inputDimension; ++j) {
-			ptr[i] = rand() % 10000 / 5000. - 1.;
-		}
-	}
-
-	// Neurone de biais initialis� � 1
-	//ptr[inputDimension] = 1;
-
 	return ptr;
 };
 
 // Supprime le modèle en m�moire
 void linear_remove_model(double *model) {
-	free(model);
 }
 
 //  ---------- APPLICATION ----------
@@ -168,12 +154,11 @@ int linear_fit_classification_hebb(double *model, double *inputs, int inputsSize
 	}
 	else {
 		int iterations(0);
-		double* unInput = (double*)malloc(sizeof(double)*inputSize);
+		double* unInput = new double[inputSize];
 
 		while (true) {
 
 			if (iterations > iterationNumber) {
-				free(unInput);
 				return 1;
 			} else
 				iterations++;
@@ -207,12 +192,11 @@ int linear_fit_classification_rosenblatt(double *model, double *inputs, int inpu
 	}
 	else {
 		int iterations(0);
-		double* unInput = (double*)malloc(sizeof(double)*inputSize);
+		double* unInput = new double[inputSize];
 
 		while (true) {
 
 			if (iterations > iterationNumber) {
-				free(unInput);
 				return 1;
 			}
 			else
@@ -228,11 +212,10 @@ int linear_fit_classification_rosenblatt(double *model, double *inputs, int inpu
 				for (j = 0; j<inputSize; ++j) {
 					unInput[j] = inputs[i + j];
 				}
-				error += learn_classification_rosenblatt(model, unInput, outputs[k], inputSize, step);
+				error += (int) learn_classification_rosenblatt(model, unInput, inputSize, outputs[k], step);
 				k++;
 			}
 			if (error == 0) {
-				free(unInput);
 				return 0;
 			}
 			error = 0;
@@ -259,7 +242,7 @@ double learn_classification_rosenblatt(double *model, double* unInput, int input
 }
 //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-int linear_fit_regression(double *model, double *inputs, int inputsSize, int inputSize, double *outputs, double learning_rate){
+int linear_fit_regression(double *model, double *inputs, int inputsSize, int inputSize, double *outputs,int nb_iterations_max, double learning_rate){
 	if (model == nullptr) {
 		return -1;
 	}
@@ -272,28 +255,28 @@ int linear_fit_regression(double *model, double *inputs, int inputsSize, int inp
 			int count(0);
 			// For each data
 			for (i = 0; i < inputsSize; i += inputSize) {
-				double *unInput = (double *)malloc(sizeof(double) * inputSize);
+				double *unInput = new double[inputSize];
 				int j(0);
 				// On r�cup�re les donn�es correspondant � l'input
 				for (j = 0; j < inputSize; ++j) {
 					unInput[j] = inputs[i + j];
 				}
 
-				double output = learn_regression(model, outputs[count], unInput, inputSize, learning_rate);
-
-				if (output != outputs[i])
-					error_count++;
+				error_count += learn_regression(model, outputs[count], unInput, inputSize, learning_rate);
 				count++;
-				free(unInput);
 			}
 			// Si l'apprentisage est fini et que le perceptron renvoie la bonne sortie pour chaque input
 			if (error_count == 0)
 				break;
+			if (iterations > nb_iterations_max) {
+				break;
+			}
+			iterations++;
 		}
 		return 0;
 	}
 }
-double learn_regression(double *model, double expected_result, const double* input, int inputSize, double learning_rate) {
+double learn_regression(double *model, double expected_result, double* input, int inputSize, double learning_rate) {
 
 	// Get the result given by the Perceptron
 	double result = linear_predict(model, input, inputSize);
@@ -308,8 +291,11 @@ double learn_regression(double *model, double expected_result, const double* inp
 		for (i = 0; i < inputSize + 1; i++) {
 			model[i] += learning_rate * error * input[i];
 		}
+		return 1;
 	}
-	return result;
+	else {
+		return 0;
+	}
 }
 double linear_predict(double *model, const double *input, int inputSize) {
 	double somme_poids_inputs(0);
