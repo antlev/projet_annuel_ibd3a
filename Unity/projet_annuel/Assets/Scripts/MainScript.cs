@@ -8,8 +8,9 @@ public class MainScript : MonoBehaviour {
 	public static System.IntPtr model;
 	public static int inputSize = 2;
 
-    public static int iterationNumber = 1000000;
-    public static double step = 0.5;
+    public static int iterationNumber = 1000;
+	public static double step = 0.5;
+	public static double learning_rate = 0.5;
 
     public Transform[] baseApprentissage;
     public Transform[] baseTest;
@@ -239,9 +240,8 @@ public class MainScript : MonoBehaviour {
 			try
 			{
 				inputsPtr = GCHandle.Alloc(inputs, GCHandleType.Pinned);
-				outputsPtr = GCHandle.Alloc(outputs, GCHandleType.Pinned);
 				Debug.Log("Start learning regression with baseApprentissage...");
-				learningResponse = LibWrapperMachineLearning.linear_fit_classification_hebb(model, inputsPtr.AddrOfPinnedObject(), inputSize * baseApprentissage.Length, inputSize, outputsPtr.AddrOfPinnedObject(), iterationNumber, step);
+				learningResponse = LibWrapperMachineLearning.linear_fit_regression(model, inputsPtr.AddrOfPinnedObject(), inputSize * baseApprentissage.Length, inputSize, outputsPtr.AddrOfPinnedObject(), learning_rate);
 				if(learningResponse == -1){
 					Debug.Log("C++ >Aucun modèle en mémoire<");
 				}else if(learningResponse == 0){
@@ -266,33 +266,21 @@ public class MainScript : MonoBehaviour {
 		if (model != System.IntPtr.Zero) {
 			Debug.Log ("linear_fit_classification_hebb");
 			double[] inputs = new double[inputSize * baseApprentissage.Length];
-			double[] outputs = new double[baseApprentissage.Length];
-			getInputsOutputs (baseApprentissage, inputs, outputs);
-			if (transformInput) {
-				transformInputs (inputs);
-			}
+			getInputs (baseApprentissage, inputs);
 			// Création des pointeurs
 			var inputsPtr = default(GCHandle);
-			var outputsPtr = default(GCHandle);
 			int learningResponse;
 			try
 			{
 				inputsPtr = GCHandle.Alloc(inputs, GCHandleType.Pinned);
-				outputsPtr = GCHandle.Alloc(outputs, GCHandleType.Pinned);
 				Debug.Log("Start learning classification hebb with baseApprentissage...");
-				learningResponse = LibWrapperMachineLearning.linear_fit_classification_hebb(model, inputsPtr.AddrOfPinnedObject(), inputSize * baseApprentissage.Length, inputSize, outputsPtr.AddrOfPinnedObject(), iterationNumber, step);
-				if(learningResponse == -1){
-					Debug.Log("C++ >Aucun modèle en mémoire<");
-				}else if(learningResponse == 0){
-					Debug.Log("Learning stop by iterations");
-				} else{
-					Debug.Log("Learning stop beacause all case were correctly classified");
-				}
+				LibWrapperMachineLearning.linear_fit_classification_hebb(model, inputsPtr.AddrOfPinnedObject(), inputSize * baseApprentissage.Length, inputSize, iterationNumber, step);
+
+
 			}
 			finally
 			{
 				if (inputsPtr.IsAllocated) inputsPtr.Free();
-				if (outputsPtr.IsAllocated) outputsPtr.Free();
 			}
 		} else {
 			Debug.Log ("Aucun modèle en mémoire");
@@ -398,7 +386,7 @@ public class MainScript : MonoBehaviour {
 //		double[] inputs = new double[inputSize * baseApprentissage.Length];
 //        double[] outputs = new double[baseApprentissage.Length];
 //
-//		getInputsOutputs (baseApprentissage, inputs, outputs, false);
+//		getInputs (baseApprentissage, inputs, false);
 //
 //        int inputsSize = inputs.Length;
 //
@@ -407,18 +395,15 @@ public class MainScript : MonoBehaviour {
 //
 ////		// Création des pointeurs
 //		var inputsPtr = default(GCHandle);
-//		var outputsPtr = default(GCHandle);
 //        try
 //        {
 //            inputsPtr = GCHandle.Alloc(inputs, GCHandleType.Pinned);
-//            outputsPtr = GCHandle.Alloc(outputs, GCHandleType.Pinned);
 //			Debug.Log("Learning hebb to model ! step > "  + step);
-//			LibWrapperMachineLearning.linear_fit_classification_hebb(model, inputsPtr.AddrOfPinnedObject(), inputsSize, inputSize, outputsPtr.AddrOfPinnedObject(), iterationNumber, step);
+//			LibWrapperMachineLearning.linear_fit_classification_hebb(model, inputsPtr.AddrOfPinnedObject(), inputsSize, inputSize, iterationNumber, step);
 //		}
 //        finally
 //        {
 //            if (inputsPtr.IsAllocated) inputsPtr.Free();
-//            if (outputsPtr.IsAllocated) outputsPtr.Free();
 //        }
 //
 //		Debug.Log("Generating testBase !");        

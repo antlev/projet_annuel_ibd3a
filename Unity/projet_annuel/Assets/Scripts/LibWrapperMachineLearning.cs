@@ -15,10 +15,10 @@ public class LibWrapperMachineLearning
     public static extern void linear_remove_model(System.IntPtr model);
 
     [DllImport("Cours1ML-280317-FirstDll")]
-    public static extern int linear_fit_regression(System.IntPtr model, System.IntPtr inputs, int inputsSize, int inputSize, System.IntPtr outputs);
+	public static extern int linear_fit_regression(System.IntPtr model, System.IntPtr inputs, int inputsSize, int inputSize, System.IntPtr outputs, double learning_rate);
 
     [DllImport("Cours1ML-280317-FirstDll")]
-	public static extern int linear_fit_classification_hebb(System.IntPtr model, System.IntPtr inputs, int inputsSize, int inputSize , System.IntPtr outputs,  int iterationNumber, double step);
+	public static extern int linear_fit_classification_hebb(System.IntPtr model, System.IntPtr inputs, int inputsSize, int inputSize,  int iterationNumber, double step);
 
     [DllImport("Cours1ML-280317-FirstDll")]
     public static extern int linear_fit_classification_rosenblatt(System.IntPtr model, System.IntPtr inputs, int inputsSize, int inputSize, System.IntPtr outputs, int iterationNumber, double step);
