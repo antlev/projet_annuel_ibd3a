@@ -120,7 +120,7 @@ public class MainScript : MonoBehaviour {
         if (GUILayout.Button("Test")) {
 			if (!_isRunning)
 			{
-				StartCoroutine("test");
+				test();
 			}
 		}
 		// Fin de la liste de composants visuels verticale
@@ -205,7 +205,11 @@ public class MainScript : MonoBehaviour {
 		if (model != System.IntPtr.Zero) {
 			generateBaseTest (baseTest, 10);
 			double[] input = new double[inputSize];
+			double[] outputs = new double[baseTest.Length];
 			Debug.Log ("Starting predicting outputs of baseTest...");
+			int i = 0;
+
+
 			foreach (var data in baseTest){
 				getInput (data, input);
 
@@ -213,12 +217,20 @@ public class MainScript : MonoBehaviour {
 				try
 				{
 					inputPtr = GCHandle.Alloc(input, GCHandleType.Pinned);
-					data.position = new Vector3(data.position.x, (float) LibWrapperMachineLearning.linear_predict (model, inputPtr.AddrOfPinnedObject(), inputSize), data.position.z);
+					outputs[i] = LibWrapperMachineLearning.linear_predict (model, inputPtr.AddrOfPinnedObject(), inputSize);
+					i++;
+
 				}
 				finally
 				{
 					if (inputPtr.IsAllocated) inputPtr.Free();
 				}
+			}
+			serialiseData2 (outputs);
+			for (i = 0; i < 100; i++) {
+
+				baseTest[i].position = new Vector3 (baseTest[i].position.x, (float)outputs [i], baseTest[i].position.z);
+
 			}
 		} else {
 			Debug.Log ("Aucun modèle en mémoire");
@@ -378,23 +390,77 @@ public class MainScript : MonoBehaviour {
 			transformInputs (inputs);
 		}
 	}
+
+	// Transforme les inputs pour certains cas non linérement séparable mais séparables par leur carré
+	public void transformInputs(double[] inputs){
+		for (int i = 0; i < inputs.Length; i++) {
+			inputs[i] *= inputs[i];
+		}
+		for (int i = 0; i < inputs.Length; i++) {
+			inputs[i] *= inputs[i];
+		}
+
+
+	}
+
+	// Use the min / max method to serialise inputs
+	public int serialiseData(double[] data){
+		double minX = data[0], maxX = data[0];
+		double minZ = data[1], maxZ = data[1];
+		for (int i = 2; i < data.Length; i += 2) {
+			if(data[i] < minX) { minX = data[i]; }
+			if(data[i] > maxX) { maxX = data[i]; }
+		}
+		for (int i = 3; i < data.Length; i += 2) {
+			if(data[i] < minZ) { minZ = data[i]; }
+			if(data[i] > maxZ) { maxZ = data[i]; }
+		}
+		Debug.Log ("min x :" + minX + " max x :" + maxX + " min z :" + minZ + " max z" + maxZ);
+		for (int i = 0; i < data.Length; i += 2) {
+			data[i] = (float) (-1.0 + 2.0 * (double) ( (double) (data [i] - minX) / (double) (maxX - minX)));
+		}
+		for (int i = 1; i < data.Length; i += 2) {
+			data[i] = (float) (-1.0 + 2.0 * (double) ( (double) (data [i] - minZ) / (double) (maxZ - minZ)));
+		}
+		return 0;
+	}
+	// Use the min / max method to serialise inputs
+	public int serialiseData2(double[] data){
+		double minX = data[0], maxX = data[0];
+		for (int i = 1; i < data.Length; i ++) {
+			if(data[i] < minX) { minX = data[i]; }
+			if(data[i] > maxX) { maxX = data[i]; }
+		}
+		for (int i = 0; i < data.Length; i ++) {
+			data[i] = (float) (-1.0 + 2.0 * (double) ( (double) (data [i] - minX) / (double) (maxX - minX)));
+		}
+		return 0;
+	}
 	// TEST FUNCTION		
 	public void test(){
 		_isRunning = true;
 		Debug.Log("LAUNCHING TEST FUNCTION");
 
-		//		generateLinear ();
-//		Debug.Log ("sleeping 2sec...");
-////		Thread.Sleep (2000);
-//
 //		Debug.Log("DEBUG baseApprentissage >" + baseApprentissage.Length + "<");
 //		Debug.Log("DEBUG baseTest >" + baseTest.Length + "<");
 //
 //		double[] inputs = new double[inputSize * baseApprentissage.Length];
 //        double[] outputs = new double[baseApprentissage.Length];
 //
-//		getInputs (baseApprentissage, inputs, false);
+//		getInputs (baseApprentissage, inputs);
+//		Debug.Log ("before");
+//		foreach (var data in inputs) {
 //
+//			Debug.Log (data);
+//		}
+//		double[] inputs = new double[] {10, 1, 7.5, 2, 5, 3, 2.5, 4, 0, 5};
+//		serialiseInputs (inputs);
+//		Debug.Log ("after");
+//
+//		foreach (var data in inputs) {
+//				
+//			Debug.Log (data);
+//		}
 //        int inputsSize = inputs.Length;
 //
 //		// Create model
@@ -477,36 +543,6 @@ public class MainScript : MonoBehaviour {
 		}
 	}
 
-	// Transforme les inputs pour certains cas non linérement séparable mais séparables par leur carré
-	public void transformInputs(double[] inputs){
-		for (int i = 0; i < inputs.Length; i++) {
-			inputs[i] *= inputs[i];
-		}
-//		foreach(var input in inputs){
-//			input *= input;
-//		}
-	}
-
-	// Use the min / max method to serialise inputs
-	public int serialiseInputs(double[] inputs){
-		double minX = inputs[0], maxX = inputs[0];
-		double minZ = inputs[1], maxZ = inputs[1];
-		for (int i = 2; i < inputs.Length; i += 2) {
-			if(inputs[i] < minX) { minX = inputs[i]; }
-			if(inputs[i] > maxX) { maxX = inputs[i]; }
-		}
-		for (int i = 3; i < inputs.Length; i += 2) {
-			if(inputs[i] < minZ) { minZ = inputs[i]; }
-			if(inputs[i] > maxZ) { maxZ = inputs[i]; }
-		}
-		for (int i = 2; i < inputs.Length; i += 2) {
-			inputs[i] = -1 + 2 * (inputs [i] - minX) / (maxX - minX);
-		}
-		for (int i = 3; i < inputs.Length; i += 2) {
-			inputs[i] = -1 + 2 * (inputs [i] - minZ) / (maxZ - minZ);
-		}
-		return 0;
-	}
 
 
 

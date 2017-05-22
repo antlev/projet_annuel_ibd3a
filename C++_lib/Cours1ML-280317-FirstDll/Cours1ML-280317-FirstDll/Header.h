@@ -14,9 +14,9 @@ extern "C" {
 
 	__declspec(dllexport) int linear_fit_classification_rosenblatt(double *model, double *inputs, int inputsSize, int inputSize, double *outputs, int iterationNumber, double step);
 
-	__declspec(dllexport) double linear_classify(double *model, const double* input, int inputSize);
+	__declspec(dllexport) double linear_classify(double *model, double* input, int inputSize);
 
-	__declspec(dllexport) double linear_predict(double *model, const double *input, int inputSize);
+	__declspec(dllexport) double linear_predict(double *model, double *input, int inputSize);
 }
 // Function only used in C++
 double learn_classification_rosenblatt(double *model, double* unInput, int inputSize, double expected_result, double step);
