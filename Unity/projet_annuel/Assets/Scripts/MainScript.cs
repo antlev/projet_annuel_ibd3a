@@ -25,6 +25,8 @@ public class MainScript : MonoBehaviour {
 	public static bool transformInput = false;
 	public static string transformButtonString = "Use Transformation";
 
+	public Camera cam1;
+	public Camera cam2;
 
 	/// <summary>
 	/// Indique si un algorithme est en cours d'exécution
@@ -117,10 +119,17 @@ public class MainScript : MonoBehaviour {
 					transformButtonString = "Don't Use Transformation";
 				}            }
         }
-        if (GUILayout.Button("Test")) {
-			if (!_isRunning)
-			{
-				test();
+        if (GUILayout.Button("Switch Cam")) {
+			if (!_isRunning) {
+
+				if (cam1.enabled == true) {
+
+					cam1.enabled = false;
+					cam2.enabled = true;
+				}else{
+					cam1.enabled = true;
+					cam2.enabled = false;		
+				}
 			}
 		}
 		// Fin de la liste de composants visuels verticale
