@@ -33,6 +33,10 @@ public class MainScript : MonoBehaviour {
 	/// </summary>
 	private bool _isRunning = false;
 
+	public void Start(){
+		cam1.enabled = true;
+		cam2.enabled = false;
+	}
 	/// <summary>
 	/// Méthode utilisée pour gérer les informations et 
 	/// boutons de l'interface utilisateur
@@ -568,16 +572,14 @@ public class MainScript : MonoBehaviour {
 			for (int i = 0; i < nbBallPerCote; i++) {
 				for (int j = 0; j < nbBallPerCote; j++) {
 					baseApprentissage[i*(int)nbBallPerCote+j].position = new Vector3 (x, y, z);
-					Debug.Log ("Placing a point on (" + x + "," + y + "," + z + ",");
 					x -= step;
 				}
-				Debug.Log ("i=" + i);
 				y -= step;
 				z -= step;
 				x = 1.0f;
 			}
 		} else {
-			Debug.Log ("baseApprentissage ne contien pas le bon nombre d'objets"+baseApprentissage.Length+" zz "+ nbBallPerCote*nbBallPerCote);
+			Debug.Log ("baseApprentissage ne contien pas le bon nombre d'objets");
 		}
 	}
 
