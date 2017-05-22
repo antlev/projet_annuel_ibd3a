@@ -33,6 +33,10 @@ public class MainScript : MonoBehaviour {
 	/// </summary>
 	private bool _isRunning = false;
 
+	public void Start(){
+		cam1.enabled = true;
+		cam2.enabled = false;
+	}
 	/// <summary>
 	/// Méthode utilisée pour gérer les informations et 
 	/// boutons de l'interface utilisateur
@@ -130,6 +134,12 @@ public class MainScript : MonoBehaviour {
 					cam1.enabled = true;
 					cam2.enabled = false;		
 				}
+			}
+		}
+		if (GUILayout.Button("Test")) {
+			if (!_isRunning) {
+				generateRegression ();
+
 			}
 		}
 		// Fin de la liste de composants visuels verticale
@@ -552,7 +562,26 @@ public class MainScript : MonoBehaviour {
 		}
 	}
 
-
+	public void generateRegression(){
+		float nbBallPerCote = 7.0f;
+		float step = (2.0f / nbBallPerCote);
+		if (baseApprentissage.Length == nbBallPerCote * nbBallPerCote) {
+			float x = 1.0f;
+			float z = 1.0f;
+			float y = 1.0f;
+			for (int i = 0; i < nbBallPerCote; i++) {
+				for (int j = 0; j < nbBallPerCote; j++) {
+					baseApprentissage[i*(int)nbBallPerCote+j].position = new Vector3 (x, y, z);
+					x -= step;
+				}
+				y -= step;
+				z -= step;
+				x = 1.0f;
+			}
+		} else {
+			Debug.Log ("baseApprentissage ne contien pas le bon nombre d'objets");
+		}
+	}
 
 
 }
