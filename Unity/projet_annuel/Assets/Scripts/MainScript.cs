@@ -132,6 +132,12 @@ public class MainScript : MonoBehaviour {
 				}
 			}
 		}
+		if (GUILayout.Button("Test")) {
+			if (!_isRunning) {
+				generateRegression ();
+
+			}
+		}
 		// Fin de la liste de composants visuels verticale
 		GUILayout.EndVertical();
 	}
@@ -552,7 +558,28 @@ public class MainScript : MonoBehaviour {
 		}
 	}
 
-
+	public void generateRegression(){
+		float nbBallPerCote = 7.0f;
+		float step = (2.0f / nbBallPerCote);
+		if (baseApprentissage.Length == nbBallPerCote * nbBallPerCote) {
+			float x = 1.0f;
+			float z = 1.0f;
+			float y = 1.0f;
+			for (int i = 0; i < nbBallPerCote; i++) {
+				for (int j = 0; j < nbBallPerCote; j++) {
+					baseApprentissage[i*(int)nbBallPerCote+j].position = new Vector3 (x, y, z);
+					Debug.Log ("Placing a point on (" + x + "," + y + "," + z + ",");
+					x -= step;
+				}
+				Debug.Log ("i=" + i);
+				y -= step;
+				z -= step;
+				x = 1.0f;
+			}
+		} else {
+			Debug.Log ("baseApprentissage ne contien pas le bon nombre d'objets"+baseApprentissage.Length+" zz "+ nbBallPerCote*nbBallPerCote);
+		}
+	}
 
 
 }
