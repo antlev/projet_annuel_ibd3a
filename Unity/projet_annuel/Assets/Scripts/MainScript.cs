@@ -28,6 +28,7 @@ public class MainScript : MonoBehaviour {
 	public Camera cam1;
 	public Camera cam2;
 
+
 	/// <summary>
 	/// Indique si un algorithme est en cours d'exécution
 	/// </summary>
@@ -45,6 +46,9 @@ public class MainScript : MonoBehaviour {
 	{
 		// Démarrage d'une liste de composants visuels verticale
 		GUILayout.BeginVertical();
+
+		step = GUI.VerticalScrollbar(new Rect(1000, 25, 250, 500), (float) step, 0.08F, 1.08F, 0.0F);
+		iterationNumber = (int) GUI.VerticalScrollbar(new Rect(1025, 25, 250, 500), iterationNumber, 0.1F, 10000, 0);
 
 		if (GUILayout.Button("Create Model")) {
 			if (!_isRunning) {
@@ -142,6 +146,8 @@ public class MainScript : MonoBehaviour {
 
 			}
 		}
+		GUILayout.TextArea ("     step >" + step + "<");
+		GUILayout.TextArea ("     iterations >" + iterationNumber + "<");
 		// Fin de la liste de composants visuels verticale
 		GUILayout.EndVertical();
 	}
@@ -171,7 +177,6 @@ public class MainScript : MonoBehaviour {
 		}
 		_isRunning = false;
 	}
-
 	public void erase_model(){
 		_isRunning = true;
 		if (model != System.IntPtr.Zero) {
