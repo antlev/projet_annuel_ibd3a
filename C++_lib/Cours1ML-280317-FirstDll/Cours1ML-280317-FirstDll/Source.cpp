@@ -7,16 +7,17 @@
 // � une valeur pseudo-al�atoire entre -1 et 1
 double *linear_create_model(int inputDimension) {
 	// Cr�ation du mod�le en m�moire
-	double* ptr = new double[inputDimension];
+	double* ptr = new double[inputDimension + 1];
 	// On affecte les poids � une valeur entre -1 et 1
-	for (int i = 0; i<inputDimension; ++i) {
-		ptr[i] = rand() % 10000 / 5000. - 1.;
+	for (int i = 0; i < inputDimension + 1; ++i) {
+		ptr[i] = ((float)rand()) / ((float)RAND_MAX) * 2.0 - 1.0;
 	}
 	return ptr;
 };
 
 // Supprime le modèle en m�moire
 void linear_remove_model(double *model) {
+	delete model;
 }
 
 //  ---------- APPLICATION ----------
@@ -25,9 +26,9 @@ double linear_classify(double *model, const double* input, int inputSize) {
 	double somme_poids_inputs(0);
 	int i;
 	for (i = 0; i < inputSize; i++) {
-		somme_poids_inputs += model[i] * input[i];
+		somme_poids_inputs += model[i + 1] * input[i];
 	}
-	somme_poids_inputs += 1; // neuronne de biais
+	somme_poids_inputs += model[0] * 1.0; // neuronne de biais
 	return (somme_poids_inputs < 0 ? -1 : 1);
 }
 
@@ -49,15 +50,16 @@ int linear_fit_classification_hebb(double *model, double *inputs, int inputsSize
 
 			if (iterations > iterationNumber) {
 				return 1;
-			} else
+			}
+			else
 				iterations++;
 
 			int i(0);
 			// For each data
-			for (i = 0; i<inputsSize; i += inputSize) {
+			for (i = 0; i < inputsSize; i += inputSize) {
 				int j(0);
 				// On r�cup�re les donn�es correspondant � l'input
-				for (j = 0; j<inputSize; ++j) {
+				for (j = 0; j < inputSize; ++j) {
 					unInput[j] = inputs[i + j];
 				}
 				learn_classification_hebb(model, unInput, inputSize, step);
@@ -80,40 +82,39 @@ int linear_fit_classification_rosenblatt(double *model, double *inputs, int inpu
 	if (model == nullptr) {
 		return -1;
 	}
-	else {
-		int iterations(0);
-		double* unInput = new double[inputSize];
 
-		while (true) {
+	int iterations(0);
+	double* unInput = new double[inputSize];
 
-			if (iterations > iterationNumber) {
-				return 1;
-			}
-			else
-				iterations++;
+	while (true) {
 
-			int i(0);
-			int error(0);
-			int k(0);
-			// For each data
-			for (i = 0; i<inputsSize; i += inputSize) {
-				int j(0);
-				// On r�cup�re les donn�es correspondant � l'input
-				for (j = 0; j<inputSize; ++j) {
-					unInput[j] = inputs[i + j];
-				}
-				error += (int) learn_classification_rosenblatt(model, unInput, inputSize, outputs[k], step);
-				k++;
-			}
-			if (error == 0) {
-				return 0;
-			}
-			error = 0;
+		if (iterations > iterationNumber) {
+			return 1;
 		}
+		else
+			iterations++;
+
+		int i(0);
+		int error(0);
+		int k(0);
+		// For each data
+		for (i = 0; i < inputsSize; i += inputSize) {
+			int j(0);
+			// On r�cup�re les donn�es correspondant � l'input
+			for (j = 0; j < inputSize; ++j) {
+				unInput[j] = inputs[i + j];
+			}
+			error += (int)learn_classification_rosenblatt(model, unInput, inputSize, outputs[k], step);
+			k++;
+		}
+		if (error == 0) {
+			return 0;
+		}
+		error = 0;
 	}
 }
 // Applique la règle de rosenblatt sur un perceptron avec un input
-double learn_classification_rosenblatt(double *model, double* unInput, int inputSize, double expected_result, double step){
+double learn_classification_rosenblatt(double *model, double* unInput, int inputSize, double expected_result, double step) {
 	// Get the result given by the Perceptron
 	double result = linear_classify(model, unInput, inputSize);
 
@@ -124,15 +125,16 @@ double learn_classification_rosenblatt(double *model, double* unInput, int input
 		double error = (expected_result - result);
 		int i;
 		// We adapt every weight of our Perceptron using the formula
-		for (i = 0; i < inputSize + 1; i++) {
-			model[i] += step * error * unInput[i];
+		for (i = 0; i < inputSize; i++) {
+			model[i + 1] += step * error * unInput[i];
 		}
+		model[0] += step * error * 1;
 	}
 	return result;
 }
 //---------------------------------------------------------------------------------------------------------------------------------------------------------
 // Function called by C# giving all inputs annd outputs of a database to learn regression
-int linear_fit_regression(double *model, double *inputs, int inputsSize, int inputSize, double *outputs,int nb_iterations_max, double learning_rate){
+int linear_fit_regression(double *model, double *inputs, int inputsSize, int inputSize, double *outputs, int nb_iterations_max, double learning_rate) {
 	if (model == nullptr) {
 		return -1;
 	}
@@ -156,7 +158,7 @@ int linear_fit_regression(double *model, double *inputs, int inputsSize, int inp
 				count++;
 			}
 			// Si l'apprentisage est fini et que le perceptron renvoie la bonne sortie pour chaque input
-			if (error_count == 0)
+			if (error_count <= 0.0001)
 				break;
 			if (iterations > nb_iterations_max) {
 				break;
@@ -172,30 +174,24 @@ double learn_regression(double *model, double expected_result, double* input, in
 	// Get the result given by the Perceptron
 	double result = linear_predict(model, input, inputSize);
 
-	// If the Perceptron doesn't not return a correct response -> We modify the weights to adapt
-	// If the Perceptron return a correct response -> Nothing to do
-	if (result != expected_result) {
 		// Convert boolean to a number
 		double error = (expected_result - result);
 		int i;
 		// We adapt every weight of our Perceptron using the formula
-		for (i = 0; i < inputSize + 1; i++) {
-			model[i] += learning_rate * error * input[i];
+		for (i = 0; i < inputSize; i++) {
+			model[i + 1] += learning_rate * error * input[i];
 		}
-		return 1;
-	}
-	else {
-		return 0;
-	}
+		model[0] += learning_rate * error * 1.0;
+		return error;
 }
 // Return the response of the Perceptron using regression
 double linear_predict(double *model, double *input, int inputSize) {
 	double somme_poids_inputs(0);
 	int i;
 	for (i = 0; i < inputSize; i++) {
-		somme_poids_inputs += model[i] * input[i];
+		somme_poids_inputs += model[i + 1] * input[i];
 	}
-	somme_poids_inputs += 1; // neuronne de biais
+	somme_poids_inputs += model[0]; // neuronne de biais
 	return somme_poids_inputs;
 }
 
@@ -203,7 +199,7 @@ double linear_predict(double *model, double *input, int inputSize) {
 void baseTest(double* inputs, double* expected_outputs, int inputSize) {
 
 	int i;
-	for (i = 0; i<20; i += 2) {
+	for (i = 0; i < 20; i += 2) {
 		// x entre -1 et 1
 		inputs[i] = rand() % 10000 / 5000. - 1.;
 		/*
@@ -215,24 +211,24 @@ void baseTest(double* inputs, double* expected_outputs, int inputSize) {
 		inputs++;
 		*/
 	}
-	for (i = 20; i<40; i += 2) {
+	for (i = 20; i < 40; i += 2) {
 		// x entre -1 et 1
 		inputs[i] = rand() % 10000 / 5000. - 1.;
 		// z entre -1 et 0
 		inputs[i + 1] = rand() % 10000 / 10000. - 1.;
 	}
-	for (i = 0; i<10; i++) {
+	for (i = 0; i < 10; i++) {
 		// y = 1
 		expected_outputs[i] = 1;
 	}
-	for (i = 10; i<20; i++) {
+	for (i = 10; i < 20; i++) {
 		// y = -1
 		expected_outputs[i] = -1;
 	}
 }
 
 void showInputs(double* inputs, int inputsSize) {
-	for (int i = 0; i<inputsSize; ++i) {
+	for (int i = 0; i < inputsSize; ++i) {
 		std::cout << "DEBUG inputs[" << i << "] >" << inputs[i] << "< " << std::endl;
 	}
 }
@@ -277,10 +273,10 @@ int main() {
 	double* unInput = new double[inputSize];
 
 	// For each data
-	for (i = 0; i<40; i += inputSize) {
+	for (i = 0; i < 40; i += inputSize) {
 		int j(0);
 		// On r�cup�re les donn�es correspondant � l'input
-		for (j = 0; j<inputSize; ++j) {
+		for (j = 0; j < inputSize; ++j) {
 			unInput[j] = inputs[i + j];
 		}
 		std::cout << "res :" << linear_classify(model, unInput, inputSize) << "Expected : " << expected_outputs[k] << std::endl;
@@ -300,7 +296,7 @@ void showModel(double* model) {
 }
 int test(double* test, int testSize) {
 	int i(0);
-	for (i = 0; i<testSize; ++i) {
+	for (i = 0; i < testSize; ++i) {
 		std::cout << "test[" << i << "] = " << test[i] << std::endl;
 	}
 	return 1;

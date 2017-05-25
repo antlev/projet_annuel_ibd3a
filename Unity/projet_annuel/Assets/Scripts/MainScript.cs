@@ -8,8 +8,8 @@ public class MainScript : MonoBehaviour {
 	public static System.IntPtr model;
 	public static int inputSize = 2;
 
-    public static int iterationNumber = 1000;
-	public static double step = 0.5;
+    public static int iterationNumber = 100000;
+	public static double step = 0.01f;
 	public static double learning_rate = 0.5;
 
     public Transform[] baseApprentissage;
