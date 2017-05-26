@@ -9,25 +9,25 @@ public class LibWrapperMachineLearning
     public static extern int return42();
 
     [DllImport("Cours1ML-280317-FirstDll")] 
-    public static extern System.IntPtr linear_create_model(int inputDimension);
+	public static extern System.IntPtr linear_create_model(int inputDimension, int outputDimension);
 
-    [DllImport("Cours1ML-280317-FirstDll")]
+	[DllImport("Cours1ML-280317-FirstDll")]
     public static extern void linear_remove_model(System.IntPtr model);
 
     [DllImport("Cours1ML-280317-FirstDll")]
-	public static extern int linear_fit_regression(System.IntPtr model, System.IntPtr inputs, int inputsSize, int inputSize, System.IntPtr outputs, int nb_iterations_max, double learning_rate);
+	public static extern int linear_fit_regression(System.IntPtr model, double[] inputs, int inputsSize, int inputSize, double[] outputs, int nb_iterations_max, double learning_rate);
 
     [DllImport("Cours1ML-280317-FirstDll")]
-	public static extern int linear_fit_classification_hebb(System.IntPtr model, System.IntPtr inputs, int inputsSize, int inputSize,  int iterationNumber, double step);
+	public static extern int linear_fit_classification_hebb(System.IntPtr model, double[] inputs, int inputsSize, int inputSize,  int iterationNumber, double step);
 
     [DllImport("Cours1ML-280317-FirstDll")]
-    public static extern int linear_fit_classification_rosenblatt(System.IntPtr model, System.IntPtr inputs, int inputsSize, int inputSize, System.IntPtr outputs, int iterationNumber, double step);
+	public static extern int linear_fit_classification_rosenblatt(System.IntPtr model, double[] inputs, int inputsSize, int inputSize, double[] outputs, int outputSize, int iterationNumber, double step);
 
     [DllImport("Cours1ML-280317-FirstDll")]
-    public static extern double linear_classify(System.IntPtr model, System.IntPtr input, int inputSize);
+	public static extern double linear_classify(System.IntPtr model, double[] input, int inputSize, double[] expectedOutputs, int outputDimension);
     
     [DllImport("Cours1ML-280317-FirstDll")]
-    public static extern double linear_predict(System.IntPtr model, System.IntPtr input, int inputSize);
+	public static extern double linear_predict(System.IntPtr model, double[] input, int inputSize);
 
     [DllImport("Cours1ML-280317-FirstDll")]
     public static extern int test();

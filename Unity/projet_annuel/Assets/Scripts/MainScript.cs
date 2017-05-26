@@ -21,13 +21,16 @@ public class MainScript : MonoBehaviour {
 	public Color blue = Color.blue;
 	public Color red = Color.red;
 	public Color green = Color.green;
+	public static int colorBlue = 0;
+	public static int colorRed = 1;
+	public static int colorGreen = 2;
 
 	public static bool transformInput = false;
 	public static string transformButtonString = "Use Transformation";
+	public static int nbOutputNeuron = 3;
 
 	public Camera cam1;
 	public Camera cam2;
-
 
 	/// <summary>
 	/// Indique si un algorithme est en cours d'exécution
@@ -47,7 +50,7 @@ public class MainScript : MonoBehaviour {
 		// Démarrage d'une liste de composants visuels verticale
 		GUILayout.BeginVertical();
 
-		step = GUI.VerticalScrollbar(new Rect(1000, 25, 250, 500), (float) step, 0.08F, 1.08F, 0.0F);
+		step = GUI.VerticalScrollbar(new Rect(1000, 25, 10, 500), (float) step, 0.08F, 1.08F, 0.0F);
 		iterationNumber = (int) GUI.VerticalScrollbar(new Rect(1025, 25, 250, 500), iterationNumber, 0.1F, 10000, 0);
 
 		if (GUILayout.Button("Create Model")) {
@@ -159,7 +162,7 @@ public class MainScript : MonoBehaviour {
 	public void create_model(){
 		_isRunning = true;
 		if (model == System.IntPtr.Zero) {
-			model = LibWrapperMachineLearning.linear_create_model (inputSize);
+			model = LibWrapperMachineLearning.linear_create_model (inputSize, nbOutputNeuron);
 			Debug.Log ("Model created !" + model);
 		} else {
 			Debug.Log ("A model has been created, please delete it if you want to create another one ");
@@ -167,16 +170,16 @@ public class MainScript : MonoBehaviour {
 		_isRunning = false;
 	}	
 
-	public void create_model(int nbCouche){
-		_isRunning = true;
-		if (model == System.IntPtr.Zero) {
-			model = LibWrapperMachineLearning.linear_create_model (inputSize);
-			Debug.Log ("Model created !" + model);
-		} else {
-			Debug.Log ("A model has been created, please delete it if you want to create another one ");
-		}
-		_isRunning = false;
-	}
+//	public void create_model(int nbCouche){
+//		_isRunning = true;
+//		if (model == System.IntPtr.Zero) {
+//			model = LibWrapperMachineLearning.linear_create_model (inputSize, nbOutputNeuron);
+//			Debug.Log ("Model created !" + model);
+//		} else {
+//			Debug.Log ("A model has been created, please delete it if you want to create another one ");
+//		}
+//		_isRunning = false;
+//	}
 	public void erase_model(){
 		_isRunning = true;
 		if (model != System.IntPtr.Zero) {
@@ -195,28 +198,49 @@ public class MainScript : MonoBehaviour {
 			Debug.Log ("génère une base de test de 10x10 boules");
 			Debug.Log ("Classify baseTest");
 			double[] input = new double[inputSize];
+			double[] outputs = new double[nbOutputNeuron];
 			foreach(var unityObject in baseTest){
 				getInput (unityObject, input);
-				var inputPtr = default(GCHandle);
-				try
-				{
-					inputPtr = GCHandle.Alloc(input, GCHandleType.Pinned);
-                    if (testWithColor) {
-                        if((float)LibWrapperMachineLearning.linear_classify(model, inputPtr.AddrOfPinnedObject(), inputSize) == 1) {
-							unityObject.GetComponent<Renderer>().material.color = UnityEngine.Color.red;
-                        } else {
-							unityObject.GetComponent<Renderer>().material.color = UnityEngine.Color.blue;
-                        }
-                        unityObject.position = new Vector3(unityObject.position.x, 0, unityObject.position.z);
-                    }
-                    else {
-                        unityObject.position = new Vector3(unityObject.position.x, (float)LibWrapperMachineLearning.linear_classify(model, inputPtr.AddrOfPinnedObject(), inputSize), unityObject.position.z);
-                    }
+
+
+                if (testWithColor) {
+
+					LibWrapperMachineLearning.linear_classify (model, input, inputSize, outputs, nbOutputNeuron);
+					int n = 0;
+					foreach (var output in outputs) {
+						Debug.Log ("output[" + n + "] >" + output + "<");
+						n++;
+					}
+					for (int i = 0; i < outputs.Length; i++) {
+						if(outputs[i] == 1){
+							if(i == colorBlue){
+								Debug.Log ("passe la1");
+								unityObject.GetComponent<Renderer>().material.color = UnityEngine.Color.blue;
+							}else if(i == colorRed){
+								Debug.Log ("passe la2");
+
+								unityObject.GetComponent<Renderer>().material.color = UnityEngine.Color.red;
+							}else{
+								Debug.Log ("passe la3");
+
+								unityObject.GetComponent<Renderer>().material.color = UnityEngine.Color.green;
+							}
+			                    unityObject.position = new Vector3(unityObject.position.x, 0, unityObject.position.z);
+						}
+					}
+
+
+
+//					if((float) == 1) {
+//						unityObject.GetComponent<Renderer>().material.color = UnityEngine.Color.red;
+//                    } else {
+//						unityObject.GetComponent<Renderer>().material.color = UnityEngine.Color.blue;
+//                    }
                 }
-				finally
-				{
-					if (inputPtr.IsAllocated) inputPtr.Free();
-				}
+                else {
+					unityObject.position = new Vector3(unityObject.position.x, (float)LibWrapperMachineLearning.linear_classify(model, input, inputSize, outputs, nbOutputNeuron), unityObject.position.z);
+                }
+
 			}
 		} else {
 			Debug.Log ("Aucun modèle en mémoire");
@@ -236,19 +260,9 @@ public class MainScript : MonoBehaviour {
 
 			foreach (var data in baseTest){
 				getInput (data, input);
+				outputs[i] = LibWrapperMachineLearning.linear_predict (model, input, inputSize);
+				i++;
 
-				var inputPtr = default(GCHandle);
-				try
-				{
-					inputPtr = GCHandle.Alloc(input, GCHandleType.Pinned);
-					outputs[i] = LibWrapperMachineLearning.linear_predict (model, inputPtr.AddrOfPinnedObject(), inputSize);
-					i++;
-
-				}
-				finally
-				{
-					if (inputPtr.IsAllocated) inputPtr.Free();
-				}
 			}
 			serialiseData2 (outputs);
 			for (i = 0; i < 100; i++) {
@@ -268,29 +282,16 @@ public class MainScript : MonoBehaviour {
 			Debug.Log ("linear_fit_regression");
 			double[] inputs = new double[inputSize * baseApprentissage.Length];
 			double[] outputs = new double[baseApprentissage.Length];
-			getInputsOutputs (baseApprentissage, inputs, outputs);
-			// Création des pointeurs
-			var inputsPtr = default(GCHandle);
-			var outputsPtr = default(GCHandle);
+			getInputsOutputs (baseApprentissage, inputs, outputs, nbOutputNeuron);
 			int learningResponse;
-			try
-			{
-				inputsPtr = GCHandle.Alloc(inputs, GCHandleType.Pinned);
-				outputsPtr = GCHandle.Alloc(outputs, GCHandleType.Pinned);
-				Debug.Log("Start learning regression with baseApprentissage...");
-				learningResponse = LibWrapperMachineLearning.linear_fit_regression(model, inputsPtr.AddrOfPinnedObject(), inputSize * baseApprentissage.Length, inputSize, outputsPtr.AddrOfPinnedObject(), iterationNumber, learning_rate);
-				if(learningResponse == -1){
-					Debug.Log("C++ >Aucun modèle en mémoire<");
-				}else if(learningResponse == 0){
-					Debug.Log("Learning stop by iterations");
-				} else{
-					Debug.Log("Learning stop beacause all case were correctly classified");
-				}
-			}
-			finally
-			{
-				if (inputsPtr.IsAllocated) inputsPtr.Free();
-				if (outputsPtr.IsAllocated) outputsPtr.Free();
+			Debug.Log("Start learning regression with baseApprentissage...");
+			learningResponse = LibWrapperMachineLearning.linear_fit_regression(model, inputs, inputSize * baseApprentissage.Length, inputSize, outputs, iterationNumber, learning_rate);
+			if(learningResponse == -1){
+				Debug.Log("C++ >Aucun modèle en mémoire<");
+			}else if(learningResponse == 0){
+				Debug.Log("Learning stop by iterations");
+			} else{
+				Debug.Log("Learning stop beacause all case were correctly classified");
 			}
 		} else {
 			Debug.Log ("Aucun modèle en mémoire");
@@ -304,26 +305,17 @@ public class MainScript : MonoBehaviour {
 			Debug.Log ("linear_fit_classification_hebb");
 			double[] inputs = new double[inputSize * baseApprentissage.Length];
 			getInputs (baseApprentissage, inputs);
-			// Création des pointeurs
-			var inputsPtr = default(GCHandle);
-			int learningResponse;
-			try
-			{
-				inputsPtr = GCHandle.Alloc(inputs, GCHandleType.Pinned);
-				Debug.Log("Start learning classification hebb with baseApprentissage...");
-				learningResponse = LibWrapperMachineLearning.linear_fit_classification_hebb(model, inputsPtr.AddrOfPinnedObject(), inputSize * baseApprentissage.Length, inputSize, iterationNumber, step);
-				if(learningResponse == -1){
-					Debug.Log("C++ >Aucun modèle en mémoire<");
-				}else if(learningResponse == 0){
-					Debug.Log("Learning stop by iterations");
-				} else{
-					Debug.Log("Learning stop beacause all case were correctly classified");
-				}
 
-			}
-			finally
-			{
-				if (inputsPtr.IsAllocated) inputsPtr.Free();
+			int learningResponse;
+
+			Debug.Log("Start learning classification hebb with baseApprentissage...");
+			learningResponse = LibWrapperMachineLearning.linear_fit_classification_hebb(model, inputs, inputSize * baseApprentissage.Length, inputSize, iterationNumber, step);
+			if(learningResponse == -1){
+				Debug.Log("C++ >Aucun modèle en mémoire<");
+			}else if(learningResponse == 0){
+				Debug.Log("Learning stop by iterations");
+			} else{
+				Debug.Log("Learning stop beacause all case were correctly classified");
 			}
 		} else {
 			Debug.Log ("Aucun modèle en mémoire");
@@ -337,31 +329,21 @@ public class MainScript : MonoBehaviour {
 		if (model != System.IntPtr.Zero) {
 			Debug.Log ("linear_fit_classification_rosenblatt");
 			double[] inputs = new double[inputSize * baseApprentissage.Length];
-			double[] outputs = new double[baseApprentissage.Length];
-			getInputsOutputs (baseApprentissage, inputs, outputs);
-			// Création des pointeurs
-			var inputsPtr = default(GCHandle);
-			var outputsPtr = default(GCHandle);
+			double[] outputs = new double[baseApprentissage.Length * nbOutputNeuron];
+			getInputsOutputs (baseApprentissage, inputs, outputs, nbOutputNeuron);
 			int learningResponse;
-			try
-			{
-				inputsPtr = GCHandle.Alloc(inputs, GCHandleType.Pinned);
-				outputsPtr = GCHandle.Alloc(outputs, GCHandleType.Pinned);
-				learningResponse = LibWrapperMachineLearning.linear_fit_classification_rosenblatt(model, inputsPtr.AddrOfPinnedObject(), inputSize * baseApprentissage.Length, inputSize, outputsPtr.AddrOfPinnedObject(), iterationNumber, step);
-				if(learningResponse == -1){
-					Debug.Log("C++ >Aucun modèle en mémoire<");
-				}else if(learningResponse == 0){
-					Debug.Log("Leaning stop by iterations");
-				} else{
-					Debug.Log("Learning stop beacause all case were correctly classified");
-				}
+			foreach(var outp in outputs){
+				Debug.Log("outputgiven>"+outp);
 			}
-			finally
-			{
-				if (inputsPtr.IsAllocated) inputsPtr.Free();
-				if (outputsPtr.IsAllocated) outputsPtr.Free();
+			learningResponse = LibWrapperMachineLearning.linear_fit_classification_rosenblatt(model, inputs, inputSize * baseApprentissage.Length, inputSize, outputs, nbOutputNeuron, iterationNumber, step);
+			if(learningResponse == -1){
+				Debug.Log("C++ >Aucun modèle en mémoire<");
+			}else if(learningResponse == 0){
+				Debug.Log("Leaning stop by iterations");
+			} else{
+				Debug.Log("Learning stop beacause all case were correctly classified");
 			}
-		} else {
+	} else {
 			Debug.Log ("Aucun modèle en mémoire");
 		}
 		_isRunning = false;
@@ -391,24 +373,58 @@ public class MainScript : MonoBehaviour {
 	}
 //	// Rempli le tableau inputs passé en paramètre avec les coordonnées x et y du tableau d'objetsUnity
 //	// ainsi que le tableau outputs avec les coordonées z du tableau d'objetsUnity
-	private void getInputsOutputs(Transform[] objetsUnity, double[] inputs, double[] outputs){
+	private void getInputsOutputs(Transform[] objetsUnity, double[] inputs, double[] outputs, int outputSize){
 		int i = 0, j = 0;
 		foreach (var data in objetsUnity)
 		{
+			Debug.Log ("DEBUG 1 ><");
 			inputs[i] = data.position.x;
 			i++;
 			inputs[i] = data.position.z;
 			i++;
+			int k;
 			if (testWithColor) {
 				if (data.GetComponent<Renderer> ().material.color == UnityEngine.Color.blue) {
-					outputs [j] = -1;
-				} else {
-					outputs [j] = 1 ;
+					Debug.Log ("DEBUG 2 ><");
+					for (k = 0; k < outputSize; k++) {
+						Debug.Log ("DEBUG 3 k>"+k+"<");
+						if (k == colorBlue) {
+							Debug.Log ("DEBUG 4 jk>"+j+k+"<");
+							outputs [j+k] = 1;
+						} else {
+							outputs [j+k] = -1;
+							Debug.Log ("DEBUG 5 jk>"+j+k+"<");
+						}
+					}
+				} else if(data.GetComponent<Renderer> ().material.color == UnityEngine.Color.red){
+					Debug.Log ("DEBUG 5bis ><");
+					for (k = 0; k < outputSize; k++) {
+						Debug.Log ("DEBUG 6 k>"+k+"<");
+						if (k == colorRed) {
+							Debug.Log ("DEBUG 7 jk>"+j+k+"<");
+							outputs [j+k] = 1;
+						} else {
+							Debug.Log ("DEBUG 8 jk>"+j+k+"<");
+							outputs [j+k] = -1;
+						}
+					}
+				} else{
+					Debug.Log ("DEBUG 9 ><");
+					for (k = 0; k < outputSize; k++) {
+						Debug.Log ("DEBUG 10 k>"+k+"< colorGreen>"+colorGreen+"< ==>"+(k == colorGreen)+"<");
+						if (k == colorGreen) {
+							Debug.Log ("DEBUG 11 jk>"+j+k+"<");
+							outputs [j+k] = 1;
+						} else {
+							Debug.Log ("DEBUG 13 jk>"+j+k+"<");
+							outputs [j+k] = -1;
+						}
+					}
 				}
 			} else {
 				outputs [j] = data.position.y;
 			}
-			j++;
+			j+=outputSize;
 		}
 		if (transformInput) {
 			transformInputs (inputs);
