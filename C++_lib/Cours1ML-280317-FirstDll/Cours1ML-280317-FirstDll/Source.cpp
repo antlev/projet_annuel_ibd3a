@@ -3,19 +3,24 @@
 #include <stdlib.h>
 #include <time.h>
 #include <cassert>
+#include "Eigen/Dense"
+
+class MatrixXd;
+
+class MatrixXd;
 
 using namespace std;
 
-// Génère un modèle aléatoirement en "settant" tous les poids
-// à une valeur pseudo-aléatoire entre -1 et 1
-double *linear_create_model(int inputSize, int outputSize) {
-	assert(inputSize > 0);
-	assert(outputSize > 0);
-	// Création du modèle en mémoire
+// G�n�re un mod�le al�atoirement en "settant" tous les poids
+// � une valeur pseudo-al�atoire entre -1 et 1
+double *linear_create_model(int inputDimension, int outputDimension) {
+	assert(inputDimension > 0);
+	assert(outputDimension > 0);
+	// Cr�ation du mod�le en m�moire
 	// On a autant de poids que d'input (sans oublier le neurone de biais) fois le nombre d'output
-	double* model = new double[(inputSize + 1) * outputSize];
-	// On affecte les poids à une valeur entre -1 et 1
-	for (int i = 0; i < (inputSize + 1) * outputSize; ++i) {
+	double* model = new double[(inputDimension + 1) * outputDimension];
+	// On affecte les poids � une valeur entre -1 et 1
+	for (int i = 0; i < (inputDimension + 1) * outputDimension; ++i) {
 		model[i] = ((float)rand()) / ((float)RAND_MAX) * 2.0 - 1.0;
 	}
 	return model;
@@ -41,18 +46,18 @@ double* addBias(double* input, int inputSize) {
 // @param input : input to use
 // @param inputSize : size of input array
 // @param outputs : array to write results of all the outputs neurons
-// @param outputSize : size of output array
-void linear_classify(double *model, double* input, int inputSize, double* output, int outputSize) {
+// @param outputDimension : size of output array
+void linear_classify(double *model, double* input, int inputSize, double* output, int outputDimension) {
 	assert(model != NULL);
 	assert(input != NULL);
 	assert(inputSize > 0);
 	assert(output != NULL);
-	assert(outputSize > 0);
+	assert(outputDimension > 0);
 	double sum_weigths_inputs;
 	double* inputWithBias = addBias(input, inputSize);
-	for (int outputIterator = 0; outputIterator < outputSize; outputIterator++) {
+	for (int outputIterator = 0; outputIterator < outputDimension; outputIterator++) {
 		sum_weigths_inputs = 0;
-		for (int modelIterator = outputIterator, inputIterator = 0; modelIterator < (inputSize + 1)*outputSize && inputIterator < inputSize + 1; inputIterator++, modelIterator += outputSize) {
+		for (int modelIterator = outputIterator, inputIterator = 0; modelIterator < (inputSize + 1)*outputDimension && inputIterator < inputSize + 1; inputIterator++, modelIterator += outputDimension) {
 			sum_weigths_inputs += model[modelIterator] * inputWithBias[inputIterator];
 		}
 		output[outputIterator] = (sum_weigths_inputs >= 0 ? 1 : -1);
@@ -98,32 +103,32 @@ int linear_fit_classification_rosenblatt(double *model, double *inputs, int inpu
 			}
 			// Get the result given by the Perceptron
 			linear_classify(model, oneInput, inputSize, oneOutput, outputSize);
-//            cout << "TEST RETURN CLASSIFY " << endl;
-//            for(int i=0; i<outputSize;i++){
-//                cout << "output[" << i << "] >" << oneOutput[i] << "<" << endl;
-//
-//            }
-//            oneInput = addBias(oneInput, inputSize);
+			//            cout << "TEST RETURN CLASSIFY " << endl;
+			//            for(int i=0; i<outputSize;i++){
+			//                cout << "output[" << i << "] >" << oneOutput[i] << "<" << endl;
+			//
+			//            }
+			//            oneInput = addBias(oneInput, inputSize);
 
 			bool* outputIsGood = new bool[outputSize];
 			double* outputError = new double[outputSize];
 			bool allOutputsAreGood = true;
 			// For each output neuron we check that response from perceptron is correct
 			for (int outputIterator = 0; outputIterator < outputSize; outputIterator++) {
-	//             cout << "DEBUG outputIterator>" << outputIterator << "< " << endl;
+				//                cout << "DEBUG outputIterator>" << outputIterator << "< " << endl;
 				outputIsGood[outputIterator] = true; // Initialising all response at true
-				// If one of the output neuron doesn't give the good answer
-//                cout << "DEBUG oneOutput[outputIterator]>" << oneOutput[outputIterator] << "<  expectedOutputs["<< inputIterator*outputSize+outputIterator <<"] >" << expectedOutputs[inputIterator*outputSize+outputIterator] << "< " << endl;
+													 // If one of the output neuron doesn't give the good answer
+													 //                cout << "DEBUG oneOutput[outputIterator]>" << oneOutput[outputIterator] << "<  expectedOutputs["<< inputIterator*outputSize+outputIterator <<"] >" << expectedOutputs[inputIterator*outputSize+outputIterator] << "< " << endl;
 				if (oneOutput[outputIterator] != expectedOutputs[inputIterator*outputSize + outputIterator]) {
-//                    cout << "DEBUG output nb " << outputIterator << " is false" << endl;
+					//                    cout << "DEBUG output nb " << outputIterator << " is false" << endl;
 					outputIsGood[outputIterator] = false;
 					if (allOutputsAreGood) { allOutputsAreGood = false; }
 					// Storing the output error in a tab
 					outputError[outputIterator] = expectedOutputs[inputIterator*outputSize + outputIterator] - oneOutput[outputIterator];
-//                    cout << "DEBUG outputError["<< outputIterator << "] >" << outputError[outputIterator] << "< " << endl;
+					//                    cout << "DEBUG outputError["<< outputIterator << "] >" << outputError[outputIterator] << "< " << endl;
 				}
 				else {
-//                    cout << "DEBUG output nb " << outputIterator << " is ok" << endl;
+					//                    cout << "DEBUG output nb " << outputIterator << " is ok" << endl;
 				}
 			}
 			// If at least one of the Perceptron's response is not good
@@ -132,21 +137,21 @@ int linear_fit_classification_rosenblatt(double *model, double *inputs, int inpu
 				for (int outputIterator = 0; outputIterator < outputSize; outputIterator++) {
 					// For each output, if the Perceptron's response ins't good -> We modify the weights affecting the output
 					if (!outputIsGood[outputIterator]) {
-//                        cout << "DEBUG modifying weight affecting output nb >" << outputIterator << "< " << endl;
+						//                        cout << "DEBUG modifying weight affecting output nb >" << outputIterator << "< " << endl;
 						// We adapt every weight of our Perceptron using the Rsoenblatt formula
 						for (int modelIterator = outputIterator; modelIterator < (inputSize + 1)*outputSize; modelIterator += outputSize) {
 							if (modelIterator < outputSize) {
-//                                cout << "modelIterator >" <<  modelIterator << "< model[" << modelIterator << "]>"<< model[modelIterator] << "<" << endl;
+								//                                cout << "modelIterator >" <<  modelIterator << "< model[" << modelIterator << "]>"<< model[modelIterator] << "<" << endl;
 								model[modelIterator] += step * outputError[outputIterator] * 1; // bias neuron
 							}
 							else {
-//                                cout << "modelIterator >" <<  modelIterator << "< model[" << modelIterator << "]>"<< model[modelIterator] << "<" << endl;
+								//                                cout << "modelIterator >" <<  modelIterator << "< model[" << modelIterator << "]>"<< model[modelIterator] << "<" << endl;
 								model[modelIterator] += step * outputError[outputIterator] * oneInput[modelIterator - outputIterator];
 							}
 						}
 					}
 					else {
-						// cout << "DEBUG NOT MODIFYING weight affecting output nb >" << outputIterator << "< " << endl;
+						//                        cout << "DEBUG NOT MODIFYING weight affecting output nb >" << outputIterator << "< " << endl;
 					}
 				}
 			}
@@ -156,78 +161,97 @@ int linear_fit_classification_rosenblatt(double *model, double *inputs, int inpu
 		}
 	}
 }
+
+Eigen::Matrix3f pinv(Eigen::Matrix3f X) {
+	Eigen::Matrix3f X_Transp = X.transpose();
+	return (((X_Transp * X).inverse()) * X_Transp);
+}
 int main() {
 
 	time_t now;
 	time(&now);
 	srand((unsigned int)now);
+	Eigen::Matrix3f A;
+	A << 1, 2, 1,
+		2, 1, 0,
+		-1, 1, 2;
+	cout << "Here is the matrix A:\n" << A << endl;
+	cout << "The transposé of A is \n" << A.transpose() << endl;
+	A.transpose();
 
-	int inputSize = 2;
-	int outputNeuronsSize = 3;
-	int iterationsMax = 10000;
-	double step(0.1);
+	cout << "Here is the matrix A:\n" << A << endl;
+	cout << "Here is the pinv of A:\n" << pinv(A) << endl;
 
-	int modelSize = (inputSize + 1) * outputNeuronsSize;
-	double* model = linear_create_model(inputSize, outputNeuronsSize);
-	showModel(model, modelSize);
+	cout << "Expected Result : " << endl;
 
-	double* inputs = new double[inputSize * 3];
-	double* expected_outputs = new double[outputNeuronsSize * 3];
+	cout << "-0.6667   1.0000   0.3333\n1.3333  -1.0000  -0.6667\n-1.0000   1.0000   1.0000 " << endl;
 
-	inputs[0] = 0;
-	inputs[1] = -0.5;
-	expected_outputs[0] = -1;
-	expected_outputs[1] = 1;
-	expected_outputs[2] = -1;
-
-	inputs[2] = 0.5;
-	inputs[3] = 0.375;
-	expected_outputs[3] = -1;
-	expected_outputs[4] = -1;
-	expected_outputs[5] = 1;
-
-	inputs[4] = -0.625;
-	inputs[5] = 0.25;
-	expected_outputs[6] = 1;
-	expected_outputs[7] = -1;
-	expected_outputs[8] = -1;
-
-	//    cout << "DEBUG Exepected_ouputs given to fit classification" << endl;
-	//    for(int i=0; i<outputNeuronsSize*3; i++){
-	//        cout << "DEBUG expected_ouputs[" << i << "] >" << expected_outputs[i] << "<" << endl;
+	//    int inputSize = 2;
+	//    int outputNeuronsSize = 3;
+	//    int iterationsMax = 10000;
+	//    double step(0.1);
+	//
+	//    int modelSize = (inputSize+1) * outputNeuronsSize;
+	//    double* model = linear_create_model(inputSize,outputNeuronsSize);
+	//    showModel(model, modelSize);
+	//
+	//    double* inputs = new double[inputSize * 3];
+	//    double* expected_outputs = new double[outputNeuronsSize*3];
+	//
+	//    inputs[0] = 0;
+	//    inputs[1] = -0.5;
+	//    expected_outputs[0] = -1;
+	//    expected_outputs[1] = 1;
+	//    expected_outputs[2] = -1;
+	//
+	//    inputs[2] = 0.5;
+	//    inputs[3] = 0.375;
+	//    expected_outputs[3] = -1;
+	//    expected_outputs[4] = -1;
+	//    expected_outputs[5] = 1;
+	//
+	//    inputs[4] = -0.625;
+	//    inputs[5] = 0.25;
+	//    expected_outputs[6] = 1;
+	//    expected_outputs[7] = -1;
+	//    expected_outputs[8] = -1;
+	//
+	////    cout << "DEBUG Exepected_ouputs given to fit classification" << endl;
+	////    for(int i=0; i<outputNeuronsSize*3; i++){
+	////        cout << "DEBUG expected_ouputs[" << i << "] >" << expected_outputs[i] << "<" << endl;
+	////    }
+	//    linear_fit_classification_rosenblatt(model,inputs,inputSize*3,inputSize, expected_outputs, outputNeuronsSize, iterationsMax, step );
+	//
+	//    double* oneInput = new double[inputSize];
+	//    double* oneOutput = new double[outputNeuronsSize];
+	//
+	//    oneInput[0] = 0;
+	//    oneInput[1] = -0.5;
+	//    linear_classify(model, oneInput, inputSize, oneOutput, outputNeuronsSize);
+	//    for(int i=0; i< outputNeuronsSize;i++){
+	//        cout << "output[" << i << "] >" << oneOutput[i] << "<"<< endl;
 	//    }
-	linear_fit_classification_rosenblatt(model, inputs, inputSize * 3, inputSize, expected_outputs, outputNeuronsSize, iterationsMax, step);
-
-	double* oneInput = new double[inputSize];
-	double* oneOutput = new double[outputNeuronsSize];
-
-	oneInput[0] = 0;
-	oneInput[1] = -0.5;
-	linear_classify(model, oneInput, inputSize, oneOutput, outputNeuronsSize);
-	for (int i = 0; i< outputNeuronsSize; i++) {
-		cout << "output[" << i << "] >" << oneOutput[i] << "<" << endl;
-	}
-	oneInput[0] = 0.5;
-	oneInput[1] = 0.375;
-	linear_classify(model, oneInput, inputSize, oneOutput, outputNeuronsSize);
-	for (int i = 0; i< outputNeuronsSize; i++) {
-		cout << "output[" << i << "] >" << oneOutput[i] << "<" << endl;
-	}
-	oneInput[0] = -0.625;
-	oneInput[1] = 0.25;
-	linear_classify(model, oneInput, inputSize, oneOutput, outputNeuronsSize);
-	for (int i = 0; i< outputNeuronsSize; i++) {
-		cout << "output[" << i << "] >" << oneOutput[i] << "<" << endl;
-	}
-	//// BASE APPRENTISSAGE
-	//baseTest(inputs, expected_outputs, inputSize);
-	///*
-	//showInputs(inputs, inputSize*20);
-	//*/
-
-
-
-	showModel(model, modelSize);
+	//    oneInput[0] = 0.5;
+	//    oneInput[1] = 0.375;
+	//    linear_classify(model, oneInput, inputSize, oneOutput, outputNeuronsSize);
+	//    for(int i=0; i< outputNeuronsSize;i++){
+	//        cout << "output[" << i << "] >" << oneOutput[i] << "<"<< endl;
+	//    }
+	//    oneInput[0] = -0.625;
+	//    oneInput[1] = 0.25;
+	//    linear_classify(model, oneInput, inputSize, oneOutput, outputNeuronsSize);
+	//    for(int i=0; i< outputNeuronsSize;i++){
+	//        cout << "output[" << i << "] >" << oneOutput[i] << "<"<< endl;
+	//    }
+	//    //// BASE APPRENTISSAGE
+	//    //baseTest(inputs, expected_outputs, inputSize);
+	//    ///*
+	//    //showInputs(inputs, inputSize*20);
+	//    //*/
+	//
+	//
+	//
+	//    showModel(model, modelSize);
 
 	//return 0;
 }
