@@ -9,13 +9,14 @@ public class MainScript : MonoBehaviour {
 	public static int inputSize = 2;
 
     public static int iterationNumber = 100000;
-	public static double step = 0.01f;
-	public static double learning_rate = 0.5;
+	public static double step = 0.3f;
+	public static double learning_rate = 0.5f;
 
     public Transform[] baseApprentissage;
     public Transform[] baseTest;
 
-    public static bool testWithColor = true;
+	public static string nbColorButtonString = "Change to 2 colors";
+	public static bool testWithColor = true;
     public static string colorButtonString = "Use height";
     public Color marblecolor;
 	public Color blue = Color.blue;
@@ -25,9 +26,11 @@ public class MainScript : MonoBehaviour {
 	public static int colorRed = 1;
 	public static int colorGreen = 2;
 
+	public static int nbColor = 3;
+
 	public static bool transformInput = false;
 	public static string transformButtonString = "Use Transformation";
-	public static int nbOutputNeuron = 3;
+	public static int nbOutputNeuron = 6;
 
 	public Camera cam1;
 	public Camera cam2;
@@ -52,10 +55,16 @@ public class MainScript : MonoBehaviour {
 
 		step = GUI.VerticalScrollbar(new Rect(1000, 25, 10, 500), (float) step, 0.08F, 1.08F, 0.0F);
 		iterationNumber = (int) GUI.VerticalScrollbar(new Rect(1025, 25, 250, 500), iterationNumber, 0.1F, 10000, 0);
+		nbOutputNeuron = (int) GUI.HorizontalScrollbar(new Rect(15, 420, 175, 50), nbOutputNeuron, 0.1F, 1, 20);
+		GUI.TextArea (new Rect (15, 440, 175, 90), "Si vous touchez au nombre de neurones de sortie, effacez le model puis recréez en un nouveau. Merci");
+		GUI.TextArea (new Rect (950, 475, 40, 30), " step");
+		GUI.TextArea (new Rect (1050, 475, 75, 30), "iterations");
+
+
 
 		if (GUILayout.Button("Create Model")) {
 			if (!_isRunning) {
-				create_model();
+				create_linear_model();
 			}
 		}
 		if (GUILayout.Button("Erase Model")) {
@@ -63,13 +72,6 @@ public class MainScript : MonoBehaviour {
 				erase_model();
 			}
 		}
-		if (GUILayout.Button("Linear_fit_classification_hebb")){
-			if (!_isRunning)
-			{
-				linear_fit_classification_hebb();
-			}
-		}
-
 		if (GUILayout.Button("Linear_fit_classification_rosenblatt")) {
 			if (!_isRunning) {
 				StartCoroutine ("linear_fit_classification_rosenblatt");
@@ -143,14 +145,22 @@ public class MainScript : MonoBehaviour {
 				}
 			}
 		}
-		if (GUILayout.Button("Test")) {
-			if (!_isRunning) {
-				generateRegression ();
-
-			}
-		}
 		GUILayout.TextArea ("     step >" + step + "<");
 		GUILayout.TextArea ("     iterations >" + iterationNumber + "<");
+		GUILayout.TextArea ("     size of input >" + inputSize + "<");
+		GUILayout.TextArea ("     size of output >" + nbOutputNeuron + "<");
+		if (testWithColor) {
+			if (GUILayout.Button (nbColorButtonString)) {
+				if (nbColor == 2) {
+					nbColor = 3;
+					nbColorButtonString = "Change to 2 colors";
+				} else {
+					nbColor = 2;
+					nbColorButtonString = "Change to 3 colors";
+				}
+			}
+		}
+
 		// Fin de la liste de composants visuels verticale
 		GUILayout.EndVertical();
 	}
@@ -159,27 +169,16 @@ public class MainScript : MonoBehaviour {
 			data.position = new Vector3(data.position.x, 5, data.position.z);
 		}
 	}
-	public void create_model(){
+	public void create_linear_model(){
 		_isRunning = true;
 		if (model == System.IntPtr.Zero) {
 			model = LibWrapperMachineLearning.linear_create_model (inputSize, nbOutputNeuron);
-			Debug.Log ("Model created !" + model);
+			Debug.Log ("Model created !");
 		} else {
 			Debug.Log ("A model has been created, please delete it if you want to create another one ");
 		}
 		_isRunning = false;
 	}	
-
-//	public void create_model(int nbCouche){
-//		_isRunning = true;
-//		if (model == System.IntPtr.Zero) {
-//			model = LibWrapperMachineLearning.linear_create_model (inputSize, nbOutputNeuron);
-//			Debug.Log ("Model created !" + model);
-//		} else {
-//			Debug.Log ("A model has been created, please delete it if you want to create another one ");
-//		}
-//		_isRunning = false;
-//	}
 	public void erase_model(){
 		_isRunning = true;
 		if (model != System.IntPtr.Zero) {
@@ -195,52 +194,30 @@ public class MainScript : MonoBehaviour {
 		_isRunning = true;
 		if (model != System.IntPtr.Zero) {
 			generateBaseTest (baseTest, 10);
-			Debug.Log ("génère une base de test de 10x10 boules");
-			Debug.Log ("Classify baseTest");
+			Debug.Log ("Classification with a test base of " + baseTest.Length + " marbles");
 			double[] input = new double[inputSize];
 			double[] outputs = new double[nbOutputNeuron];
 			foreach(var unityObject in baseTest){
 				getInput (unityObject, input);
-
-
                 if (testWithColor) {
-
 					LibWrapperMachineLearning.linear_classify (model, input, inputSize, outputs, nbOutputNeuron);
-					int n = 0;
-					foreach (var output in outputs) {
-						Debug.Log ("output[" + n + "] >" + output + "<");
-						n++;
-					}
 					for (int i = 0; i < outputs.Length; i++) {
 						if(outputs[i] == 1){
-							if(i == colorBlue){
-								Debug.Log ("passe la1");
+							if(i%nbColor == colorBlue){
 								unityObject.GetComponent<Renderer>().material.color = UnityEngine.Color.blue;
-							}else if(i == colorRed){
-								Debug.Log ("passe la2");
-
+							}else if(i%nbColor == colorRed){
 								unityObject.GetComponent<Renderer>().material.color = UnityEngine.Color.red;
 							}else{
-								Debug.Log ("passe la3");
-
 								unityObject.GetComponent<Renderer>().material.color = UnityEngine.Color.green;
 							}
-			                    unityObject.position = new Vector3(unityObject.position.x, 0, unityObject.position.z);
+							// Just to position the balls somewhere we can see them
+		                    unityObject.position = new Vector3(unityObject.position.x, 2, unityObject.position.z);
 						}
 					}
-
-
-
-//					if((float) == 1) {
-//						unityObject.GetComponent<Renderer>().material.color = UnityEngine.Color.red;
-//                    } else {
-//						unityObject.GetComponent<Renderer>().material.color = UnityEngine.Color.blue;
-//                    }
                 }
                 else {
 					unityObject.position = new Vector3(unityObject.position.x, (float)LibWrapperMachineLearning.linear_classify(model, input, inputSize, outputs, nbOutputNeuron), unityObject.position.z);
                 }
-
 			}
 		} else {
 			Debug.Log ("Aucun modèle en mémoire");
@@ -298,43 +275,14 @@ public class MainScript : MonoBehaviour {
 		}
 		_isRunning = false;
 	}	
-
-	public void linear_fit_classification_hebb(){
-		_isRunning = true;
-		if (model != System.IntPtr.Zero) {
-			Debug.Log ("linear_fit_classification_hebb");
-			double[] inputs = new double[inputSize * baseApprentissage.Length];
-			getInputs (baseApprentissage, inputs);
-
-			int learningResponse;
-
-			Debug.Log("Start learning classification hebb with baseApprentissage...");
-			learningResponse = LibWrapperMachineLearning.linear_fit_classification_hebb(model, inputs, inputSize * baseApprentissage.Length, inputSize, iterationNumber, step);
-			if(learningResponse == -1){
-				Debug.Log("C++ >Aucun modèle en mémoire<");
-			}else if(learningResponse == 0){
-				Debug.Log("Learning stop by iterations");
-			} else{
-				Debug.Log("Learning stop beacause all case were correctly classified");
-			}
-		} else {
-			Debug.Log ("Aucun modèle en mémoire");
-		}
-		_isRunning = false;
-	}
-
-
 	public void linear_fit_classification_rosenblatt(){
 		_isRunning = true;
 		if (model != System.IntPtr.Zero) {
-			Debug.Log ("linear_fit_classification_rosenblatt");
+			Debug.Log ("linear_fit_classification_rosenblatt with a learning base of " + baseApprentissage.Length + " marbles");
 			double[] inputs = new double[inputSize * baseApprentissage.Length];
 			double[] outputs = new double[baseApprentissage.Length * nbOutputNeuron];
 			getInputsOutputs (baseApprentissage, inputs, outputs, nbOutputNeuron);
 			int learningResponse;
-			foreach(var outp in outputs){
-				Debug.Log("outputgiven>"+outp);
-			}
 			learningResponse = LibWrapperMachineLearning.linear_fit_classification_rosenblatt(model, inputs, inputSize * baseApprentissage.Length, inputSize, outputs, nbOutputNeuron, iterationNumber, step);
 			if(learningResponse == -1){
 				Debug.Log("C++ >Aucun modèle en mémoire<");
@@ -377,46 +325,32 @@ public class MainScript : MonoBehaviour {
 		int i = 0, j = 0;
 		foreach (var data in objetsUnity)
 		{
-			Debug.Log ("DEBUG 1 ><");
 			inputs[i] = data.position.x;
 			i++;
 			inputs[i] = data.position.z;
 			i++;
-			int k;
 			if (testWithColor) {
 				if (data.GetComponent<Renderer> ().material.color == UnityEngine.Color.blue) {
-					Debug.Log ("DEBUG 2 ><");
-					for (k = 0; k < outputSize; k++) {
-						Debug.Log ("DEBUG 3 k>"+k+"<");
-						if (k == colorBlue) {
-							Debug.Log ("DEBUG 4 jk>"+j+k+"<");
+					for (int k = 0; k < nbOutputNeuron; k++) {
+						if (k % nbColor == colorBlue) {
 							outputs [j+k] = 1;
 						} else {
 							outputs [j+k] = -1;
-							Debug.Log ("DEBUG 5 jk>"+j+k+"<");
 						}
 					}
 				} else if(data.GetComponent<Renderer> ().material.color == UnityEngine.Color.red){
-					Debug.Log ("DEBUG 5bis ><");
-					for (k = 0; k < outputSize; k++) {
-						Debug.Log ("DEBUG 6 k>"+k+"<");
-						if (k == colorRed) {
-							Debug.Log ("DEBUG 7 jk>"+j+k+"<");
+					for (int k = 0; k < nbOutputNeuron; k++) {
+						if (k % nbColor == colorRed) {
 							outputs [j+k] = 1;
-						} else {
-							Debug.Log ("DEBUG 8 jk>"+j+k+"<");
+						} else {					
 							outputs [j+k] = -1;
 						}
 					}
 				} else{
-					Debug.Log ("DEBUG 9 ><");
-					for (k = 0; k < outputSize; k++) {
-						Debug.Log ("DEBUG 10 k>"+k+"< colorGreen>"+colorGreen+"< ==>"+(k == colorGreen)+"<");
-						if (k == colorGreen) {
-							Debug.Log ("DEBUG 11 jk>"+j+k+"<");
+					for (int k = 0; k < nbOutputNeuron; k++) {
+						if (k % nbColor == colorGreen) {
 							outputs [j+k] = 1;
 						} else {
-							Debug.Log ("DEBUG 13 jk>"+j+k+"<");
 							outputs [j+k] = -1;
 						}
 					}
@@ -424,7 +358,7 @@ public class MainScript : MonoBehaviour {
 			} else {
 				outputs [j] = data.position.y;
 			}
-			j+=outputSize;
+			j += outputSize;
 		}
 		if (transformInput) {
 			transformInputs (inputs);
@@ -432,19 +366,17 @@ public class MainScript : MonoBehaviour {
 	}
 
 	// Transforme les inputs pour certains cas non linérement séparable mais séparables par leur carré
-	public void transformInputs(double[] inputs){
+	private void transformInputs(double[] inputs){
 		for (int i = 0; i < inputs.Length; i++) {
 			inputs[i] *= inputs[i];
 		}
 		for (int i = 0; i < inputs.Length; i++) {
 			inputs[i] *= inputs[i];
 		}
-
-
 	}
 
 	// Use the min / max method to serialise inputs
-	public int serialiseData(double[] data){
+	private int serialiseData(double[] data){
 		double minX = data[0], maxX = data[0];
 		double minZ = data[1], maxZ = data[1];
 		for (int i = 2; i < data.Length; i += 2) {
@@ -465,7 +397,7 @@ public class MainScript : MonoBehaviour {
 		return 0;
 	}
 	// Use the min / max method to serialise inputs
-	public int serialiseData2(double[] data){
+	private int serialiseData2(double[] data){
 		double minX = data[0], maxX = data[0];
 		for (int i = 1; i < data.Length; i ++) {
 			if(data[i] < minX) { minX = data[i]; }
@@ -477,7 +409,7 @@ public class MainScript : MonoBehaviour {
 		return 0;
 	}
 	// TEST FUNCTION		
-	public void test(){
+	private void test(){
 		_isRunning = true;
 		Debug.Log("LAUNCHING TEST FUNCTION");
 
@@ -543,7 +475,7 @@ public class MainScript : MonoBehaviour {
     }
 	// Place a square with equally reparted marbles 
 	// separation gives the number of marble by size f the square
-	public void generateBaseTest(Transform[] testObject, int separation){
+	private void generateBaseTest(Transform[] testObject, int separation){
 		if (testObject.Length != separation * separation) {
 			Debug.Log ("Le nombre d'objet envoyé ne correspond pas à la séparation demandée");
 		} else {
@@ -561,16 +493,15 @@ public class MainScript : MonoBehaviour {
 					x += 2.0f / separation;
 				}
 			}
-			Debug.Log ("Les boules de test sont placé selon une sépartion de " + separation + "x" + separation + " sur les axes (x;z)");
 		}
 	}
 
 	System.Random rdm = new System.Random ();
-	float generateRdm(double a, double b){
+	private float generateRdm(double a, double b){
 		return (float) (a + rdm.NextDouble () * (b - a));
 	}
 
-	public void generateLinear(){
+	private void generateLinear(){
 		foreach (var data in baseApprentissage) {
 			var z = generateRdm (-1, 1);
 			if (z < 0) {
@@ -583,7 +514,7 @@ public class MainScript : MonoBehaviour {
 		}
 	}
 
-	public void generateRegression(){
+	private void generateRegression(){
 		float nbBallPerCote = 7.0f;
 		float step = (2.0f / nbBallPerCote);
 		if (baseApprentissage.Length == nbBallPerCote * nbBallPerCote) {

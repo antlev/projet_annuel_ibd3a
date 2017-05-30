@@ -142,15 +142,11 @@ int linear_fit_classification_rosenblatt(double *model, double *inputs, int inpu
 					if (!outputIsGood[outputIterator]) {
 						//                        cout << "DEBUG modifying weight affecting output nb >" << outputIterator << "< " << endl;
 						// We adapt every weight of our Perceptron using the Rsoenblatt formula
-						for (int modelIterator = outputIterator; modelIterator < (inputSize + 1)*outputSize; modelIterator += outputSize) {
-							if (modelIterator < outputSize) {
-								cout << "modelIterator >" << modelIterator << "< model[" << modelIterator << "]>" << model[modelIterator] << "<" << endl;
-								model[modelIterator] += step * outputError[outputIterator] * 1; // bias neuron
-							}
-							else {
-								cout << "modelIterator >" << modelIterator << "< model[" << modelIterator << "]>" << model[modelIterator] << "< outputIterator >" << outputIterator << "< outputError[outputIterator] >" << outputError[outputIterator] << "< modelIterator - outputIterator >" << modelIterator - outputIterator << "< oneInput[modelIterator - outputIterator] >" << oneInput[modelIterator - outputIterator] << "< " << endl;
-								model[modelIterator] += step * outputError[outputIterator] * oneInput[modelIterator - outputIterator];
-							}
+						for (int modelIterator = outputIterator, inputIterator = 0; modelIterator < (inputSize + 1)*outputSize; modelIterator += outputSize, inputIterator++) {
+
+							cout << "modelIterator >" << modelIterator << "< model[" << modelIterator << "]>" << model[modelIterator] << "< outputIterator >" << outputIterator << "< outputError[outputIterator] >" << outputError[outputIterator] << "< inputIterator >" << inputIterator << "< oneInput[inputIterator] >" << oneInput[inputIterator] << "< " << endl;
+							model[modelIterator] += step * outputError[outputIterator] * oneInput[inputIterator];
+
 						}
 					}
 					else {
@@ -261,7 +257,7 @@ int main() {
 //---------------------------------------------------------------------------------------------------------------------------------------------------------
 // Function called by C# giving all inputs annd outputs of a database to learn regression
 int linear_fit_regression(double *model, double *inputs, int inputsSize, int inputSize, double *outputs, int nb_iterations_max, double learning_rate) {
-	if (model == nullptr) {
+	if (model == NULL) {
 		return -1;
 	}
 	else {
