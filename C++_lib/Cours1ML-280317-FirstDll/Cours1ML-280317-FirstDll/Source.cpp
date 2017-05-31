@@ -161,41 +161,41 @@ int linear_fit_classification_rosenblatt(double *model, double *inputs, int inpu
 		}
 	}
 }
-Eigen::MatrixXd *linear_create_model_regression(int inputDimension, int outputDimension) {
+Eigen::MatrixXd linear_create_model_regression(int inputDimension, int outputDimension) {
 	assert(inputDimension > 0);
 	assert(outputDimension > 0);
 	Eigen::MatrixXd model((inputDimension + 1) * outputDimension, 1);
 	for (int i = 0; i < (inputDimension + 1) * outputDimension; ++i) {
-		model(((float)rand()) / ((float)RAND_MAX) * 2.0 - 1.0, 1);
+		model(((float)rand()) / ((float)RAND_MAX) * 2.0 - 1.0, 0);
 	}
-	return &model;
+	return model;
 };
 
 Eigen::MatrixXd pinv(Eigen::MatrixXd X) {
 	Eigen::MatrixXd X_Transp = X.transpose();
 	return (((X_Transp * X).inverse()) * X_Transp);
 }
-Eigen::MatrixXd* linear_fit_regression(Eigen::MatrixXd* model, double *inputs, int inputsSize, int inputSize, double *expectedOutputs, int outputSize) {
-	addBias(inputs, inputSize*, inputsSize*);
+void linear_fit_regression(Eigen::MatrixXd* model, double *inputs, int inputsSize, int inputSize, double *expectedOutputs, int outputSize) {
+	addBias(inputs, &inputsSize, inputSize);
 	// Build X and Y
-	Eigen::MatrixXd X(inputSize, inputsSize / inputSize);
+	int nbInput = inputsSize / inputSize;
+	Eigen::MatrixXd X(inputSize, nbInput);
 	Eigen::MatrixXd Y(outputSize, 1);
-	for (int i = 0; i < inputsSize/inputSize; i++) {
-		for (j = 0; j < inputSize; j++) {
+	for (int i = 0; i < nbInput; i++) {
+		for (int j = 0; j < inputSize; j++) {
 			X(j, i) = inputs[i*inputSize + j];
 		}
 	}
-	for (int i = 0; i < outputSize; i++) {
-		Y(i, 1) = expectedOutputs[i];
+	for (int i = 0; i < outputSize*nbInput; i++) {
+		Y(i, 0) = expectedOutputs[i];
 	}
 	*model = learnRegression(X, Y);
-	return model;
 }
 
-void addBias(double *inputs, int* inputsSize, int* inputSize) {
-	double* tempInputs = new double[inputsSize + inputsSize / inputSize];
-	for (i = 0; i < inputsSize + inputsSize / inputSize; i++) {
-		if (i%(inputSize+1) == 0) {
+void addBias(double *inputs, int* inputsSize, int inputSize) {
+	double* tempInputs = new double[*inputsSize + *inputsSize / inputSize];
+	for (int i = 0; i < (*inputsSize + (*inputsSize / inputSize)); i++) {
+		if (i % (inputSize + 1) == 0) {
 			tempInputs[i] = 1;
 			i++;
 			tempInputs[i] = inputs[i];
@@ -203,30 +203,29 @@ void addBias(double *inputs, int* inputsSize, int* inputSize) {
 		else {
 			tempInputs[i] = inputs[i];
 		}
-		inputsSize = inputsSize + inputsSize / inputSize;
-		*inputSize++;
+		*inputsSize += (*inputsSize / inputSize);
 	}
 }
-Eigen::MatrixXd* learnRegression(Eigen::MatrixXd* X, Eigen::MatrixXd* Y) {
-	return &(pinv(X) * Y)
+Eigen::MatrixXd learnRegression(Eigen::MatrixXd X, Eigen::MatrixXd Y) {
+	return pinv(X) * Y;
 }
-void linearPredict(Eigen::MatrixXd* model, double* input, int inputSize, double* output, int outputDimension) {
-	assert(model != NULL);
+void linearPredict(Eigen::MatrixXd model, double* input, int inputSize, double* output, int outputDimension) {
+	//	assert(model != NULL);
 	assert(input != NULL);
 	assert(inputSize > 0);
 	assert(output != NULL);
 	assert(outputDimension > 0);
-	//double sum_weigths_inputs;
-	//double* inputWithBias = addBias(input, inputSize);
-	//for (int outputIterator = 0; outputIterator < outputDimension; outputIterator++) {
-	//	//        cout << "Debug outputIterator >" << outputIterator << "< " << endl;
+	double sum_weigths_inputs;
+	double* inputWithBias = addBias(input, inputSize);
+	for (int outputIterator = 0; outputIterator < outputDimension; outputIterator++) {
+		//        cout << "Debug outputIterator >" << outputIterator << "< " << endl;
 
-	//	sum_weigths_inputs = 0;
-	//	for (int modelIterator = outputIterator, inputIterator = 0; modelIterator < (inputSize + 1)*outputDimension && inputIterator < inputSize + 1; inputIterator++, modelIterator += outputDimension) {
-	//		//            cout << "Debug modelIterator >" << modelIterator << "< inputIterator >" << inputIterator << "< " << endl;
-	//		sum_weigths_inputs += model[modelIterator] * inputWithBias[inputIterator];
-	//	}
-	//	output[outputIterator] = (sum_weigths_inputs >= 0 ? 1 : -1);
+		sum_weigths_inputs = 0;
+		for (int modelIterator = outputIterator, inputIterator = 0; modelIterator < (inputSize + 1)*outputDimension && inputIterator < inputSize + 1; inputIterator++, modelIterator += outputDimension) {
+			//            cout << "Debug modelIterator >" << modelIterator << "< inputIterator >" << inputIterator << "< " << endl;
+			sum_weigths_inputs += model(modelIterator, 0) * inputWithBias[inputIterator];
+		}
+		output[outputIterator] = sum_weigths_inputs;
 	}
 }
 int main() {
@@ -234,89 +233,103 @@ int main() {
 	time_t now;
 	time(&now);
 	srand((unsigned int)now);
-	    Eigen::MatrixXd A;
-	    A << 1, 2, 1,
-	            2, 1, 0,
-	            -1, 1, 2;
-	    cout << "Here is the matrix A:\n" << A << endl;
-	    cout << "The transposé of A is \n" << A.transpose() << endl;
-	    A.transpose();
-	
-	    cout << "Here is the matrix A:\n" << A << endl;
-	    cout << "Here is the pinv of A:\n" << pinv(A) << endl;
-	
-	    cout << "Expected Result : " << endl;
-	
-	    cout << "-0.6667   1.0000   0.3333\n1.3333  -1.0000  -0.6667\n-1.0000   1.0000   1.0000 " << endl;
+	/*	Eigen::MatrixXd A(3,3);
+	A(0,0) = 1;
+	A(0,1) = 2;
+	A(0,2) = 1;
+	A(1,0) = 2;
+	A(1,1) = 1;
+	A(1,2) = 0;
+	A(2,0) = -1;
+	A(2,1) = 1;
+	A(2,2) = 2;
 
-	//int inputSize = 2;
-	//int outputNeuronsSize = 3;
-	//int iterationsMax = 10000;
-	//double step(0.1);
+	cout << "Here is the matrix A:\n" << A << endl;
+	cout << "The transposé of A is \n" << A.transpose() << endl;
+	A.transpose();
 
-	//int modelSize = (inputSize + 1) * outputNeuronsSize;
-	//double* model = linear_create_model(inputSize, outputNeuronsSize);
+	cout << "Here is the matrix A:\n" << A << endl;
+	cout << "Here is the pinv of A:\n" << pinv(A) << endl;
+
+	cout << "Expected Result : " << endl;
+
+	cout << "-0.6667   1.0000   0.3333\n1.3333  -1.0000  -0.6667\n-1.0000   1.0000   1.0000 " << endl;*/
+
+
+	int inputSize = 2;
+	int outputNeuronsSize = 3;
+	int iterationsMax = 10000;
+	double step(0.1);
+
+	int modelSize = (inputSize + 1) * outputNeuronsSize;
+	//	double* model = linear_create_model(inputSize, outputNeuronsSize);
+	//	showModel(model, modelSize);
+
+	double* inputs = new double[inputSize * 3];
+	double* expected_outputs = new double[outputNeuronsSize * 3];
+
+	inputs[0] = 0;
+	inputs[1] = -0.5;
+	expected_outputs[0] = 0.25;
+	expected_outputs[1] = 0.5;
+	expected_outputs[2] = -1;
+
+	inputs[2] = 0.5;
+	inputs[3] = 0.375;
+	expected_outputs[3] = 0.6;
+	expected_outputs[4] = -0.3;
+	expected_outputs[5] = 0.2;
+
+	inputs[4] = -0.625;
+	inputs[5] = 0.25;
+	expected_outputs[6] = 0.1;
+	expected_outputs[7] = -0.1;
+	expected_outputs[8] = -0.8;
+
+	cout << "DEBUG Exepected_ouputs given to fit classification" << endl;
+	for (int i = 0; i<outputNeuronsSize * 3; i++) {
+		cout << "DEBUG expected_ouputs[" << i << "] >" << expected_outputs[i] << "<" << endl;
+	}
+	//	linear_fit_classification_rosenblatt(model, inputs, inputSize * 3, inputSize, expected_outputs, outputNeuronsSize, iterationsMax, step);
+
+	Eigen::MatrixXd model = linear_create_model_regression(2, 3);
+	linear_fit_regression(&model, inputs, inputSize * 3, inputSize, expected_outputs, 3);
+
+	double* oneInput = new double[inputSize];
+	double* oneOutput = new double[outputNeuronsSize];
+
+	oneInput[0] = 0;
+	oneInput[1] = -0.5;
+	//	linear_classify(model, oneInput, inputSize, oneOutput, outputNeuronsSize);
+	//	linearPredict(model, oneInput, inputSize, oneOutput, outputNeuronsSize);
+	//	for (int i = 0; i< outputNeuronsSize; i++) {
+	//		cout << "output[" << i << "] >" << oneOutput[i] << "<" << endl;
+	//	}
+	//	oneInput[0] = 0.5;
+	//	oneInput[1] = 0.375;
+	////	linear_classify(model, oneInput, inputSize, oneOutput, outputNeuronsSize);
+	//	linearPredict(model, oneInput, inputSize, oneOutput, outputNeuronsSize);
+	//	for (int i = 0; i< outputNeuronsSize; i++) {
+	//		cout << "output[" << i << "] >" << oneOutput[i] << "<" << endl;
+	//	}
+	//	oneInput[0] = -0.625;
+	//	oneInput[1] = 0.25;
+	////	linear_classify(model, oneInput, inputSize, oneOutput, outputNeuronsSize);
+	//	linearPredict(model, oneInput, inputSize, oneOutput, outputNeuronsSize);
+	//	for (int i = 0; i< outputNeuronsSize; i++) {
+	//		cout << "output[" << i << "] >" << oneOutput[i] << "<" << endl;
+	//	}
+	// BASE APPRENTISSAGE
+	//	baseTest(inputs, expected_outputs, inputSize);
+	/*
+	showInputs(inputs, inputSize*20);
+	*/
+
+
+
 	//showModel(model, modelSize);
 
-	//double* inputs = new double[inputSize * 3];
-	//double* expected_outputs = new double[outputNeuronsSize * 3];
-
-	//inputs[0] = 0;
-	//inputs[1] = -0.5;
-	//expected_outputs[0] = -1;
-	//expected_outputs[1] = 1;
-	//expected_outputs[2] = -1;
-
-	//inputs[2] = 0.5;
-	//inputs[3] = 0.375;
-	//expected_outputs[3] = -1;
-	//expected_outputs[4] = -1;
-	//expected_outputs[5] = 1;
-
-	//inputs[4] = -0.625;
-	//inputs[5] = 0.25;
-	//expected_outputs[6] = 1;
-	//expected_outputs[7] = -1;
-	//expected_outputs[8] = -1;
-
-	//    cout << "DEBUG Exepected_ouputs given to fit classification" << endl;
-	//    for(int i=0; i<outputNeuronsSize*3; i++){
-	//        cout << "DEBUG expected_ouputs[" << i << "] >" << expected_outputs[i] << "<" << endl;
-	//    }
-	//linear_fit_classification_rosenblatt(model, inputs, inputSize * 3, inputSize, expected_outputs, outputNeuronsSize, iterationsMax, step);
-
-	//double* oneInput = new double[inputSize];
-	//double* oneOutput = new double[outputNeuronsSize];
-
-	//oneInput[0] = 0;
-	//oneInput[1] = -0.5;
-	//linear_classify(model, oneInput, inputSize, oneOutput, outputNeuronsSize);
-	//for (int i = 0; i< outputNeuronsSize; i++) {
-	//	cout << "output[" << i << "] >" << oneOutput[i] << "<" << endl;
-	//}
-	//oneInput[0] = 0.5;
-	//oneInput[1] = 0.375;
-	//linear_classify(model, oneInput, inputSize, oneOutput, outputNeuronsSize);
-	//for (int i = 0; i< outputNeuronsSize; i++) {
-	//	cout << "output[" << i << "] >" << oneOutput[i] << "<" << endl;
-	//}
-	//oneInput[0] = -0.625;
-	//oneInput[1] = 0.25;
-	//linear_classify(model, oneInput, inputSize, oneOutput, outputNeuronsSize);
-	//for (int i = 0; i< outputNeuronsSize; i++) {
-	//	cout << "output[" << i << "] >" << oneOutput[i] << "<" << endl;
-	//}
-	//// BASE APPRENTISSAGE
-	//baseTest(inputs, expected_outputs, inputSize);
-	///*
-	//showInputs(inputs, inputSize*20);
-	//*/
-
-
-
-	//showModel(model, modelSize);
-
-	return 0;
+	return 1;
 }
 
 //////////////// PERCEPTRON MULTI-COUCHES ////////////////////////
