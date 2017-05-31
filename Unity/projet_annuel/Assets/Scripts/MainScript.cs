@@ -55,8 +55,11 @@ public class MainScript : MonoBehaviour {
 
 		step = GUI.VerticalScrollbar(new Rect(1000, 25, 10, 500), (float) step, 0.08F, 1.08F, 0.0F);
 		iterationNumber = (int) GUI.VerticalScrollbar(new Rect(1025, 25, 250, 500), iterationNumber, 0.1F, 10000, 0);
-		nbOutputNeuron = (int) GUI.HorizontalScrollbar(new Rect(15, 420, 175, 50), nbOutputNeuron, 0.1F, 1, 20);
-		GUI.TextArea (new Rect (15, 440, 175, 90), "Si vous touchez au nombre de neurones de sortie, effacez le model puis recréez en un nouveau. Merci");
+        if (model == System.IntPtr.Zero)
+        {
+            nbOutputNeuron = (int)GUI.HorizontalScrollbar(new Rect(15, 420, 175, 50), nbOutputNeuron, 0.1F, 1, 20);
+            GUI.TextArea(new Rect(15, 440, 175, 25), "output neurons scrollbar");
+        }
 		GUI.TextArea (new Rect (950, 475, 40, 30), " step");
 		GUI.TextArea (new Rect (1050, 475, 75, 30), "iterations");
 
@@ -149,7 +152,7 @@ public class MainScript : MonoBehaviour {
 		GUILayout.TextArea ("     iterations >" + iterationNumber + "<");
 		GUILayout.TextArea ("     size of input >" + inputSize + "<");
 		GUILayout.TextArea ("     size of output >" + nbOutputNeuron + "<");
-		if (testWithColor) {
+		if (testWithColor && model == System.IntPtr.Zero) {
 			if (GUILayout.Button (nbColorButtonString)) {
 				if (nbColor == 2) {
 					nbColor = 3;
