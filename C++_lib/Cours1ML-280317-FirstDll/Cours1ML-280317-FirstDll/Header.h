@@ -32,7 +32,10 @@ extern "C" {
 // Function only used in C++
 //double learn_classification_rosenblatt(double *model, double* unInput, int inputSize, double expected_result, double step);
 int learn_classification_hebb(double *model, double *unInput, int inputSize, double step);
-double learn_regression(double *model, double expected_result, double* input, int inputSize, double learning_rate);
 void showModel(double* model, int modelSize);
-void addBias(double *inputs, int* inputsSize, int inputSize);
-Eigen::MatrixXd learnRegression(Eigen::MatrixXd X, Eigen::MatrixXd Y);
+void showInputs(double* inputs, int inputSize);
+double* addBiasToInput(double *input, int inputSize);
+double* addBiasToInputs(double *inputs, int *inputsSize, int *inputSize);
+Eigen::MatrixXd pinv(Eigen::MatrixXd X);
+void matrixToOutput(Eigen::MatrixXd outputMatrix, double* outputs, int nbData, int outputSize);
+void inputTabToMatrix(Eigen::MatrixXd* inputsMatrix, double* inputs, int inputsSize, int inputSize);
