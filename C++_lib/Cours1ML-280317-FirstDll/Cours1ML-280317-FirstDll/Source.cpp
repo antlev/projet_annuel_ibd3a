@@ -173,14 +173,23 @@ int linear_fit_classification_rosenblatt(double *model, double *inputs, int inpu
 
 
 Eigen::MatrixXd* linear_fit_regression(double *inputs, int inputsSize, int inputSize, double *expectedOutputs, int outputSize) {
+	cout << "before bias" << endl;
+	for (int i = 0; i<inputsSize; i++) {
+		cout << "inputs[" << i << "] = " << inputs[i] << endl;
+	}
 	inputs = addBiasToInputs(inputs, &inputsSize, &inputSize);
+	cout << "after bias" << endl;
+	for (int i = 0; i<inputsSize; i++) {
+		cout << "inputs[" << i << "] = " << inputs[i] << endl;
+	}
 	// Build X and Y
 	int nbInput = inputsSize / inputSize;
-	Eigen::MatrixXd X(inputSize, nbInput);
+
+	Eigen::MatrixXd X(nbInput, inputSize);
 	Eigen::MatrixXd Y(nbInput, outputSize);
 	for (int i = 0; i < nbInput; i++) {
 		for (int j = 0; j < inputSize; j++) {
-			X(j, i) = inputs[i*inputSize + j];
+			X(i, j) = inputs[i*inputSize + j];
 		}
 	}
 	for (int i = 0; i < nbInput; i++) {
@@ -198,12 +207,14 @@ double* addBiasToInputs(double *inputs, int *inputsSize, int *inputSize) {
 	int nbData = *inputsSize / *inputSize;
 	*inputsSize += nbData;
 	double* newInputs = new double[*inputsSize + nbData];
-	for (int i = 0; i < (*inputsSize); i++) {
-		if (i % (*inputSize + 1) == 0) {
-			newInputs[i] = 1;
-			i++;
+	int inputIterator = 0;
+	for (int newinputIterator = 0; newinputIterator < (*inputsSize); newinputIterator++) {
+		if (newinputIterator % (*inputSize + 1) == 0) {
+			newInputs[newinputIterator] = 1;
+			newinputIterator++;
 		}
-		newInputs[i] = inputs[i];
+		newInputs[newinputIterator] = inputs[inputIterator];
+		inputIterator++;
 	}
 	*inputSize += 1;
 	return newInputs;
@@ -217,21 +228,51 @@ void linearPredict(Eigen::MatrixXd* model, double* inputs, int inputsSize, int i
 	int nbData = inputsSize / inputSize;
 	inputs = addBiasToInputs(inputs, &inputsSize, &inputSize);
 
-	Eigen::MatrixXd inputsMatrix(nbData, inputSize);
+	Eigen::MatrixXd inputsMatrix(inputSize, nbData);
 
 	int inputIterator = 0;
 	for (int i = 0; i<nbData; i++) {
 		for (int j = 0; j<inputSize; ++j) {
-			inputsMatrix(j, i) = inputs[inputIterator];
+			inputsMatrix(i, j) = inputs[inputIterator];
 			inputIterator++;
 		}
 	}
-	Eigen::MatrixXd outputMatrix(outputSize, nbData);
+	// Eigen::MatrixXd outputMatrix(outputSize, nbData);
 	// Calcul de l'output
-	outputMatrix = (*model).transpose() * inputsMatrix;
+	Eigen::MatrixXd outputMatrix = (*model).transpose() * inputsMatrix;
 
 	matrixToOutput(outputMatrix, outputs, nbData, outputSize);
 }
+
+
+//void test(Eigen::MatrixXd* model, double* inputs, int inputsSize, int inputSize, double* outputs, int outputSize){
+//    int nbData = inputsSize / inputSize;
+//    inputs = addBiasToInputs(inputs, &inputsSize, &inputSize);
+//
+//    // Eigen::MatrixXd inputsMatrix(inputSize, nbData);
+//
+//    // int inputIterator = 0;
+//    // for (int i = 0; i<nbData; i++) {
+//    // 	for (int j = 0; j<inputSize; ++j) {
+//    // 		inputsMatrix(i, j) = inputs[inputIterator];
+//    // 		inputIterator++;
+//    // 	}
+//    // }
+//    // Eigen::MatrixXd outputMatrix(outputSize, nbData);
+//    // Calcul de l'output
+//    //Eigen::MatrixXd outputMatrix = (*model).transpose() * inputsMatrix;
+//
+//    for(int i=0;i<nbData;i++){
+//        int sum=0;
+//        for(int j=0;j<inputsSize;j++){
+//            sum += (*model)(i,j) * inputs[i*inputsSize+j];
+//        }
+//        outputs[i] = sum;
+//    }
+//
+//
+//    // matrixToOutput(outputMatrix, outputs, nbData, outputSize);
+//}
 void inputTabToMatrix(Eigen::MatrixXd* inputsMatrix, double* inputs, int inputsSize, int inputSize) {
 	int nbData = inputsSize / inputSize;
 	int inputIterator = 0;
@@ -251,6 +292,12 @@ void matrixToOutput(Eigen::MatrixXd outputMatrix, double* outputs, int nbData, i
 		}
 	}
 }
+/*void test(Eigen::MatrixXd* model, double* input, double* output){
+Eigen::Vector3d inputVector(input[0], input[1], input[2]);
+Eigen:: outputVector(0,0,0);
+outputVector = inputVector * (*model);
+output[0] = outputVector(0,0,0);
+}*/
 int main() {
 
 	time_t now;
@@ -280,7 +327,7 @@ int main() {
 
 
 	int inputSize = 2;
-	int outputNeuronsSize = 3;
+	int outputNeuronsSize = 1;
 	int nbData = 3;
 
 	int inputsSize = inputSize * nbData;
@@ -297,26 +344,48 @@ int main() {
 
 	inputs[2] = 0.5;
 	inputs[3] = 0.375;
-	expected_outputs[3] = 0.6;
-	expected_outputs[4] = -0.3;
-	expected_outputs[5] = 0.2;
+	// expected_outputs[3] = 0.6;
+	// expected_outputs[4] = -0.3;
+	// expected_outputs[5] = 0.2;
 
 	inputs[4] = -0.625;
 	inputs[5] = 0.25;
-	expected_outputs[6] = 0.1;
-	expected_outputs[7] = -0.1;
-	expected_outputs[8] = -0.8;
+	// expected_outputs[6] = 0.1;
+	// expected_outputs[7] = -0.1;
+	// expected_outputs[8] = -0.8;
 
 	Eigen::MatrixXd* model = linear_fit_regression(inputs, inputsSize, inputSize, expected_outputs, outputNeuronsSize);
 
-	linearPredict(model, inputs, inputsSize, inputSize, outputs, outputNeuronsSize);
+	//    double* input = new double(3);
+	//    double* output = new double(1);
+	//    input[0] = 0;
+	//    input[1] = 0.5;
+	//    input[2] = 0.375;
+	//    test(model, input,  output);
+	//    cout << "res : [" << output[0] << "]" << endl;
+	//
+	//    input[0] = -0.625;
+	//    input[1] = 0.25;
+	//    input[2] = 0.375;
+	//    test(model, input,  output);
+	//    cout << "res : [" << output[0] << "]" << endl;
+	//
+	//
+	//    input[0] = 0;
+	//    input[1] = 0;
+	//    input[2] = -0.5;
+	//    test(model, input,  output);
+	//    cout << "res : [" << output[0] << "]" << endl;
 
-	for (int i = 0; i<nbData; ++i) {
-		for (int j = 0; j< outputNeuronsSize; ++j) {
-			cout << "[" << outputs[i*outputNeuronsSize + j] << "]";
-		}
-		cout << endl;
-	}
+
+	// linearPredict(model, inputs, inputsSize, inputSize, outputs, outputNeuronsSize);
+
+	//    for (int i = 0; i<nbData; ++i) {
+	//        for (int j = 0; j< outputNeuronsSize; ++j) {
+	//            cout << "[" << outputs[i*outputNeuronsSize + j] << "]";
+	//        }
+	//        cout << endl;
+	//    }
 
 
 	return 1;
@@ -397,4 +466,3 @@ int test(double* test, int testSize) {
 	}
 	return 1;
 }
-
