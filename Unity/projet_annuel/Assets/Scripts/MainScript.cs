@@ -29,8 +29,8 @@ public class MainScript : MonoBehaviour {
 
 	public static int nbColor = 3;
 
-	public static bool transformInput = false;
-	public static string transformButtonString = "Use Transformation";
+	public static int transformInput = 0;
+	public static string transformButtonString = "Use Transformation Carre";
 	public static int nbOutputNeuron = 6;
 
 	public Camera cam1;
@@ -125,16 +125,19 @@ public class MainScript : MonoBehaviour {
         {
             if (!_isRunning)
             {
-				if (transformInput)
-				{
-					transformInput = false;
-					transformButtonString = "Use Transformation";
-				}
-				else
-				{
-					transformInput = true;
+				if (transformInput == 1) {
+					transformInput = 2;
+					inputSize = 1;
 					transformButtonString = "Don't Use Transformation";
-				}            }
+				} else if (transformInput == 2) {
+					inputSize = 2;
+					transformInput = 0;
+					transformButtonString = "Use Transformation Carre";
+				} else {
+					transformInput = 1;
+					transformButtonString = "Use Transformation x*y";	
+				}
+			}
         }
         if (GUILayout.Button("Switch Cam")) {
 			if (!_isRunning) {
@@ -199,7 +202,12 @@ public class MainScript : MonoBehaviour {
 		if (model != System.IntPtr.Zero) {
 			generateBaseTest (baseTest, 10);
 			Debug.Log ("Classification with a test base of " + baseTest.Length + " marbles");
-			double[] input = new double[inputSize];
+			double[] input;
+			if (transformInput == 2) {
+				input = new double[inputSize+1];
+			} else {
+				input = new double[inputSize];
+			}
 			double[] outputs = new double[nbOutputNeuron];
 			foreach(var unityObject in baseTest){
 				getInput (unityObject, input);
@@ -261,7 +269,12 @@ public class MainScript : MonoBehaviour {
 		_isRunning = true;
 		if (model != System.IntPtr.Zero) {
 			Debug.Log ("linear_fit_classification_rosenblatt with a learning base of " + baseApprentissage.Length + " marbles");
-			double[] inputs = new double[inputSize * baseApprentissage.Length];
+			double[] inputs;
+			if (transformInput == 2) {
+				inputs = new double[(inputSize+1) * baseApprentissage.Length];
+			} else {
+				inputs = new double[inputSize * baseApprentissage.Length];
+			}
 			double[] outputs = new double[baseApprentissage.Length * nbOutputNeuron];
 			getInputsOutputs (baseApprentissage, inputs, outputs, nbOutputNeuron);
 			int learningResponse;
@@ -282,8 +295,10 @@ public class MainScript : MonoBehaviour {
 	private void getInput(Transform objetUnity, double[] input){
 		input[0] = objetUnity.position.x;
 		input[1] = objetUnity.position.z;
-		if (transformInput) {
-			transformInputs (input);
+		if (transformInput == 1) {
+			transformCarre (input);
+		} else if (transformInput == 2) {
+			transformXxY (input);
 		}
 	}
 	// Rempli le tableau input passé en paramètre avec les coordonnées x et y de l'objetsUnity
@@ -297,8 +312,10 @@ public class MainScript : MonoBehaviour {
 				inputs [i+1] = objetsUnity[i/2].position.z;
 			}
 		}
-		if (transformInput) {
-			transformInputs (inputs);
+		if (transformInput == 1) {
+			transformCarre (inputs);
+		} else if (transformInput == 2) {
+			transformXxY (inputs);
 		}
 	}
 //	// Rempli le tableau inputs passé en paramètre avec les coordonnées x et y du tableau d'objetsUnity
@@ -342,18 +359,24 @@ public class MainScript : MonoBehaviour {
 			}
 			j += outputSize;
 		}
-		if (transformInput) {
-			transformInputs (inputs);
+		if (transformInput == 1) {
+			transformCarre (inputs);
+		} else if (transformInput == 2) {
+			transformXxY (inputs);
 		}
 	}
 
 	// Transforme les inputs pour certains cas non linérement séparable mais séparables par leur carré
-	private void transformInputs(double[] inputs){
+	private void transformCarre(double[] inputs){
 		for (int i = 0; i < inputs.Length; i++) {
 			inputs[i] *= inputs[i];
 		}
-		for (int i = 0; i < inputs.Length; i++) {
-			inputs[i] *= inputs[i];
+	}
+
+	private void transformXxY(double[] x){
+		int j = 0;
+		for (int i = 0; i < x.Length/2; i++, j+=2) {
+			x[i] = x[j] * x[j+1];
 		}
 	}
 
