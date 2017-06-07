@@ -6,18 +6,19 @@ using System.Threading;
 public class MainScript : MonoBehaviour {
 
 	public static System.IntPtr model;
+	public static System.IntPtr regressionModel;
+
 	public static int inputSize = 2;
 
     public static int iterationNumber = 100000;
 	public static double step = 0.3f;
-	public static double learning_rate = 0.5f;
 
     public Transform[] baseApprentissage;
     public Transform[] baseTest;
 
 	public static string nbColorButtonString = "Change to 2 colors";
-	public static bool testWithColor = true;
-    public static string colorButtonString = "Use height";
+	public static bool testWithColor = false;
+    public static string colorButtonString = "Use color";
     public Color marblecolor;
 	public Color blue = Color.blue;
 	public Color red = Color.red;
@@ -230,52 +231,30 @@ public class MainScript : MonoBehaviour {
 
 	public void predict(){
 		_isRunning = true;
-		if (model != System.IntPtr.Zero) {
-			generateBaseTest (baseTest, 10);
-			double[] input = new double[inputSize];
-			double[] outputs = new double[baseTest.Length];
-			Debug.Log ("Starting predicting outputs of baseTest...");
-			int i = 0;
-
-
-			foreach (var data in baseTest){
-				getInput (data, input);
-				outputs[i] = LibWrapperMachineLearning.linear_predict (model, input, inputSize);
-				i++;
-
+		generateBaseTest (baseTest, 10);
+		double[] input = new double[inputSize];
+		double[] outputs = new double[1];
+		Debug.Log ("Starting predicting outputs of baseTest...");
+		foreach (var data in baseTest){
+			getInput (data, input);
+			Debug.Log ("input :" + inputSize);
+			foreach (var inp in input) {
+				Debug.Log (">" + inp + "<");
 			}
-			serialiseData2 (outputs);
-			for (i = 0; i < 100; i++) {
-
-				baseTest[i].position = new Vector3 (baseTest[i].position.x, (float)outputs [i], baseTest[i].position.z);
-
-			}
-		} else {
-			Debug.Log ("Aucun modèle en mémoire");
+			LibWrapperMachineLearning.linearPredict (regressionModel, input, inputSize,outputs,1);
+			data.position = new Vector3 (data.position.x, (float)outputs[0], data.position.z);
 		}
 		_isRunning = false;
 	}
 	public void linear_fit_regression(){
 		_isRunning = true;
-		if (model != System.IntPtr.Zero) {
 
-			Debug.Log ("linear_fit_regression");
-			double[] inputs = new double[inputSize * baseApprentissage.Length];
-			double[] outputs = new double[baseApprentissage.Length];
-			getInputsOutputs (baseApprentissage, inputs, outputs, nbOutputNeuron);
-			int learningResponse;
-			Debug.Log("Start learning regression with baseApprentissage...");
-			learningResponse = LibWrapperMachineLearning.linear_fit_regression(model, inputs, inputSize * baseApprentissage.Length, inputSize, outputs, iterationNumber, learning_rate);
-			if(learningResponse == -1){
-				Debug.Log("C++ >Aucun modèle en mémoire<");
-			}else if(learningResponse == 0){
-				Debug.Log("Learning stop by iterations");
-			} else{
-				Debug.Log("Learning stop beacause all case were correctly classified");
-			}
-		} else {
-			Debug.Log ("Aucun modèle en mémoire");
-		}
+		Debug.Log ("linear_fit_regression");
+		double[] inputs = new double[inputSize * baseApprentissage.Length];
+		double[] outputs = new double[baseApprentissage.Length];
+		getInputsOutputs (baseApprentissage, inputs, outputs, 1);
+		Debug.Log("Start learning regression with baseApprentissage...");
+		regressionModel = LibWrapperMachineLearning.linear_fit_regression(inputs, inputSize * baseApprentissage.Length, inputSize, outputs, nbOutputNeuron);		
 		_isRunning = false;
 	}	
 	public void linear_fit_classification_rosenblatt(){
