@@ -160,7 +160,7 @@ public class MainScript : MonoBehaviour {
 
 			testInputs [2] = 0;
 			testInputs [3] = 4;
-
+			 
 			testInputs [4] = 10;
 			testInputs [5] = 2;
 
@@ -233,7 +233,7 @@ public class MainScript : MonoBehaviour {
 				getInput (unityObject, input);
                 if (testWithColor) {
 					LibWrapperMachineLearning.linear_classify (model, input, inputSize, outputs, nbOutputNeuron);
-					for (int i = 0; i < outputs.Length; i++) {
+					for (int i = 0; i < nbOutputNeuron; i++) {
 						if(outputs[i] == 1){
 							if(i%nbColor == colorBlue){
 								unityObject.GetComponent<Renderer>().material.color = UnityEngine.Color.blue;
@@ -242,10 +242,10 @@ public class MainScript : MonoBehaviour {
 							}else{
 								unityObject.GetComponent<Renderer>().material.color = UnityEngine.Color.green;
 							}
-							// Just to position the balls somewhere we can see them
-		                    unityObject.position = new Vector3(unityObject.position.x, 2, unityObject.position.z);
 						}
 					}
+					// Just to position the balls somewhere we can see them
+					unityObject.position = new Vector3(unityObject.position.x, 2, unityObject.position.z);
                 }
                 else {
 					unityObject.position = new Vector3(unityObject.position.x, (float)LibWrapperMachineLearning.linear_classify(model, input, inputSize, outputs, nbOutputNeuron), unityObject.position.z);
@@ -420,6 +420,23 @@ public class MainScript : MonoBehaviour {
 				}
 			}
 		}
+		double[] serializedInputs = new double[inputs.Length];
+		for (int i = 0; i < inputs.Length; i+=inputSize) {
+			for (int j = 0; j < inputSize; j ++) {
+				serializedInputs[i+j] = (float) (-1.0 + 2.0 * (double) ( (double) (inputs [i+j] - minTab[j]) / (double) (maxTab[j] - minTab[j])));
+			}
+		}
+		return serializedInputs;
+	}
+	// Use the min / max method to serialise inputs
+	private double[] serialiseData(double[] inputs, int inputSize, double min, double max){
+		// Set with min max passed as a paramter
+		double[] minTab = new double[inputSize];
+		double[] maxTab = new double[inputSize];
+		for (int i = 0; i < inputSize; ++i) {
+			minTab [i] = min;
+			maxTab [i] = max;
+		}s
 		double[] serializedInputs = new double[inputs.Length];
 		for (int i = 0; i < inputs.Length; i+=inputSize) {
 			for (int j = 0; j < inputSize; j ++) {
