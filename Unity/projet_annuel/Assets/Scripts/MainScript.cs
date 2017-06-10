@@ -155,17 +155,17 @@ public class MainScript : MonoBehaviour {
 		if (GUILayout.Button("TEST")) {
 			double[] testInputs = new double[3 * 2];
 
-			testInputs [0] = -10;
-			testInputs [1] = 6;
+			testInputs [0] = 0;
+			testInputs [1] = 50;
 
-			testInputs [2] = 0;
-			testInputs [3] = 4;
+			testInputs [2] = 127;
+			testInputs [3] = 100;
 			 
-			testInputs [4] = 10;
-			testInputs [5] = 2;
+			testInputs [4] = 255;
+			testInputs [5] = 180;
 
-			testInputs = serialiseData (testInputs, 2);
-
+			testInputs = serialiseData (testInputs, 2, 0, 255, -1, 1);
+				
 			for (int i = 0; i < 3 * 2; i++) {
 				Debug.Log ("test >" + testInputs [i]);
 			}	
@@ -430,17 +430,11 @@ public class MainScript : MonoBehaviour {
 	}
 	// Use the min / max method to serialise inputs
 	private double[] serialiseData(double[] inputs, int inputSize, double minDepart, double maxDepart, double minArr, double maxArr ){
-		// Set with min max passed as a paramter
-		double[] minTab = new double[inputSize];
-		double[] maxTab = new double[inputSize];
-		for (int i = 0; i < inputSize; ++i) {
-			minTab [i] = minDepart;
-			maxTab [i] = maxDepart;
-		}
+
 		double[] serializedInputs = new double[inputs.Length];
 		for (int i = 0; i < inputs.Length; i+=inputSize) {
 			for (int j = 0; j < inputSize; j ++) {
-				serializedInputs[i+j] = (float) (minArr + (1.0 + maxArr)  * (double) ( (double) (inputs [i+j] - minTab[j]) / (double) (maxTab[j] - minTab[j])));
+				serializedInputs[i+j] = (float) (minArr + (1.0 + maxArr)  * (double) ( (double) (inputs [i+j] - minDepart) / (double) (maxDepart - minDepart)));
 			}
 		}
 		return serializedInputs;
