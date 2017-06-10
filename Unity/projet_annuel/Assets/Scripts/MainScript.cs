@@ -31,7 +31,7 @@ public class MainScript : MonoBehaviour {
 
 	public static int transformInput = 0;
 	public static string transformButtonString = "Use Transformation Carre";
-	public static int nbOutputNeuron = 6;
+	public static int nbOutputNeuron = 3;
 
 	public Camera cam1;
 	public Camera cam2;
@@ -241,7 +241,7 @@ public class MainScript : MonoBehaviour {
 		_isRunning = true;
 		generateBaseTest (baseTest, 10);
 		double[] input = new double[inputSize];
-		double[] outputs = new double[1];
+		double[] output = new double[1];
 		Debug.Log ("Starting predicting outputs of baseTest...");
 		foreach (var data in baseTest){
 			getInput (data, input);
@@ -249,8 +249,8 @@ public class MainScript : MonoBehaviour {
 			foreach (var inp in input) {
 				Debug.Log (">" + inp + "<");
 			}
-			LibWrapperMachineLearning.linearPredict (regressionModel, input, inputSize,outputs,1);
-			data.position = new Vector3 (data.position.x, (float)outputs[0], data.position.z);
+			LibWrapperMachineLearning.linearPredict (regressionModel, input, inputSize,output,nbOutputNeuron);
+			data.position = new Vector3 (data.position.x, (float)output[0], data.position.z);
 		}
 		_isRunning = false;
 	}
@@ -259,8 +259,8 @@ public class MainScript : MonoBehaviour {
 
 		Debug.Log ("linear_fit_regression");
 		double[] inputs = new double[inputSize * baseApprentissage.Length];
-		double[] outputs = new double[baseApprentissage.Length];
-		getInputsOutputs (baseApprentissage, inputs, outputs, 1);
+		double[] outputs = new double[baseApprentissage.Length*nbOutputNeuron];
+		getInputsOutputs (baseApprentissage, inputs, outputs);
 		Debug.Log("Start learning regression with baseApprentissage...");
 		regressionModel = LibWrapperMachineLearning.linear_fit_regression(inputs, inputSize * baseApprentissage.Length, inputSize, outputs, nbOutputNeuron);		
 		_isRunning = false;
@@ -276,7 +276,7 @@ public class MainScript : MonoBehaviour {
 				inputs = new double[inputSize * baseApprentissage.Length];
 			}
 			double[] outputs = new double[baseApprentissage.Length * nbOutputNeuron];
-			getInputsOutputs (baseApprentissage, inputs, outputs, nbOutputNeuron);
+			getInputsOutputs (baseApprentissage, inputs, outputs);
 			int learningResponse;
 			learningResponse = LibWrapperMachineLearning.linear_fit_classification_rosenblatt(model, inputs, inputSize * baseApprentissage.Length, inputSize, outputs, nbOutputNeuron, iterationNumber, step);
 			if(learningResponse == -1){
@@ -320,7 +320,7 @@ public class MainScript : MonoBehaviour {
 	}
 //	// Rempli le tableau inputs passé en paramètre avec les coordonnées x et y du tableau d'objetsUnity
 //	// ainsi que le tableau outputs avec les coordonées z du tableau d'objetsUnity
-	private void getInputsOutputs(Transform[] objetsUnity, double[] inputs, double[] outputs, int outputSize){
+	private void getInputsOutputs(Transform[] objetsUnity, double[] inputs, double[] outputs){
 		int i = 0, j = 0;
 		foreach (var data in objetsUnity)
 		{
@@ -357,7 +357,7 @@ public class MainScript : MonoBehaviour {
 			} else {
 				outputs [j] = data.position.y;
 			}
-			j += outputSize;
+			j += nbOutputNeuron;
 		}
 		if (transformInput == 1) {
 			transformCarre (inputs);
