@@ -152,6 +152,26 @@ public class MainScript : MonoBehaviour {
 				}
 			}
 		}
+		if (GUILayout.Button("TEST")) {
+			double[] testInputs = new double[3 * 2];
+
+			testInputs [0] = -10;
+			testInputs [1] = 6;
+
+			testInputs [2] = 0;
+			testInputs [3] = 4;
+
+			testInputs [4] = 10;
+			testInputs [5] = 2;
+
+			testInputs = serialiseData (testInputs, 2);
+
+			for (int i = 0; i < 3 * 2; i++) {
+				Debug.Log ("test >" + testInputs [i]);
+			}	
+		}
+
+
 		GUILayout.TextArea ("     step >" + step + "<");
 		GUILayout.TextArea ("     iterations >" + iterationNumber + "<");
 		GUILayout.TextArea ("     size of input >" + inputSize + "<");
@@ -380,6 +400,34 @@ public class MainScript : MonoBehaviour {
 		}
 	}
 
+	// Use the min / max method to serialise inputs
+	private double[] serialiseData(double[] inputs, int inputSize){
+
+		double[] minTab = new double[inputSize];
+		double[] maxTab = new double[inputSize];
+
+		for (int i = 0; i < inputSize; ++i) {
+			minTab [i] = inputs [i];
+			maxTab [i] = inputs [i];
+		}
+		for (int i = inputSize; i < inputs.Length; i+=inputSize) {
+			for (int j = 0; j < inputSize; ++j) {
+				if (minTab [j] > inputs [i + j]) {
+					minTab [j] = inputs [i + j];
+				}
+				if (maxTab [j] < inputs [i  + j]) {
+					maxTab [j] = inputs [i+j];
+				}
+			}
+		}
+		double[] serializedInputs = new double[inputs.Length];
+		for (int i = 0; i < inputs.Length; i+=inputSize) {
+			for (int j = 0; j < inputSize; j ++) {
+				serializedInputs[i+j] = (float) (-1.0 + 2.0 * (double) ( (double) (inputs [i+j] - minTab[j]) / (double) (maxTab[j] - minTab[j])));
+			}
+		}
+		return serializedInputs;
+	}
 	// Use the min / max method to serialise inputs
 	private int serialiseData(double[] data){
 		double minX = data[0], maxX = data[0];
