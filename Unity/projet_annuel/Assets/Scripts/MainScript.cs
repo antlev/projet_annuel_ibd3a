@@ -429,18 +429,18 @@ public class MainScript : MonoBehaviour {
 		return serializedInputs;
 	}
 	// Use the min / max method to serialise inputs
-	private double[] serialiseData(double[] inputs, int inputSize, double min, double max){
+	private double[] serialiseData(double[] inputs, int inputSize, double minDepart, double maxDepart, double minArr, double maxArr ){
 		// Set with min max passed as a paramter
 		double[] minTab = new double[inputSize];
 		double[] maxTab = new double[inputSize];
 		for (int i = 0; i < inputSize; ++i) {
-			minTab [i] = min;
-			maxTab [i] = max;
-		}s
+			minTab [i] = minDepart;
+			maxTab [i] = maxDepart;
+		}
 		double[] serializedInputs = new double[inputs.Length];
 		for (int i = 0; i < inputs.Length; i+=inputSize) {
 			for (int j = 0; j < inputSize; j ++) {
-				serializedInputs[i+j] = (float) (-1.0 + 2.0 * (double) ( (double) (inputs [i+j] - minTab[j]) / (double) (maxTab[j] - minTab[j])));
+				serializedInputs[i+j] = (float) (minArr + (1.0 + maxArr)  * (double) ( (double) (inputs [i+j] - minTab[j]) / (double) (maxTab[j] - minTab[j])));
 			}
 		}
 		return serializedInputs;
