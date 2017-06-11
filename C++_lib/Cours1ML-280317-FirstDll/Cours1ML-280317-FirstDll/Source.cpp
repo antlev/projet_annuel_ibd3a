@@ -4,7 +4,7 @@
 #include <time.h>
 #include <cassert>
 #include "Eigen/Dense"
-
+#include <cmath>
 class MatrixXd;
 
 using namespace std;
@@ -96,7 +96,6 @@ int linear_fit_classification_rosenblatt(double *model, double *inputs, int inpu
 		error = 0;
 		double* oneInput = new double[inputSize];
 		double* oneOutput = new double[outputSize];
-		int inputIterator;
 		// For each data passed in parameter of the function
 		for (int inputsIterator = 0, inputIterator = 0; inputsIterator < inputsSize; inputsIterator += inputSize, inputIterator++) {
 			// recovering inputs one by one
@@ -227,29 +226,28 @@ int main() {
 
 	int inputsSize = inputSize * nbData;
 	int outputsSize = outputNeuronsSize*nbData;
-	double* outputs = new double[outputsSize];
 	double* inputs = new double[inputsSize];
-	double* expected_outputs = new double[outputsSize];
+	double* expectedOutputs = new double[outputsSize];
 
 	inputs[0] = 0;
 	inputs[1] = -0.5;
-	expected_outputs[0] = 0.25;
-	expected_outputs[1] = 0.1;
-	expected_outputs[2] = -1;
+	expectedOutputs[0] = 0.25;
+	expectedOutputs[1] = 0.1;
+	expectedOutputs[2] = -1;
 
 	inputs[2] = 0.5;
 	inputs[3] = 0.375;
-	expected_outputs[3] = 0.6;
-	expected_outputs[4] = -0.3;
-	expected_outputs[5] = 0.2;
+	expectedOutputs[3] = 0.6;
+	expectedOutputs[4] = -0.3;
+	expectedOutputs[5] = 0.2;
 
 	inputs[4] = -0.625;
 	inputs[5] = 0.25;
-	expected_outputs[6] = 0.1;
-	expected_outputs[7] = -0.1;
-	expected_outputs[8] = -0.8;
+	expectedOutputs[6] = 0.1;
+	expectedOutputs[7] = -0.1;
+	expectedOutputs[8] = -0.8;
 
-	Eigen::MatrixXd* model = linear_fit_regression(inputs, inputsSize, inputSize, expected_outputs, outputNeuronsSize);
+	Eigen::MatrixXd* model = linear_fit_regression(inputs, inputsSize, inputSize, expectedOutputs, outputNeuronsSize);
 
 	cout << "model : " << *model << " (" << model->rows() << "," << model->cols() << ")" << endl;
 	double* input = new double(inputSize);
@@ -266,6 +264,41 @@ int main() {
 	input[1] = 0.25;
 	linearPredict(model, input, inputSize, output, outputNeuronsSize);
 
+	double*** modelWeights;
+	double** modelNeurons;
+	double** modelError;
+	int nbLayer = 3;
+	int modelStruct[3] = { 2, 3, 3 };
+	int iterationsMax = 1000;
+	double learningRate = 0.1;
+
+
+	pmcCreateModel(modelStruct, nbLayer, &modelWeights, &modelNeurons, &modelError);
+
+	cout << "test " << modelNeurons[0][0] << endl;
+
+	pmcFitClassification(&modelWeights, &modelNeurons, &modelError, modelStruct, nbLayer, inputs, inputSize, inputsSize, expectedOutputs, outputNeuronsSize, learningRate, iterationsMax);
+
+	input[0] = 0;
+	input[1] = -0.5;
+	pmcClassifyOneInput(modelWeights, &modelNeurons, modelStruct, nbLayer, input, inputSize, &output, outputNeuronsSize);
+	for (int i = 0; i < outputNeuronsSize; ++i) {
+		cout << "TEST Output[" << i << "] >" << output[i] << "<" << endl;
+	}
+
+	input[0] = 0.5;
+	input[1] = 0.375;
+	pmcClassifyOneInput(modelWeights, &modelNeurons, modelStruct, nbLayer, input, inputSize, &output, outputNeuronsSize);
+	for (int i = 0; i < outputNeuronsSize; ++i) {
+		cout << "TEST Output[" << i << "] >" << output[i] << "<" << endl;
+	}
+
+	input[0] = -0.625;
+	input[1] = 0.25;
+	pmcClassifyOneInput(modelWeights, &modelNeurons, modelStruct, nbLayer, input, inputSize, &output, outputNeuronsSize);
+	for (int i = 0; i < outputNeuronsSize; ++i) {
+		cout << "TEST Output[" << i << "] >" << output[i] << "<" << endl;
+	}
 	return 1;
 }
 // Add bias to the inputs
@@ -308,21 +341,122 @@ void matrixToTab(Eigen::MatrixXd matrix, double *tab, int nbRow, int nbCols) {
 	}
 }
 //////////////// PERCEPTRON MULTI-COUCHES ////////////////////////
-//double*** pmc_create_model(double* modelStruct, int modelStructSize, int inputSize){
-//    double*** model = new double**[modelStructSize];
-//    for(int i=0; i<modelStructSize; i++){
-//        model[i] = new double*[modelStruct[i]];
-//        for(int j=0;j<modelStruct[i];j++) {
-//            int previousLayerSize = i == 0 ? inputSize : modelStruct[i - 1];
-//            model[i][j] = new double[previousLayerSize];
-//            for (int k = 0; k < previousLayerSize; ++k) {
-//                model[i][j][k] = ((float) rand()) / ((float) RAND_MAX) * 2.0 - 1.0;
-//            }
-//        }
-//    }
-//    return  model;
-//}
-void pmc_remove_model(double*** model, double* modelStruct, int modelStructSize, int inputSize) {
+// ModelStruct corresponds to the structure of the model to generate
+// Each case correspond to the number of neurons of the hidden layer(s) and the output
+// It does not contain the input neurons
+// example modelstruct = [2][3] -> input of size 2, no hidden layers only an output composed of 3 neurons
+// example modelstruct = [2][3][2][3] -> input of size 2, 2 hidden layers of 3 and 2 neurons, and an output composed of 3 neurons
+// nbLayer correspond to the modelStruct size
+// The model is then easy to use to get the weight corresponding to the layer 2  linking the left 2nd neuron to the 3rd right is model[2][2][3]
+void pmcCreateModel(int *modelStruct, int nbLayer, double ****modelWeights, double ***modelNeurons, double ***modelError) {
+	assert(modelStruct[0] > 0 && modelStruct[1] > 0);
+	assert(nbLayer >= 2);
+	for (int i = 0; i < nbLayer; ++i) {
+		assert(modelStruct[i] > 0);
+	}
+	(*modelWeights) = new double**[nbLayer - 1];
+	(*modelNeurons) = new double*[nbLayer];
+	(*modelError) = new double*[nbLayer];
+
+
+	for (int layerNumber = 0; layerNumber<nbLayer; layerNumber++) {
+		(*modelNeurons)[layerNumber] = new double[modelStruct[layerNumber] + 1]; // Bias neuron
+		(*modelError)[layerNumber] = new double[modelStruct[layerNumber] + 1]; // Bias neuron
+		for (int leftNeuron = 0; leftNeuron<modelStruct[layerNumber] + 1; leftNeuron++) {
+			(*modelError)[layerNumber][leftNeuron] = 0;
+			(*modelNeurons)[layerNumber][leftNeuron] = 0;
+		}
+		(*modelNeurons)[layerNumber][modelStruct[layerNumber]] = 1; // Bias
+	}
+	for (int layerNumber = 0; layerNumber<nbLayer - 1; layerNumber++) {
+		(*modelWeights)[layerNumber] = new double*[modelStruct[layerNumber] + 1]; // Bias neuron
+		for (int leftNeuron = 0; leftNeuron<modelStruct[layerNumber] + 1; leftNeuron++) {
+			(*modelWeights)[layerNumber][leftNeuron] = new double[modelStruct[layerNumber + 1]];
+			for (int rightNeuron = 0; rightNeuron < modelStruct[layerNumber + 1]; ++rightNeuron) {
+				(*modelWeights)[layerNumber][leftNeuron][rightNeuron] = ((float)rand()) / ((float)RAND_MAX) * 2.0 - 1.0;
+			}
+		}
+	}
+}
+
+void pmcFitClassification(double**** modelWeights, double*** modelNeurons, double*** modelError, int* modelStruct, int nbLayer, double* inputs, int inputSize, int inputsSize, double* outputs, int outputSize, double learningRate, int maxIteraions) {
+	addBiasToInputs(inputs, &inputsSize, &inputSize);
+	int nbData = inputsSize / inputSize;
+	int iterations(0);
+	int indexOfRdmData;
+	double* oneInput = new double[inputSize];
+	double* oneOutput = new double[outputSize];
+	while (1) {
+		indexOfRdmData = rand() % (nbData);
+		for (int i = indexOfRdmData, j = 0; i < inputSize; ++i, ++j) {
+			oneInput[j] = inputs[i];
+		}
+		for (int i = indexOfRdmData, j = 0; i < outputSize; ++i, ++j) {
+			oneOutput[j] = outputs[i];
+		}
+		pmcClassifyOneInput(*modelWeights, modelNeurons, modelStruct, nbLayer, oneInput, inputSize, &oneOutput, outputSize);
+		pmcFitOneInput(modelWeights, *modelNeurons, modelError, modelStruct, nbLayer, oneInput, inputSize, oneOutput, outputSize, learningRate);
+		if (iterations++ >= maxIteraions) {
+			break;
+		}
+	}
+
+}
+void pmcFitOneInput(double**** modelWeights, double** modelNeurons, double*** modelError, int* modelStruct, int nbLayer, double* oneInput, int inputSize, double* oneOutput, int outputSize, double learningRate) {
+	double sum;
+	// CALCULATE ERROR FOR LAST LAYER
+	for (int neuronNb = 0; neuronNb < modelStruct[nbLayer - 1]; ++neuronNb) {
+		(*modelError)[nbLayer - 1][neuronNb] =
+			(1 - (modelNeurons[nbLayer - 1][neuronNb] * modelNeurons[nbLayer - 1][neuronNb])) *(modelNeurons[nbLayer - 1][neuronNb] - oneOutput[neuronNb]);
+	}
+	// CALCULATE ERROR FOR ALL OTHER LAYERS
+	for (int layerNb = nbLayer - 2; layerNb > 0; --layerNb) {
+		for (int neuronNb = 0; neuronNb < modelStruct[layerNb]; ++neuronNb) {
+			sum = 0;
+			for (int j = 1; j < modelStruct[layerNb] + 1 /*Bias*/; ++j) {
+				sum += (*modelWeights)[layerNb][neuronNb][j] * (*modelError)[layerNb][neuronNb];
+			}
+			(*modelError)[layerNb][neuronNb] =
+				(1 - (modelNeurons[layerNb][neuronNb] * modelNeurons[layerNb][neuronNb])) * sum;
+		}
+	}
+	// UPDATE WEIGHTS
+	for (int layerNb = 0; layerNb < nbLayer - 1; ++layerNb) {
+		for (int leftNeuronNb = 0; leftNeuronNb < modelStruct[layerNb] + 1; ++leftNeuronNb) {
+			for (int rightNeuronNb = 0; rightNeuronNb < modelStruct[layerNb + 1/*Bias*/]; ++rightNeuronNb) {
+				(*modelWeights)[layerNb][leftNeuronNb][rightNeuronNb] -= learningRate * std::pow(modelNeurons[layerNb][leftNeuronNb], -1) * (*modelError)[layerNb][leftNeuronNb];
+			}
+		}
+	}
+}
+// Calculate the sum of the weights * the previous neuron layer, using the model struct, layerNb and neuronNb to set
+double sum(double*** modelWeights, double** modelNeurons, int* modelStruct, int layerNb, int neuronNb) {
+	double sum = 0;
+	for (int i = 0; i < modelStruct[layerNb - 1] + 1; ++i) {
+		sum += modelNeurons[layerNb - 1][i] * modelWeights[layerNb - 1][i][neuronNb];
+	}
+	return sum;
+}
+// Set all the neurons considering the input and weight
+// Set the oneOutput variable
+void pmcClassifyOneInput(double*** modelWeights, double*** modelNeurons, int* modelStruct, int nbLayer, double* oneInput, int inputSize, double** oneOutput, int outputSize) {
+	addBiasToInput(oneInput, inputSize);
+	// set the input layer with the input given plus the bias neuron
+	for (int i = 0; i< inputSize + 1; ++i) {
+		(*modelNeurons)[0][i] = oneInput[i];
+	}
+	// Set all the neurons of the model
+	for (int layerNb = 1; layerNb < nbLayer; ++layerNb) {
+		for (int neuronNb = 0; neuronNb < modelStruct[layerNb] + 1; ++neuronNb) {
+			(*modelNeurons)[layerNb][neuronNb] = sum(modelWeights, *modelNeurons, modelStruct, layerNb, neuronNb);
+		}
+	}
+	// Set the output
+	for (int i = 0; i < outputSize; ++i) {
+		(*oneOutput)[i] = (*modelNeurons)[nbLayer - 1][i];
+	}
+}
+void pmc_remove_model(double*** model, int* modelStruct, int modelStructSize, int inputSize) {
 	for (int i = 0; i<modelStructSize; i++) {
 		for (int j = 0; j<modelStruct[i]; j++) {
 			delete(model[i][j]);

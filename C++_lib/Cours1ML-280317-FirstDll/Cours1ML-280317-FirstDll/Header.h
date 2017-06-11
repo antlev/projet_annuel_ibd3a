@@ -26,6 +26,13 @@ extern "C" {
 	__declspec(dllexport) void linear_classify(double *model, double* input, int inputSize, double* outputs, int outputDimension);
 
 	__declspec(dllexport) void linearPredict(Eigen::MatrixXd* model, double* input, int inputSize, double* output, int outputSize);
+
+	__declspec(dllexport)  void pmcFitClassification(double**** modelWeights, double*** modelNeurons, double*** modelError, int* modelStruct, int nbLayer, double* inputs, int inputSize, int inputsSize, double* outputs, int outputSize, double learningRate, int maxIteraions);
+
+	__declspec(dllexport) void pmcCreateModel(int *modelStruct, int nbLayer, double ****modelWeights, double ***modelNeurons, double ***modelError);
+
+
+
 }
 // Function only used in C++
 //double learn_classification_rosenblatt(double *model, double* unInput, int inputSize, double expected_result, double step);
@@ -34,3 +41,6 @@ double* addBiasToInputs(double *inputs, int *inputsSize, int *inputSize);
 Eigen::MatrixXd pinv(Eigen::MatrixXd X);
 void matrixToTab(Eigen::MatrixXd matrix, double *tab, int nbRow, int nbCols);
 void tabToMatrix(Eigen::MatrixXd* matrix, double* tab, int nbRow, int nbCols);
+void pmcFitOneInput(double**** modelWeights, double** modelNeurons, double*** modelError, int* modelStruct, int nbLayer, double* oneInput, int inputSize, double* oneOutput, int outputSize, double learningRate);
+double sum(double*** modelWeights, double** modelNeurons, int* modelStruct, int layerNb, int neuronNb);
+void pmcClassifyOneInput(double*** modelWeights, double*** modelNeurons, int* modelStruct, int nbLayer, double* oneInput, int inputSize, double** oneOutput, int outputSize);

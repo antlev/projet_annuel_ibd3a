@@ -143,7 +143,6 @@ public class MainScript : MonoBehaviour {
 			if (!_isRunning) {
 
 				if (cam1.enabled == true) {
-
 					cam1.enabled = false;
 					cam2.enabled = true;
 				}else{
@@ -168,7 +167,9 @@ public class MainScript : MonoBehaviour {
 				
 			for (int i = 0; i < 3 * 2; i++) {
 				Debug.Log ("test >" + testInputs [i]);
-			}	
+			}
+
+
 		}
 
 
