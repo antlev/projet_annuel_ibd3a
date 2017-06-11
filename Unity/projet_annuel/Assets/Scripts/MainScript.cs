@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Runtime.InteropServices;
 using System.Threading;
+using System.Collections;
 
 
 public class MainScript : MonoBehaviour {
@@ -274,7 +275,57 @@ public class MainScript : MonoBehaviour {
 		}
 		_isRunning = false;
 	}
-	public void linear_fit_regression(){
+
+    public void predict_color()
+    {
+        _isRunning = true;
+        generateBaseTest(baseTest, 10);
+        double[] input = new double[inputSize];
+        double[] output = new double[1];
+        Debug.Log("Starting predicting outputs of baseTest...");
+        foreach (var data in baseTest)
+        {
+            getInput(data, input);
+            Debug.Log("input :" + inputSize);
+            foreach (var inp in input)
+            {
+                Debug.Log(">" + inp + "<");
+            }
+            if (testWithColor)
+            {
+                byte red = 0;
+                byte blue = 0;
+                byte green = 0;
+
+                LibWrapperMachineLearning.linearPredict(regressionModel, input, inputSize, output, nbOutputNeuron);
+                for (int i = 0; i < output.Length; i++)
+                {
+                    double[] tmpOutput;
+                    tmpOutput[0] = output[i];
+                    if (i % nbColor == colorBlue)
+                    {
+                        blue = System.Convert.ToByte(serialiseData(tmpOutput, 1,  0, 255, -1, 1));
+                    }
+                    else if (i % nbColor == colorRed)
+                    {
+                        red = System.Convert.ToByte(serialiseData(tmpOutput, 1, 0, 255, -1, 1));
+                    }
+                    else
+                    {
+                        green = System.Convert.ToByte(serialiseData(tmpOutput, 1, 0, 255, -1, 1));
+
+                    }
+                    //Color rgbColor = new Color();
+                    //rgbColor = System.Drawing.Color.FromArgb(red, green, blue);
+                    Color32 color32 = new Color32(red, green, blue, 1);
+                    unityObject.GetComponent<Renderer>().material.color = color32;
+                }
+            }
+        }
+        _isRunning = false;
+    }
+
+    public void linear_fit_regression(){
 		_isRunning = true;
 
 		Debug.Log ("linear_fit_regression");
@@ -282,9 +333,14 @@ public class MainScript : MonoBehaviour {
 		double[] outputs = new double[baseApprentissage.Length*nbOutputNeuron];
 		getInputsOutputs (baseApprentissage, inputs, outputs);
 		Debug.Log("Start learning regression with baseApprentissage...");
-		regressionModel = LibWrapperMachineLearning.linear_fit_regression(inputs, inputSize * baseApprentissage.Length, inputSize, outputs, nbOutputNeuron);		
+        if(testWithColor)
+        {
+            inputs = serialiseData(inputs, inputSize, -1, 1, 0, 255);
+        }
+        regressionModel = LibWrapperMachineLearning.linear_fit_regression(inputs, inputSize * baseApprentissage.Length, inputSize, outputs, nbOutputNeuron);		
 		_isRunning = false;
 	}	
+
 	public void linear_fit_classification_rosenblatt(){
 		_isRunning = true;
 		if (model != System.IntPtr.Zero) {
@@ -429,7 +485,7 @@ public class MainScript : MonoBehaviour {
 		return serializedInputs;
 	}
 	// Use the min / max method to serialise inputs
-	private double[] serialiseData(double[] inputs, int inputSize, double minDepart, double maxDepart, double minArr, double maxArr ){
+	private double[] serialiseData(double[] inputs, int inputSize, int minDepart, int maxDepart, int minArr, int maxArr ){
 
 		double[] serializedInputs = new double[inputs.Length];
 		for (int i = 0; i < inputs.Length; i+=inputSize) {
