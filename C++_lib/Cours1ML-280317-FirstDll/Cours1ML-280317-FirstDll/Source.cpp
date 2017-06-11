@@ -55,11 +55,8 @@ void linear_classify(double *model, double* input, int inputSize, double* output
 	double sum_weigths_inputs;
 	double* inputWithBias = addBiasToInput(input, inputSize);
 	for (int outputIterator = 0; outputIterator < outputDimension; outputIterator++) {
-		//        cout << "Debug outputIterator >" << outputIterator << "< " << endl;
-
 		sum_weigths_inputs = 0;
 		for (int modelIterator = outputIterator, inputIterator = 0; modelIterator < (inputSize + 1)*outputDimension && inputIterator < inputSize + 1; inputIterator++, modelIterator += outputDimension) {
-			//            cout << "Debug modelIterator >" << modelIterator << "< inputIterator >" << inputIterator << "< " << endl;
 			sum_weigths_inputs += model[modelIterator] * inputWithBias[inputIterator];
 		}
 		output[outputIterator] = (sum_weigths_inputs >= 0 ? 1 : -1);
@@ -104,11 +101,6 @@ int linear_fit_classification_rosenblatt(double *model, double *inputs, int inpu
 			}
 			// Get the result given by the Perceptron
 			linear_classify(model, oneInput, inputSize, oneOutput, outputSize);
-			cout << "TEST RETURN CLASSIFY " << endl;
-			for (int i = 0; i<outputSize; i++) {
-				cout << "output[" << i << "] >" << oneOutput[i] << "<" << endl;
-
-			}
 			oneInput = addBiasToInput(oneInput, inputSize);
 
 			bool* outputIsGood = new bool[outputSize];
@@ -116,20 +108,13 @@ int linear_fit_classification_rosenblatt(double *model, double *inputs, int inpu
 			bool allOutputsAreGood = true;
 			// For each output neuron we check that response from perceptron is correct
 			for (int outputIterator = 0; outputIterator < outputSize; outputIterator++) {
-				cout << "DEBUG outputIterator>" << outputIterator << "< " << endl;
 				outputIsGood[outputIterator] = true; // Initialising all response at true
 													 // If one of the output neuron doesn't give the good answer
-				cout << "DEBUG oneOutput[outputIterator]>" << oneOutput[outputIterator] << "<  expectedOutputs[" << inputIterator*outputSize + outputIterator << "] >" << expectedOutputs[inputIterator*outputSize + outputIterator] << "< " << endl;
 				if (oneOutput[outputIterator] != expectedOutputs[inputIterator*outputSize + outputIterator]) {
-					cout << "DEBUG output nb " << outputIterator << " is false" << endl;
 					outputIsGood[outputIterator] = false;
 					if (allOutputsAreGood) { allOutputsAreGood = false; }
 					// Storing the output error in a tab
 					outputError[outputIterator] = expectedOutputs[inputIterator*outputSize + outputIterator] - oneOutput[outputIterator];
-					cout << "DEBUG outputError[" << outputIterator << "] >" << outputError[outputIterator] << "< " << endl;
-				}
-				else {
-					cout << "DEBUG output nb " << outputIterator << " is ok" << endl;
 				}
 			}
 			// If at least one of the Perceptron's response is not good
@@ -141,14 +126,10 @@ int linear_fit_classification_rosenblatt(double *model, double *inputs, int inpu
 						//                        cout << "DEBUG modifying weight affecting output nb >" << outputIterator << "< " << endl;
 						// We adapt every weight of our Perceptron using the Rsoenblatt formula
 						for (int modelIterator = outputIterator, inputIterator = 0; modelIterator < (inputSize + 1)*outputSize; modelIterator += outputSize, inputIterator++) {
-
-							cout << "modelIterator >" << modelIterator << "< model[" << modelIterator << "]>" << model[modelIterator] << "< outputIterator >" << outputIterator << "< outputError[outputIterator] >" << outputError[outputIterator] << "< inputIterator >" << inputIterator << "< oneInput[inputIterator] >" << oneInput[inputIterator] << "< " << endl;
 							model[modelIterator] += step * outputError[outputIterator] * oneInput[inputIterator];
-
 						}
 					}
 					else {
-						cout << "DEBUG NOT MODIFYING weight affecting output nb >" << outputIterator << "< " << endl;
 					}
 				}
 			}
@@ -165,23 +146,9 @@ Eigen::MatrixXd* linear_fit_regression(double *inputs, int inputsSize, int input
 	// Build X and Y
 	int nbInput = inputsSize / inputSize;
 	Eigen::MatrixXd X(nbInput, inputSize);
-	//    cout << "X(" << nbInput << "," << inputSize << ")!" << endl;
 	Eigen::MatrixXd Y(nbInput, outputSize);
-	//    cout << "Y(" << nbInput << "," << outputSize << ")!" << endl;
-
 	tabToMatrix(&X, inputs, nbInput, inputSize);
 	tabToMatrix(&Y, expectedOutputs, nbInput, outputSize);
-	//    for (int i = 0; i < nbInput; i++) {
-	//        for (int j = 0; j < inputSize; j++) {
-	//            cout << "X(" << i << "," << j << ") = " << X(i,j) << endl;
-	//        }
-	//    }
-	//    for (int i = 0; i < nbInput; i++) {
-	//        for (int j = 0; j < outputSize; j++) {
-	//            cout << "Y(" << i << "," << j << ") = " << Y(i,j) << endl;
-	//        }
-	//    }
-	// return the calculated result as a matrix
 	return new Eigen::MatrixXd(pinv(X) * Y);
 }
 // Return the pseudo inverse of the matrix passed as a parameter
