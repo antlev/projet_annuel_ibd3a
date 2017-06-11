@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Runtime.InteropServices;
 using System.Threading;
+using System.Collections;
 
 
 public class MainScript : MonoBehaviour {
@@ -151,28 +152,6 @@ public class MainScript : MonoBehaviour {
 				}
 			}
 		}
-		if (GUILayout.Button("TEST")) {
-			double[] testInputs = new double[3 * 2];
-
-			testInputs [0] = 0;
-			testInputs [1] = 50;
-
-			testInputs [2] = 127;
-			testInputs [3] = 100;
-			 
-			testInputs [4] = 255;
-			testInputs [5] = 180;
-
-			testInputs = serialiseData (testInputs, 2, 0, 255, -1, 1);
-				
-			for (int i = 0; i < 3 * 2; i++) {
-				Debug.Log ("test >" + testInputs [i]);
-			}
-
-
-		}
-
-
 		GUILayout.TextArea ("     step >" + step + "<");
 		GUILayout.TextArea ("     iterations >" + iterationNumber + "<");
 		GUILayout.TextArea ("     size of input >" + inputSize + "<");
@@ -262,7 +241,7 @@ public class MainScript : MonoBehaviour {
 		_isRunning = true;
 		generateBaseTest (baseTest, 10);
 		double[] input = new double[inputSize];
-		double[] output = new double[1];
+		double[] output = new double[nbOutputNeuron];
 		Debug.Log ("Starting predicting outputs of baseTest...");
 		foreach (var data in baseTest){
 			getInput (data, input);
@@ -271,21 +250,32 @@ public class MainScript : MonoBehaviour {
 				Debug.Log (">" + inp + "<");
 			}
 			LibWrapperMachineLearning.linearPredict (regressionModel, input, inputSize,output,nbOutputNeuron);
-			data.position = new Vector3 (data.position.x, (float)output[0], data.position.z);
+			if (testWithColor) {
+				output = serialiseData (output, 3, -1f, 1f, 0f, 1f);
+				Debug.Log ("output[" + 0 + "] = " + output [0] + "output[" + 1 + "] = " + output [1] + "output[" + 3 + "] = " + output [2]);
+				data.GetComponent<Renderer> ().material.color = new Color ((float)output [1], (float)output [2], (float)output [0]);
+				data.position = new Vector3 (data.position.x, 2, data.position.z);
+			} else {
+				data.position = new Vector3 (data.position.x, (float)output [0], data.position.z);
+			}
 		}
 		_isRunning = false;
 	}
-	public void linear_fit_regression(){
+    public void linear_fit_regression(){
 		_isRunning = true;
-
 		Debug.Log ("linear_fit_regression");
 		double[] inputs = new double[inputSize * baseApprentissage.Length];
 		double[] outputs = new double[baseApprentissage.Length*nbOutputNeuron];
-		getInputsOutputs (baseApprentissage, inputs, outputs);
-		Debug.Log("Start learning regression with baseApprentissage...");
-		regressionModel = LibWrapperMachineLearning.linear_fit_regression(inputs, inputSize * baseApprentissage.Length, inputSize, outputs, nbOutputNeuron);		
+		if (testWithColor) {
+			getInputsOutputsColorRegression (baseApprentissage, inputs, outputs);
+			outputs = serialiseData (outputs, nbColor, 0f, 1f, -1f, 1f);
+		} else {
+			getInputsOutputs (baseApprentissage, inputs, outputs);
+		}
+        regressionModel = LibWrapperMachineLearning.linear_fit_regression(inputs, inputSize * baseApprentissage.Length, inputSize, outputs, nbOutputNeuron);		
 		_isRunning = false;
 	}	
+
 	public void linear_fit_classification_rosenblatt(){
 		_isRunning = true;
 		if (model != System.IntPtr.Zero) {
@@ -322,6 +312,7 @@ public class MainScript : MonoBehaviour {
 			transformXxY (input);
 		}
 	}
+
 	// Rempli le tableau input passé en paramètre avec les coordonnées x et y de l'objetsUnity
 	private void getInputs(Transform[] objetsUnity, double[] inputs){
 		if (inputs.Length < objetsUnity.Length * 2) {
@@ -387,6 +378,21 @@ public class MainScript : MonoBehaviour {
 		}
 	}
 
+	private void getInputsOutputsColorRegression(Transform[] objetsUnity, double[] inputs, double[] outputs){
+		int i = 0, j = 0;
+		foreach (var data in objetsUnity) {
+			inputs [i] = data.position.x;
+			i++;
+			inputs [i] = data.position.z;
+			i++;
+			outputs [j] = data.GetComponent<Renderer> ().material.color.b;
+			j++;
+			outputs [j] = data.GetComponent<Renderer> ().material.color.r;
+			j++;
+			outputs [j] = data.GetComponent<Renderer> ().material.color.g;
+			j++;
+		}
+	}
 	// Transforme les inputs pour certains cas non linérement séparable mais séparables par leur carré
 	private void transformCarre(double[] inputs){
 		for (int i = 0; i < inputs.Length; i++) {
@@ -430,7 +436,7 @@ public class MainScript : MonoBehaviour {
 		return serializedInputs;
 	}
 	// Use the min / max method to serialise inputs
-	private double[] serialiseData(double[] inputs, int inputSize, double minDepart, double maxDepart, double minArr, double maxArr ){
+	private double[] serialiseData(double[] inputs, int inputSize, float minDepart, float maxDepart, float minArr, float maxArr ){
 
 		double[] serializedInputs = new double[inputs.Length];
 		for (int i = 0; i < inputs.Length; i+=inputSize) {
@@ -476,66 +482,7 @@ public class MainScript : MonoBehaviour {
 	// TEST FUNCTION		
 	private void test(){
 		_isRunning = true;
-		Debug.Log("LAUNCHING TEST FUNCTION");
 
-//		Debug.Log("DEBUG baseApprentissage >" + baseApprentissage.Length + "<");
-//		Debug.Log("DEBUG baseTest >" + baseTest.Length + "<");
-//
-//		double[] inputs = new double[inputSize * baseApprentissage.Length];
-//        double[] outputs = new double[baseApprentissage.Length];
-//
-//		getInputs (baseApprentissage, inputs);
-//		Debug.Log ("before");
-//		foreach (var data in inputs) {
-//
-//			Debug.Log (data);
-//		}
-//		double[] inputs = new double[] {10, 1, 7.5, 2, 5, 3, 2.5, 4, 0, 5};
-//		serialiseInputs (inputs);
-//		Debug.Log ("after");
-//
-//		foreach (var data in inputs) {
-//				
-//			Debug.Log (data);
-//		}
-//        int inputsSize = inputs.Length;
-//
-//		// Create model
-//		create_model();
-//
-////		// Création des pointeurs
-//		var inputsPtr = default(GCHandle);
-//        try
-//        {
-//            inputsPtr = GCHandle.Alloc(inputs, GCHandleType.Pinned);
-//			Debug.Log("Learning hebb to model ! step > "  + step);
-//			LibWrapperMachineLearning.linear_fit_classification_hebb(model, inputsPtr.AddrOfPinnedObject(), inputsSize, inputSize, iterationNumber, step);
-//		}
-//        finally
-//        {
-//            if (inputsPtr.IsAllocated) inputsPtr.Free();
-//        }
-//
-//		Debug.Log("Generating testBase !");        
-//        double[] input = new double[inputSize];
-//		generateBaseTest (baseTest, 10);
-//
-//		foreach (var data in baseTest)
-//        {
-//			var inputPtr = default(GCHandle);
-//			getInputs (data, input);
-//            try
-//			{
-//				inputPtr = GCHandle.Alloc(input, GCHandleType.Pinned);
-//				data.position = new Vector3(data.position.x, (float) LibWrapperMachineLearning.linear_classify(model, inputPtr.AddrOfPinnedObject(), inputSize), data.position.z);
-//            }
-//            finally
-//            {
-//                if (inputPtr.IsAllocated) inputPtr.Free();
-//            }
-//        }
-//		erase_model();
-		Debug.Log ("Test Function finished !");
 		_isRunning = false;
     }
 	// Place a square with equally reparted marbles 
