@@ -100,13 +100,6 @@ public class MainScript : MonoBehaviour {
 				predict();
 			}
 		}
-		if (GUILayout.Button("predict_color")) {
-			if (!_isRunning)
-			{
-				predict_color();
-			}
-		}
-
 		if (GUILayout.Button("Clean")) {
 			if (!_isRunning)
 			{
@@ -160,27 +153,6 @@ public class MainScript : MonoBehaviour {
 				}
 			}
 		}
-		if (GUILayout.Button("TEST")) {
-			double[] testInputs = new double[3 * 2];
-
-			testInputs [0] = 0;
-			testInputs [1] = 50;
-
-			testInputs [2] = 127;
-			testInputs [3] = 100;
-			 
-			testInputs [4] = 255;
-			testInputs [5] = 180;
-
-			testInputs = serialiseData (testInputs, 2, 0, 255, -1, 1);
-				
-			for (int i = 0; i < 3 * 2; i++) {
-				Debug.Log ("test >" + testInputs [i]);
-			}	
-			Debug.Log ("toto >" + baseApprentissage [0].GetComponent<Renderer> ().material.color.r);
-		}
-
-
 		GUILayout.TextArea ("     step >" + step + "<");
 		GUILayout.TextArea ("     iterations >" + iterationNumber + "<");
 		GUILayout.TextArea ("     size of input >" + inputSize + "<");
@@ -270,7 +242,7 @@ public class MainScript : MonoBehaviour {
 		_isRunning = true;
 		generateBaseTest (baseTest, 10);
 		double[] input = new double[inputSize];
-		double[] output = new double[1];
+		double[] output = new double[nbOutputNeuron];
 		Debug.Log ("Starting predicting outputs of baseTest...");
 		foreach (var data in baseTest){
 			getInput (data, input);
@@ -279,36 +251,17 @@ public class MainScript : MonoBehaviour {
 				Debug.Log (">" + inp + "<");
 			}
 			LibWrapperMachineLearning.linearPredict (regressionModel, input, inputSize,output,nbOutputNeuron);
-			data.position = new Vector3 (data.position.x, (float)output[0], data.position.z);
+			if (testWithColor) {
+				output = serialiseData (output, 3, -1f, 1f, 0f, 1f);
+				Debug.Log ("output[" + 0 + "] = " + output [0] + "output[" + 1 + "] = " + output [1] + "output[" + 3 + "] = " + output [2]);
+				data.GetComponent<Renderer> ().material.color = new Color ((float)output [1], (float)output [2], (float)output [0]);
+				data.position = new Vector3 (data.position.x, 2, data.position.z);
+			} else {
+				data.position = new Vector3 (data.position.x, (float)output [0], data.position.z);
+			}
 		}
 		_isRunning = false;
 	}
-
-    public void predict_color()
-    {
-        _isRunning = true;
-        generateBaseTest(baseTest, 10);
-        double[] input = new double[inputSize];
-        double[] output = new double[nbOutputNeuron];
-        Debug.Log("Starting predicting outputs of baseTest...");
-        foreach (var data in baseTest)
-        {
-            getInput(data, input);
-
-			LibWrapperMachineLearning.linearPredict(regressionModel, input, inputSize, output, nbOutputNeuron);
-			for (int i = 0; i < output.Length; i++) {
-				output [i] = output [i] * 2 - 1;
-			}
-//			output = serialiseData (output, nbColor, -1f, 1f, 0f, 1f);
-			Debug.Log ("output[" + 0 + "] = " + output [0] + "output[" + 1 + "] = " + output [1] + "output[" + 3 + "] = " + output [2]);
-			data.GetComponent<Renderer> ().material.color =  new Color ((float)output [1], (float)output [2], (float)output [0]);
-			data.position = new Vector3 (data.position.x, 2, data.position.z);
-
-
-        }
-        _isRunning = false;
-    }
-
     public void linear_fit_regression(){
 		_isRunning = true;
 		Debug.Log ("linear_fit_regression");
@@ -316,15 +269,7 @@ public class MainScript : MonoBehaviour {
 		double[] outputs = new double[baseApprentissage.Length*nbOutputNeuron];
 		if (testWithColor) {
 			getInputsOutputsColorRegression (baseApprentissage, inputs, outputs);
-			for (int i = 0; i < outputs.Length; i++) {
-				//				outputs [i] = outputs [i] * 2 - 1;
-				Debug.Log("outputs["+i+"] = "+ outputs[i]);
-			}
 			outputs = serialiseData (outputs, nbColor, 0f, 1f, -1f, 1f);
-			for (int i = 0; i < outputs.Length; i++) {
-//				outputs [i] = outputs [i] * 2 - 1;
-				Debug.Log("outputs["+i+"] = "+ outputs[i]);
-			}
 		} else {
 			getInputsOutputs (baseApprentissage, inputs, outputs);
 		}
