@@ -100,6 +100,13 @@ public class MainScript : MonoBehaviour {
 				predict();
 			}
 		}
+		if (GUILayout.Button("predict_color")) {
+			if (!_isRunning)
+			{
+				predict_color();
+			}
+		}
+
 		if (GUILayout.Button("Clean")) {
 			if (!_isRunning)
 			{
@@ -170,6 +177,7 @@ public class MainScript : MonoBehaviour {
 			for (int i = 0; i < 3 * 2; i++) {
 				Debug.Log ("test >" + testInputs [i]);
 			}	
+			Debug.Log ("toto >" + baseApprentissage [0].GetComponent<Renderer> ().material.color.r);
 		}
 
 
@@ -281,62 +289,45 @@ public class MainScript : MonoBehaviour {
         _isRunning = true;
         generateBaseTest(baseTest, 10);
         double[] input = new double[inputSize];
-        double[] output = new double[1];
+        double[] output = new double[nbOutputNeuron];
         Debug.Log("Starting predicting outputs of baseTest...");
         foreach (var data in baseTest)
         {
             getInput(data, input);
-            Debug.Log("input :" + inputSize);
-            foreach (var inp in input)
-            {
-                Debug.Log(">" + inp + "<");
-            }
-            if (testWithColor)
-            {
-                byte red = 0;
-                byte blue = 0;
-                byte green = 0;
 
-                LibWrapperMachineLearning.linearPredict(regressionModel, input, inputSize, output, nbOutputNeuron);
-                for (int i = 0; i < output.Length; i++)
-                {
-                    double[] tmpOutput;
-                    tmpOutput[0] = output[i];
-                    if (i % nbColor == colorBlue)
-                    {
-                        blue = System.Convert.ToByte(serialiseData(tmpOutput, 1,  0, 255, -1, 1));
-                    }
-                    else if (i % nbColor == colorRed)
-                    {
-                        red = System.Convert.ToByte(serialiseData(tmpOutput, 1, 0, 255, -1, 1));
-                    }
-                    else
-                    {
-                        green = System.Convert.ToByte(serialiseData(tmpOutput, 1, 0, 255, -1, 1));
+			LibWrapperMachineLearning.linearPredict(regressionModel, input, inputSize, output, nbOutputNeuron);
+			for (int i = 0; i < output.Length; i++) {
+				output [i] = output [i] * 2 - 1;
+			}
+//			output = serialiseData (output, nbColor, -1f, 1f, 0f, 1f);
+			Debug.Log ("output[" + 0 + "] = " + output [0] + "output[" + 1 + "] = " + output [1] + "output[" + 3 + "] = " + output [2]);
+			data.GetComponent<Renderer> ().material.color =  new Color ((float)output [1], (float)output [2], (float)output [0]);
+			data.position = new Vector3 (data.position.x, 2, data.position.z);
 
-                    }
-                    //Color rgbColor = new Color();
-                    //rgbColor = System.Drawing.Color.FromArgb(red, green, blue);
-                    Color32 color32 = new Color32(red, green, blue, 1);
-                    unityObject.GetComponent<Renderer>().material.color = color32;
-                }
-            }
+
         }
         _isRunning = false;
     }
 
     public void linear_fit_regression(){
 		_isRunning = true;
-
 		Debug.Log ("linear_fit_regression");
 		double[] inputs = new double[inputSize * baseApprentissage.Length];
 		double[] outputs = new double[baseApprentissage.Length*nbOutputNeuron];
-		getInputsOutputs (baseApprentissage, inputs, outputs);
-		Debug.Log("Start learning regression with baseApprentissage...");
-        if(testWithColor)
-        {
-            inputs = serialiseData(inputs, inputSize, -1, 1, 0, 255);
-        }
+		if (testWithColor) {
+			getInputsOutputsColorRegression (baseApprentissage, inputs, outputs);
+			for (int i = 0; i < outputs.Length; i++) {
+				//				outputs [i] = outputs [i] * 2 - 1;
+				Debug.Log("outputs["+i+"] = "+ outputs[i]);
+			}
+			outputs = serialiseData (outputs, nbColor, 0f, 1f, -1f, 1f);
+			for (int i = 0; i < outputs.Length; i++) {
+//				outputs [i] = outputs [i] * 2 - 1;
+				Debug.Log("outputs["+i+"] = "+ outputs[i]);
+			}
+		} else {
+			getInputsOutputs (baseApprentissage, inputs, outputs);
+		}
         regressionModel = LibWrapperMachineLearning.linear_fit_regression(inputs, inputSize * baseApprentissage.Length, inputSize, outputs, nbOutputNeuron);		
 		_isRunning = false;
 	}	
@@ -377,6 +368,7 @@ public class MainScript : MonoBehaviour {
 			transformXxY (input);
 		}
 	}
+
 	// Rempli le tableau input passé en paramètre avec les coordonnées x et y de l'objetsUnity
 	private void getInputs(Transform[] objetsUnity, double[] inputs){
 		if (inputs.Length < objetsUnity.Length * 2) {
@@ -442,6 +434,21 @@ public class MainScript : MonoBehaviour {
 		}
 	}
 
+	private void getInputsOutputsColorRegression(Transform[] objetsUnity, double[] inputs, double[] outputs){
+		int i = 0, j = 0;
+		foreach (var data in objetsUnity) {
+			inputs [i] = data.position.x;
+			i++;
+			inputs [i] = data.position.z;
+			i++;
+			outputs [j] = data.GetComponent<Renderer> ().material.color.b;
+			j++;
+			outputs [j] = data.GetComponent<Renderer> ().material.color.r;
+			j++;
+			outputs [j] = data.GetComponent<Renderer> ().material.color.g;
+			j++;
+		}
+	}
 	// Transforme les inputs pour certains cas non linérement séparable mais séparables par leur carré
 	private void transformCarre(double[] inputs){
 		for (int i = 0; i < inputs.Length; i++) {
@@ -485,7 +492,7 @@ public class MainScript : MonoBehaviour {
 		return serializedInputs;
 	}
 	// Use the min / max method to serialise inputs
-	private double[] serialiseData(double[] inputs, int inputSize, int minDepart, int maxDepart, int minArr, int maxArr ){
+	private double[] serialiseData(double[] inputs, int inputSize, float minDepart, float maxDepart, float minArr, float maxArr ){
 
 		double[] serializedInputs = new double[inputs.Length];
 		for (int i = 0; i < inputs.Length; i+=inputSize) {
