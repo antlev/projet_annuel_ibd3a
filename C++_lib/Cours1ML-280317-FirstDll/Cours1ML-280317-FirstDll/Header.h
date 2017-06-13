@@ -27,7 +27,7 @@ extern "C" {
 
 	__declspec(dllexport) void linearPredict(Eigen::MatrixXd* model, double* input, int inputSize, double* output, int outputSize);
 
-	__declspec(dllexport)  void pmcFitClassification(double**** modelWeights, double*** modelNeurons, double*** modelError, int* modelStruct, int nbLayer, double* inputs, int inputSize, int inputsSize, double* expectedOutputs, int outputSize, double learningRate, int maxIteraions);
+	__declspec(dllexport)  void pmcFit(double**** modelWeights, double*** modelNeurons, double*** modelError, int* modelStruct, int nbLayer, double* inputs, int inputSize, int inputsSize, double* expectedOutputs, int outputSize, double learningRate, int maxIteraions, int option);
 
 	__declspec(dllexport) void pmcCreateModel(int *modelStruct, int nbLayer, double ****modelWeights, double ***modelNeurons, double ***modelError);
 
@@ -41,6 +41,7 @@ double* addBiasToInputs(double *inputs, int *inputsSize, int *inputSize);
 Eigen::MatrixXd pinv(Eigen::MatrixXd X);
 void matrixToTab(Eigen::MatrixXd matrix, double *tab, int nbRow, int nbCols);
 void tabToMatrix(Eigen::MatrixXd* matrix, double* tab, int nbRow, int nbCols);
-void pmcFitOneInput(double**** modelWeights, double** modelNeurons, double*** modelError, int* modelStruct, int nbLayer, double* oneInput, int inputSize, double* oneOutput, int outputSize, double learningRate);
+void pmcFitOneInput(double**** modelWeights, double** modelNeurons, double*** modelError, int* modelStruct, int nbLayer, double* oneInput, int inputSize, double* oneOutput, int outputSize, double learningRate, int option);
 double sum(double*** modelWeights, double** modelNeurons, int* modelStruct, int layerNb, int neuronNb);
 void pmcClassifyOneInput(double*** modelWeights, double*** modelNeurons, int* modelStruct, int nbLayer, double* oneInput, int inputSize, double** oneOutput, int outputSize);
+void pmcPredictOneInput(double*** modelWeights, double*** modelNeurons, int* modelStruct, int nbLayer, double* oneInput, int inputSize, double** oneOutput, int outputSize);
