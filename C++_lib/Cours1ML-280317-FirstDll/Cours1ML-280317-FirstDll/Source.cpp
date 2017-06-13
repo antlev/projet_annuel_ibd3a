@@ -55,11 +55,8 @@ void linear_classify(double *model, double* input, int inputSize, double* output
 	double sum_weigths_inputs;
 	double* inputWithBias = addBiasToInput(input, inputSize);
 	for (int outputIterator = 0; outputIterator < outputDimension; outputIterator++) {
-		//        cout << "Debug outputIterator >" << outputIterator << "< " << endl;
-
 		sum_weigths_inputs = 0;
 		for (int modelIterator = outputIterator, inputIterator = 0; modelIterator < (inputSize + 1)*outputDimension && inputIterator < inputSize + 1; inputIterator++, modelIterator += outputDimension) {
-			//            cout << "Debug modelIterator >" << modelIterator << "< inputIterator >" << inputIterator << "< " << endl;
 			sum_weigths_inputs += model[modelIterator] * inputWithBias[inputIterator];
 		}
 		output[outputIterator] = (sum_weigths_inputs >= 0 ? 1 : -1);
@@ -104,32 +101,19 @@ int linear_fit_classification_rosenblatt(double *model, double *inputs, int inpu
 			}
 			// Get the result given by the Perceptron
 			linear_classify(model, oneInput, inputSize, oneOutput, outputSize);
-			cout << "TEST RETURN CLASSIFY " << endl;
-			for (int i = 0; i<outputSize; i++) {
-				cout << "output[" << i << "] >" << oneOutput[i] << "<" << endl;
-
-			}
 			oneInput = addBiasToInput(oneInput, inputSize);
-
 			bool* outputIsGood = new bool[outputSize];
 			double* outputError = new double[outputSize];
 			bool allOutputsAreGood = true;
 			// For each output neuron we check that response from perceptron is correct
 			for (int outputIterator = 0; outputIterator < outputSize; outputIterator++) {
-				cout << "DEBUG outputIterator>" << outputIterator << "< " << endl;
 				outputIsGood[outputIterator] = true; // Initialising all response at true
 													 // If one of the output neuron doesn't give the good answer
-				cout << "DEBUG oneOutput[outputIterator]>" << oneOutput[outputIterator] << "<  expectedOutputs[" << inputIterator*outputSize + outputIterator << "] >" << expectedOutputs[inputIterator*outputSize + outputIterator] << "< " << endl;
 				if (oneOutput[outputIterator] != expectedOutputs[inputIterator*outputSize + outputIterator]) {
-					cout << "DEBUG output nb " << outputIterator << " is false" << endl;
 					outputIsGood[outputIterator] = false;
 					if (allOutputsAreGood) { allOutputsAreGood = false; }
 					// Storing the output error in a tab
 					outputError[outputIterator] = expectedOutputs[inputIterator*outputSize + outputIterator] - oneOutput[outputIterator];
-					cout << "DEBUG outputError[" << outputIterator << "] >" << outputError[outputIterator] << "< " << endl;
-				}
-				else {
-					cout << "DEBUG output nb " << outputIterator << " is ok" << endl;
 				}
 			}
 			// If at least one of the Perceptron's response is not good
@@ -138,17 +122,10 @@ int linear_fit_classification_rosenblatt(double *model, double *inputs, int inpu
 				for (int outputIterator = 0; outputIterator < outputSize; outputIterator++) {
 					// For each output, if the Perceptron's response ins't good -> We modify the weights affecting the output
 					if (!outputIsGood[outputIterator]) {
-						//                        cout << "DEBUG modifying weight affecting output nb >" << outputIterator << "< " << endl;
 						// We adapt every weight of our Perceptron using the Rsoenblatt formula
 						for (int modelIterator = outputIterator, inputIterator = 0; modelIterator < (inputSize + 1)*outputSize; modelIterator += outputSize, inputIterator++) {
-
-							cout << "modelIterator >" << modelIterator << "< model[" << modelIterator << "]>" << model[modelIterator] << "< outputIterator >" << outputIterator << "< outputError[outputIterator] >" << outputError[outputIterator] << "< inputIterator >" << inputIterator << "< oneInput[inputIterator] >" << oneInput[inputIterator] << "< " << endl;
 							model[modelIterator] += step * outputError[outputIterator] * oneInput[inputIterator];
-
 						}
-					}
-					else {
-						cout << "DEBUG NOT MODIFYING weight affecting output nb >" << outputIterator << "< " << endl;
 					}
 				}
 			}
@@ -165,22 +142,10 @@ Eigen::MatrixXd* linear_fit_regression(double *inputs, int inputsSize, int input
 	// Build X and Y
 	int nbInput = inputsSize / inputSize;
 	Eigen::MatrixXd X(nbInput, inputSize);
-	//    cout << "X(" << nbInput << "," << inputSize << ")!" << endl;
 	Eigen::MatrixXd Y(nbInput, outputSize);
-	//    cout << "Y(" << nbInput << "," << outputSize << ")!" << endl;
 
 	tabToMatrix(&X, inputs, nbInput, inputSize);
 	tabToMatrix(&Y, expectedOutputs, nbInput, outputSize);
-	//    for (int i = 0; i < nbInput; i++) {
-	//        for (int j = 0; j < inputSize; j++) {
-	//            cout << "X(" << i << "," << j << ") = " << X(i,j) << endl;
-	//        }
-	//    }
-	//    for (int i = 0; i < nbInput; i++) {
-	//        for (int j = 0; j < outputSize; j++) {
-	//            cout << "Y(" << i << "," << j << ") = " << Y(i,j) << endl;
-	//        }
-	//    }
 	// return the calculated result as a matrix
 	return new Eigen::MatrixXd(pinv(X) * Y);
 }
@@ -203,16 +168,9 @@ void linearPredict(Eigen::MatrixXd* model, double* input, int inputSize, double*
 	for (int i = 0; i<inputSize + 1; i++) {
 		inputMatrix(0, i) = inputWithBias[i];
 	}
-	cout << "inputMatrix >" << inputMatrix << "<" << endl;
 	Eigen::MatrixXd outputMatrix(outputSize, 1);
 	outputMatrix = inputMatrix * (*model);
-	cout << "outputVector >" << outputMatrix << "<" << endl;
-
 	matrixToTab(outputMatrix, output, 1, outputSize);
-
-	for (int i = 0; i<outputSize; i++) {
-		cout << "output[" << i << "] = " << output[i] << endl;
-	}
 }
 
 // Add bias to the inputs
@@ -340,8 +298,6 @@ int main() {
 
 	pmcCreateModel(modelStruct, nbLayer, &modelWeights, &modelNeurons, &modelError);
 
-	cout << "test " << modelNeurons[0][0] << endl;
-
 	pmcFit(&modelWeights, &modelNeurons, &modelError, modelStruct, nbLayer, inputs, inputSize, inputsSize, expectedOutputs, outputNeuronsSize, learningRate, iterationsMax, 0);
 
 	input[0] = 1;
@@ -433,8 +389,6 @@ void pmcCreateModel(int *modelStruct, int nbLayer, double ****modelWeights, doub
 	(*modelWeights) = new double**[nbLayer - 1];
 	(*modelNeurons) = new double*[nbLayer];
 	(*modelError) = new double*[nbLayer];
-
-
 	for (int layerNumber = 0; layerNumber<nbLayer; layerNumber++) {
 		(*modelNeurons)[layerNumber] = new double[modelStruct[layerNumber] + 1]; // Bias neuron
 		(*modelError)[layerNumber] = new double[modelStruct[layerNumber] + 1]; // Bias neuron
@@ -454,9 +408,7 @@ void pmcCreateModel(int *modelStruct, int nbLayer, double ****modelWeights, doub
 		}
 	}
 }
-
 void pmcFit(double**** modelWeights, double*** modelNeurons, double*** modelError, int* modelStruct, int nbLayer, double* inputs, int inputSize, int inputsSize, double* expectedOutputs, int outputSize, double learningRate, int maxIteraions, int option) {
-	//    addBiasToInputs(inputs, &inputsSize, &inputSize);
 	int nbData = inputsSize / inputSize;
 	int iterations(0);
 	int indexOfRdmData;
@@ -465,7 +417,6 @@ void pmcFit(double**** modelWeights, double*** modelNeurons, double*** modelErro
 	while (1) {
 		indexOfRdmData = rand() % (nbData);
 		for (int i = indexOfRdmData*inputSize, j = 0; i < (indexOfRdmData + 1)*inputSize; ++i, ++j) {
-			//            cout << "toto nan" << inputs[i] << endl;
 			oneInput[j] = inputs[i];
 		}
 		for (int i = indexOfRdmData*outputSize, j = 0; i < (indexOfRdmData + 1)*outputSize; ++i, ++j) {
@@ -482,7 +433,6 @@ void pmcFit(double**** modelWeights, double*** modelNeurons, double*** modelErro
 			break;
 		}
 	}
-
 }
 void pmcFitOneInput(double**** modelWeights, double** modelNeurons, double*** modelError, int* modelStruct, int nbLayer, double* oneInput, int inputSize, double* oneOutput, int outputSize, double learningRate, int option) {
 	double sum;
@@ -514,9 +464,7 @@ void pmcFitOneInput(double**** modelWeights, double** modelNeurons, double*** mo
 	for (int layerNb = 1; layerNb < nbLayer; ++layerNb) {
 		for (int leftNeuronNb = 0; leftNeuronNb < modelStruct[layerNb - 1] + 1 /*Bias*/; ++leftNeuronNb) {
 			for (int rightNeuronNb = 0; rightNeuronNb < modelStruct[layerNb]; ++rightNeuronNb) {
-				//                cout << "test (" << rightNeuronNb << ") modelNeurons[" << layerNb-1 << "][" << leftNeuronNb << "] >" << modelNeurons[layerNb-1][leftNeuronNb] << "< TOTO modelNeurons[" << layerNb-1 << "][" << leftNeuronNb << "] >"<< modelNeurons[layerNb-1][leftNeuronNb] << endl;
 				(*modelWeights)[layerNb - 1][leftNeuronNb][rightNeuronNb] -= learningRate * modelNeurons[layerNb - 1][leftNeuronNb] * (*modelError)[layerNb][rightNeuronNb];
-				//                cout << "updating  (*modelWeights)[" << layerNb - 1<< "][" << leftNeuronNb << "][" << rightNeuronNb << "]" <<  (*modelWeights)[layerNb - 1][leftNeuronNb][rightNeuronNb] << endl;
 			}
 		}
 	}
@@ -525,34 +473,26 @@ void pmcFitOneInput(double**** modelWeights, double** modelNeurons, double*** mo
 double sum(double*** modelWeights, double** modelNeurons, int* modelStruct, int layerNb, int neuronNb) {
 	double sum = 0;
 	for (int i = 0; i < modelStruct[layerNb - 1] + 1; ++i) {
-		//        cout << "test nan modelNeurons[" << layerNb - 1 << "][" << i << "] = " << modelNeurons[layerNb - 1][i]  << endl;
-		//        cout << "test nan modelWeights[" << layerNb - 1 << "][" << i << "][" << neuronNb << "] = " << modelWeights[layerNb - 1][i][neuronNb]  << endl;
 		sum += modelNeurons[layerNb - 1][i] * modelWeights[layerNb - 1][i][neuronNb];
-		//        cout << "test nan sum >" << sum << endl;
 	}
 	return sum;
 }
 // Set all the neurons considering the input and weight
 // Set the oneOutput variable
 void pmcClassifyOneInput(double*** modelWeights, double*** modelNeurons, int* modelStruct, int nbLayer, double* oneInput, int inputSize, double** oneOutput, int outputSize) {
-	//    addBiasToInput(oneInput, inputSize);
 	// set the input layer with the input given plus the bias neuron
 	for (int i = 0; i< inputSize; ++i) {
 		(*modelNeurons)[0][i] = oneInput[i];
-		//        cout << "setting (*modelNeurons)[" << 0 << "][" << i << "] = " << (*modelNeurons)[0][i] << endl;
 	}
 	(*modelNeurons)[0][inputSize] = 1;
-	//    cout << "setting (*modelNeurons)[" << 0 << "][" << inputSize << "] = " << (*modelNeurons)[0][inputSize] << endl;
 	// Set all the neurons of the model
 	for (int layerNb = 1; layerNb < nbLayer; ++layerNb) {
 		for (int neuronNb = 0; neuronNb < modelStruct[layerNb] + 1; ++neuronNb) {
 			if (neuronNb == modelStruct[layerNb]) { // Bias
 				(*modelNeurons)[layerNb][neuronNb] = 1;
-				//                cout << "a setting (*modelNeurons)[" << layerNb << "][" << neuronNb << "] = " << (*modelNeurons)[layerNb][neuronNb] << endl;
 			}
 			else {
 				(*modelNeurons)[layerNb][neuronNb] = tanh(sum(modelWeights, *modelNeurons, modelStruct, layerNb, neuronNb));
-				//                cout << "b setting (*modelNeurons)[" << layerNb << "][" << neuronNb << "] = " << (*modelNeurons)[layerNb][neuronNb] << endl;
 			}
 		}
 	}
@@ -560,20 +500,16 @@ void pmcClassifyOneInput(double*** modelWeights, double*** modelNeurons, int* mo
 // Set all the neurons considering the input and weight
 // Set the oneOutput variable
 void pmcPredictOneInput(double*** modelWeights, double*** modelNeurons, int* modelStruct, int nbLayer, double* oneInput, int inputSize, double** oneOutput, int outputSize) {
-	//    addBiasToInput(oneInput, inputSize);
 	// set the input layer with the input given plus the bias neuron
 	for (int i = 0; i< inputSize; ++i) {
 		(*modelNeurons)[0][i] = oneInput[i];
-		//        cout << "setting (*modelNeurons)[" << 0 << "][" << i << "] = " << (*modelNeurons)[0][i] << endl;
 	}
 	(*modelNeurons)[0][inputSize] = 1;
-	//    cout << "setting (*modelNeurons)[" << 0 << "][" << inputSize << "] = " << (*modelNeurons)[0][inputSize] << endl;
 	// Set all the neurons of the model
 	for (int layerNb = 1; layerNb < nbLayer; ++layerNb) {
 		for (int neuronNb = 0; neuronNb < modelStruct[layerNb] + 1; ++neuronNb) {
 			if (neuronNb == modelStruct[layerNb]) { // Bias
 				(*modelNeurons)[layerNb][neuronNb] = 1;
-				//                cout << "a setting (*modelNeurons)[" << layerNb << "][" << neuronNb << "] = " << (*modelNeurons)[layerNb][neuronNb] << endl;
 			}
 			else {
 				if (layerNb == nbLayer - 1) {
@@ -581,7 +517,6 @@ void pmcPredictOneInput(double*** modelWeights, double*** modelNeurons, int* mod
 				}
 				else {
 					(*modelNeurons)[layerNb][neuronNb] = tanh(sum(modelWeights, *modelNeurons, modelStruct, layerNb, neuronNb));
-					//                cout << "b setting (*modelNeurons)[" << layerNb << "][" << neuronNb << "] = " << (*modelNeurons)[layerNb][neuronNb] << endl;
 				}
 			}
 		}
@@ -603,14 +538,8 @@ void baseTest(double* inputs, double* expected_outputs, int inputSize) {
 	for (i = 0; i < 20; i += 2) {
 		// x entre -1 et 1
 		inputs[i] = rand() % 10000 / 5000. - 1.;
-		/*
-		inputs++;
-		*/
 		// z entre 0 et 1
 		inputs[i + 1] = rand() % 10000 / 10000.;
-		/*
-		inputs++;
-		*/
 	}
 	for (i = 20; i < 40; i += 2) {
 		// x entre -1 et 1
@@ -627,31 +556,3 @@ void baseTest(double* inputs, double* expected_outputs, int inputSize) {
 		expected_outputs[i] = -1;
 	}
 }
-//void test(Eigen::MatrixXd* model, double* inputs, int inputsSize, int inputSize, double* outputs, int outputSize){
-//    int nbData = inputsSize / inputSize;
-//    inputs = addBiasToInputs(inputs, &inputsSize, &inputSize);
-//
-//    // Eigen::MatrixXd inputsMatrix(inputSize, nbData);
-//
-//    // int inputIterator = 0;
-//    // for (int i = 0; i<nbData; i++) {
-//    // 	for (int j = 0; j<inputSize; ++j) {
-//    // 		inputsMatrix(i, j) = inputs[inputIterator];
-//    // 		inputIterator++;
-//    // 	}
-//    // }
-//    // Eigen::MatrixXd outputMatrix(outputSize, nbData);
-//    // Calcul de l'output
-//    //Eigen::MatrixXd outputMatrix = (*model).transpose() * inputsMatrix;
-//
-//    for(int i=0;i<nbData;i++){
-//        int sum=0;
-//        for(int j=0;j<inputsSize;j++){
-//            sum += (*model)(i,j) * inputs[i*inputsSize+j];
-//        }
-//        outputs[i] = sum;
-//    }
-//
-//
-//    // matrixToTab(outputMatrix, outputs, nbData, outputSize);
-//}
