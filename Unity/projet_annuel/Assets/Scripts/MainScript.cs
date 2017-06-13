@@ -16,6 +16,7 @@ public class MainScript : MonoBehaviour {
 
     public Transform[] baseApprentissage;
     public Transform[] baseTest;
+	public Transform toto;
 
 	public static string nbColorButtonString = "Change to 2 colors";
 	public static bool testWithColor = false;
@@ -128,10 +129,8 @@ public class MainScript : MonoBehaviour {
             {
 				if (transformInput == 1) {
 					transformInput = 2;
-					inputSize = 1;
 					transformButtonString = "Don't Use Transformation";
 				} else if (transformInput == 2) {
-					inputSize = 2;
 					transformInput = 0;
 					transformButtonString = "Use Transformation Carre";
 				} else {
@@ -203,16 +202,17 @@ public class MainScript : MonoBehaviour {
 			generateBaseTest (baseTest, 10);
 			Debug.Log ("Classification with a test base of " + baseTest.Length + " marbles");
 			double[] input;
-			if (transformInput == 2) {
-				input = new double[inputSize+1];
-			} else {
-				input = new double[inputSize];
-			}
+			input = new double[inputSize];
+
 			double[] outputs = new double[nbOutputNeuron];
 			foreach(var unityObject in baseTest){
 				getInput (unityObject, input);
                 if (testWithColor) {
-					LibWrapperMachineLearning.linear_classify (model, input, inputSize, outputs, nbOutputNeuron);
+					if (transformInput == 2) {
+						LibWrapperMachineLearning.linear_classify (model, input, 1, outputs, nbOutputNeuron);
+					} else {
+						LibWrapperMachineLearning.linear_classify (model, input, inputSize, outputs, nbOutputNeuron);
+					}
 					for (int i = 0; i < nbOutputNeuron; i++) {
 						if(outputs[i] == 1){
 							if(i%nbColor == colorBlue){
@@ -235,8 +235,34 @@ public class MainScript : MonoBehaviour {
 			Debug.Log ("Aucun modèle en mémoire");
 		}
 		_isRunning = false;
-	}
+	}	
+	public void linear_fit_classification_rosenblatt(){
+		_isRunning = true;
+		if (model != System.IntPtr.Zero) {
+			Debug.Log ("linear_fit_classification_rosenblatt with a learning base of " + baseApprentissage.Length + " marbles");
+			double[] inputs;
 
+			inputs = new double[inputSize * baseApprentissage.Length];
+			double[] outputs = new double[baseApprentissage.Length * nbOutputNeuron];
+			getInputsOutputs (baseApprentissage, inputs, outputs);
+			int learningResponse;
+			if (transformInput == 2) {
+				learningResponse = LibWrapperMachineLearning.linear_fit_classification_rosenblatt (model, inputs, 1 * baseApprentissage.Length, 1, outputs, nbOutputNeuron, iterationNumber, step);
+			} else {
+				learningResponse = LibWrapperMachineLearning.linear_fit_classification_rosenblatt (model, inputs, inputSize * baseApprentissage.Length, inputSize, outputs, nbOutputNeuron, iterationNumber, step);
+			}
+			if(learningResponse == -1){
+				Debug.Log("C++ >Aucun modèle en mémoire<");
+			}else if(learningResponse == 0){
+				Debug.Log("Leaning stop by iterations");
+			} else{
+				Debug.Log("Learning stop beacause all case were correctly classified");
+			}
+	} else {
+			Debug.Log ("Aucun modèle en mémoire");
+		}
+		_isRunning = false;
+	}
 	public void predict(){
 		_isRunning = true;
 		generateBaseTest (baseTest, 10);
@@ -261,7 +287,7 @@ public class MainScript : MonoBehaviour {
 		}
 		_isRunning = false;
 	}
-    public void linear_fit_regression(){
+	public void linear_fit_regression(){
 		_isRunning = true;
 		Debug.Log ("linear_fit_regression");
 		double[] inputs = new double[inputSize * baseApprentissage.Length];
@@ -272,37 +298,10 @@ public class MainScript : MonoBehaviour {
 		} else {
 			getInputsOutputs (baseApprentissage, inputs, outputs);
 		}
-        regressionModel = LibWrapperMachineLearning.linear_fit_regression(inputs, inputSize * baseApprentissage.Length, inputSize, outputs, nbOutputNeuron);		
+		regressionModel = LibWrapperMachineLearning.linear_fit_regression(inputs, inputSize * baseApprentissage.Length, inputSize, outputs, nbOutputNeuron);		
 		_isRunning = false;
 	}	
-
-	public void linear_fit_classification_rosenblatt(){
-		_isRunning = true;
-		if (model != System.IntPtr.Zero) {
-			Debug.Log ("linear_fit_classification_rosenblatt with a learning base of " + baseApprentissage.Length + " marbles");
-			double[] inputs;
-			if (transformInput == 2) {
-				inputs = new double[(inputSize+1) * baseApprentissage.Length];
-			} else {
-				inputs = new double[inputSize * baseApprentissage.Length];
-			}
-			double[] outputs = new double[baseApprentissage.Length * nbOutputNeuron];
-			getInputsOutputs (baseApprentissage, inputs, outputs);
-			int learningResponse;
-			learningResponse = LibWrapperMachineLearning.linear_fit_classification_rosenblatt(model, inputs, inputSize * baseApprentissage.Length, inputSize, outputs, nbOutputNeuron, iterationNumber, step);
-			if(learningResponse == -1){
-				Debug.Log("C++ >Aucun modèle en mémoire<");
-			}else if(learningResponse == 0){
-				Debug.Log("Leaning stop by iterations");
-			} else{
-				Debug.Log("Learning stop beacause all case were correctly classified");
-			}
-	} else {
-			Debug.Log ("Aucun modèle en mémoire");
-		}
-		_isRunning = false;
-	}
-
+	// Utils
 	private void getInput(Transform objetUnity, double[] input){
 		input[0] = objetUnity.position.x;
 		input[1] = objetUnity.position.z;
@@ -383,12 +382,14 @@ public class MainScript : MonoBehaviour {
 		foreach (var data in objetsUnity) {
 			inputs [i] = data.position.x;
 			i++;
+
 			inputs [i] = data.position.z;
 			i++;
 			outputs [j] = data.GetComponent<Renderer> ().material.color.b;
 			j++;
 			outputs [j] = data.GetComponent<Renderer> ().material.color.r;
 			j++;
+			toto.GetComponent<Renderer>().material.color.
 			outputs [j] = data.GetComponent<Renderer> ().material.color.g;
 			j++;
 		}

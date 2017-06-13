@@ -55,8 +55,11 @@ void linear_classify(double *model, double* input, int inputSize, double* output
 	double sum_weigths_inputs;
 	double* inputWithBias = addBiasToInput(input, inputSize);
 	for (int outputIterator = 0; outputIterator < outputDimension; outputIterator++) {
+		//        cout << "Debug outputIterator >" << outputIterator << "< " << endl;
+
 		sum_weigths_inputs = 0;
 		for (int modelIterator = outputIterator, inputIterator = 0; modelIterator < (inputSize + 1)*outputDimension && inputIterator < inputSize + 1; inputIterator++, modelIterator += outputDimension) {
+			//            cout << "Debug modelIterator >" << modelIterator << "< inputIterator >" << inputIterator << "< " << endl;
 			sum_weigths_inputs += model[modelIterator] * inputWithBias[inputIterator];
 		}
 		output[outputIterator] = (sum_weigths_inputs >= 0 ? 1 : -1);
@@ -101,6 +104,11 @@ int linear_fit_classification_rosenblatt(double *model, double *inputs, int inpu
 			}
 			// Get the result given by the Perceptron
 			linear_classify(model, oneInput, inputSize, oneOutput, outputSize);
+			cout << "TEST RETURN CLASSIFY " << endl;
+			for (int i = 0; i<outputSize; i++) {
+				cout << "output[" << i << "] >" << oneOutput[i] << "<" << endl;
+
+			}
 			oneInput = addBiasToInput(oneInput, inputSize);
 
 			bool* outputIsGood = new bool[outputSize];
@@ -108,13 +116,20 @@ int linear_fit_classification_rosenblatt(double *model, double *inputs, int inpu
 			bool allOutputsAreGood = true;
 			// For each output neuron we check that response from perceptron is correct
 			for (int outputIterator = 0; outputIterator < outputSize; outputIterator++) {
+				cout << "DEBUG outputIterator>" << outputIterator << "< " << endl;
 				outputIsGood[outputIterator] = true; // Initialising all response at true
 													 // If one of the output neuron doesn't give the good answer
+				cout << "DEBUG oneOutput[outputIterator]>" << oneOutput[outputIterator] << "<  expectedOutputs[" << inputIterator*outputSize + outputIterator << "] >" << expectedOutputs[inputIterator*outputSize + outputIterator] << "< " << endl;
 				if (oneOutput[outputIterator] != expectedOutputs[inputIterator*outputSize + outputIterator]) {
+					cout << "DEBUG output nb " << outputIterator << " is false" << endl;
 					outputIsGood[outputIterator] = false;
 					if (allOutputsAreGood) { allOutputsAreGood = false; }
 					// Storing the output error in a tab
 					outputError[outputIterator] = expectedOutputs[inputIterator*outputSize + outputIterator] - oneOutput[outputIterator];
+					cout << "DEBUG outputError[" << outputIterator << "] >" << outputError[outputIterator] << "< " << endl;
+				}
+				else {
+					cout << "DEBUG output nb " << outputIterator << " is ok" << endl;
 				}
 			}
 			// If at least one of the Perceptron's response is not good
@@ -126,10 +141,14 @@ int linear_fit_classification_rosenblatt(double *model, double *inputs, int inpu
 						//                        cout << "DEBUG modifying weight affecting output nb >" << outputIterator << "< " << endl;
 						// We adapt every weight of our Perceptron using the Rsoenblatt formula
 						for (int modelIterator = outputIterator, inputIterator = 0; modelIterator < (inputSize + 1)*outputSize; modelIterator += outputSize, inputIterator++) {
+
+							cout << "modelIterator >" << modelIterator << "< model[" << modelIterator << "]>" << model[modelIterator] << "< outputIterator >" << outputIterator << "< outputError[outputIterator] >" << outputError[outputIterator] << "< inputIterator >" << inputIterator << "< oneInput[inputIterator] >" << oneInput[inputIterator] << "< " << endl;
 							model[modelIterator] += step * outputError[outputIterator] * oneInput[inputIterator];
+
 						}
 					}
 					else {
+						cout << "DEBUG NOT MODIFYING weight affecting output nb >" << outputIterator << "< " << endl;
 					}
 				}
 			}
@@ -146,9 +165,23 @@ Eigen::MatrixXd* linear_fit_regression(double *inputs, int inputsSize, int input
 	// Build X and Y
 	int nbInput = inputsSize / inputSize;
 	Eigen::MatrixXd X(nbInput, inputSize);
+	//    cout << "X(" << nbInput << "," << inputSize << ")!" << endl;
 	Eigen::MatrixXd Y(nbInput, outputSize);
+	//    cout << "Y(" << nbInput << "," << outputSize << ")!" << endl;
+
 	tabToMatrix(&X, inputs, nbInput, inputSize);
 	tabToMatrix(&Y, expectedOutputs, nbInput, outputSize);
+	//    for (int i = 0; i < nbInput; i++) {
+	//        for (int j = 0; j < inputSize; j++) {
+	//            cout << "X(" << i << "," << j << ") = " << X(i,j) << endl;
+	//        }
+	//    }
+	//    for (int i = 0; i < nbInput; i++) {
+	//        for (int j = 0; j < outputSize; j++) {
+	//            cout << "Y(" << i << "," << j << ") = " << Y(i,j) << endl;
+	//        }
+	//    }
+	// return the calculated result as a matrix
 	return new Eigen::MatrixXd(pinv(X) * Y);
 }
 // Return the pseudo inverse of the matrix passed as a parameter
@@ -181,110 +214,7 @@ void linearPredict(Eigen::MatrixXd* model, double* input, int inputSize, double*
 		cout << "output[" << i << "] = " << output[i] << endl;
 	}
 }
-int main() {
 
-	time_t now;
-	time(&now);
-	srand((unsigned int)now);
-
-	int inputSize = 2;
-	int outputNeuronsSize = 3;
-	int nbData = 3;
-
-	int inputsSize = inputSize * nbData;
-	int outputsSize = outputNeuronsSize*nbData;
-	double* inputs = new double[inputsSize];
-	double* expectedOutputs = new double[outputsSize];
-
-	inputs[0] = 0;
-	inputs[1] = -0.5;
-	expectedOutputs[0] = 0.25;
-	expectedOutputs[1] = 0.1;
-	expectedOutputs[2] = -1;
-
-	inputs[2] = 0.5;
-	inputs[3] = 0.375;
-	expectedOutputs[3] = 0.6;
-	expectedOutputs[4] = -0.3;
-	expectedOutputs[5] = 0.2;
-
-	inputs[4] = -0.625;
-	inputs[5] = 0.25;
-	expectedOutputs[6] = 0.1;
-	expectedOutputs[7] = -0.1;
-	expectedOutputs[8] = -0.8;
-
-	Eigen::MatrixXd* model = linear_fit_regression(inputs, inputsSize, inputSize, expectedOutputs, outputNeuronsSize);
-
-	cout << "model : " << *model << " (" << model->rows() << "," << model->cols() << ")" << endl;
-	double* input = new double(inputSize);
-	double* output = new double(outputNeuronsSize);
-	input[0] = 0;
-	input[1] = -0.5;
-	linearPredict(model, input, inputSize, output, outputNeuronsSize);
-
-	input[0] = 0.5;
-	input[1] = 0.375;
-	linearPredict(model, input, inputSize, output, outputNeuronsSize);
-
-	input[0] = -0.625;
-	input[1] = 0.25;
-	linearPredict(model, input, inputSize, output, outputNeuronsSize);
-
-	double*** modelWeights;
-	double** modelNeurons;
-	double** modelError;
-	int nbLayer = 3;
-	int modelStruct[3] = { 2, 3, 3 };
-	int iterationsMax = 1000;
-	double learningRate = 0.1;
-
-	inputs[0] = 0;
-	inputs[1] = 0.5;
-	expectedOutputs[0] = 0.25;
-	expectedOutputs[1] = 0.1;
-	expectedOutputs[2] = 1;
-
-	inputs[2] = 0.5;
-	inputs[3] = 0.375;
-	expectedOutputs[3] = 0.6;
-	expectedOutputs[4] = 0.3;
-	expectedOutputs[5] = 0.2;
-
-	inputs[4] = 0.625;
-	inputs[5] = 0.25;
-	expectedOutputs[6] = 0.1;
-	expectedOutputs[7] = 0.1;
-	expectedOutputs[8] = 0.8;
-
-	pmcCreateModel(modelStruct, nbLayer, &modelWeights, &modelNeurons, &modelError);
-
-	cout << "test " << modelNeurons[0][0] << endl;
-
-	pmcFitClassification(&modelWeights, &modelNeurons, &modelError, modelStruct, nbLayer, inputs, inputSize, inputsSize, expectedOutputs, outputNeuronsSize, learningRate, iterationsMax);
-
-	input[0] = 0;
-	input[1] = 0.5;
-	pmcClassifyOneInput(modelWeights, &modelNeurons, modelStruct, nbLayer, input, inputSize, &output, outputNeuronsSize);
-	for (int i = 0; i < outputNeuronsSize; ++i) {
-		cout << "TEST Output[" << i << "] >" << output[i] << "<" << endl;
-	}
-
-	input[0] = 0.5;
-	input[1] = 0.375;
-	pmcClassifyOneInput(modelWeights, &modelNeurons, modelStruct, nbLayer, input, inputSize, &output, outputNeuronsSize);
-	for (int i = 0; i < outputNeuronsSize; ++i) {
-		cout << "TEST Output[" << i << "] >" << output[i] << "<" << endl;
-	}
-
-	input[0] = 0.625;
-	input[1] = 0.25;
-	pmcClassifyOneInput(modelWeights, &modelNeurons, modelStruct, nbLayer, input, inputSize, &output, outputNeuronsSize);
-	for (int i = 0; i < outputNeuronsSize; ++i) {
-		cout << "TEST Output[" << i << "] >" << output[i] << "<" << endl;
-	}
-	return 1;
-}
 // Add bias to the inputs
 // Modify inputSize and inputsSize
 // Return the new input
@@ -323,6 +253,130 @@ void matrixToTab(Eigen::MatrixXd matrix, double *tab, int nbRow, int nbCols) {
 			iterator++;
 		}
 	}
+}
+int main() {
+
+	time_t now;
+	time(&now);
+	srand((unsigned int)now);
+
+	int inputSize = 2;
+	int outputNeuronsSize = 1;
+	int nbData = 4;
+
+	int inputsSize = inputSize * nbData;
+	int outputsSize = outputNeuronsSize*nbData;
+	double* inputs = new double[inputsSize];
+	double* expectedOutputs = new double[outputsSize];
+	//
+	//    inputs[0] = 0;
+	//    inputs[1] = -0.5;
+	//    expectedOutputs[0] = 0.25;
+	//    expectedOutputs[1] = 0.1;
+	//    expectedOutputs[2] = -1;
+	//
+	//    inputs[2] = 0.5;
+	//    inputs[3] = 0.375;
+	//    expectedOutputs[3] = 0.6;
+	//    expectedOutputs[4] = -0.3;
+	//    expectedOutputs[5] = 0.2;
+	//
+	//    inputs[4] = -0.625;
+	//    inputs[5] = 0.25;
+	//    expectedOutputs[6] = 0.1;
+	//    expectedOutputs[7] = -0.1;
+	//    expectedOutputs[8] = -0.8;
+	//
+	//    Eigen::MatrixXd* model = linear_fit_regression(inputs, inputsSize, inputSize, expectedOutputs, outputNeuronsSize);
+	//
+	//    cout << "model : " << *model << " (" << model->rows() << "," << model->cols() << ")" << endl;
+	double* input = new double[inputSize];
+	double* output = new double[outputNeuronsSize];
+	//    input[0] = 0;
+	//    input[1] = -0.5;
+	//    linearPredict(model, input, inputSize, output, outputNeuronsSize);
+	//
+	//    input[0] = 0.5;
+	//    input[1] = 0.375;
+	//    linearPredict(model, input, inputSize, output, outputNeuronsSize);
+	//
+	//    input[0] = -0.625;
+	//    input[1] = 0.25;
+	//    linearPredict(model, input, inputSize, output, outputNeuronsSize);
+
+	double*** modelWeights;
+	double** modelNeurons;
+	double** modelError;
+	int nbLayer = 3;
+	int modelStruct[3] = { 2, 2, 1 };
+	int iterationsMax = 100000;
+	double learningRate = 0.01;
+
+	inputs[0] = -1;
+	inputs[1] = -1;
+	expectedOutputs[0] = 1;
+	//    expectedOutputs[1] = 0.1;
+	//    expectedOutputs[2] = 1;
+
+	inputs[2] = 1;
+	inputs[3] = 1;
+	expectedOutputs[1] = 1;
+
+	//    expectedOutputs[3] = 0.6;
+	//    expectedOutputs[4] = 0.3;
+	//    expectedOutputs[5] = 0.2;
+
+	inputs[4] = -1;
+	inputs[5] = 1;
+	expectedOutputs[2] = -1;
+
+	//    expectedOutputs[6] = 0.1;
+	//    expectedOutputs[7] = 0.1;
+	//    expectedOutputs[8] = 0.8;
+
+	inputs[6] = 1;
+	inputs[7] = -1;
+	expectedOutputs[3] = -1;
+
+	pmcCreateModel(modelStruct, nbLayer, &modelWeights, &modelNeurons, &modelError);
+
+	cout << "test " << modelNeurons[0][0] << endl;
+
+	pmcFitClassification(&modelWeights, &modelNeurons, &modelError, modelStruct, nbLayer, inputs, inputSize, inputsSize, expectedOutputs, outputNeuronsSize, learningRate, iterationsMax);
+
+	//modelWeights[0][0][0] = 1;
+	//modelWeights[0][1][0] = 1;
+	//modelWeights[0][2][0] = -0.5;
+
+
+	input[0] = 1;
+	input[1] = 1;
+	pmcClassifyOneInput(modelWeights, &modelNeurons, modelStruct, nbLayer, input, inputSize, &output, outputNeuronsSize);
+	for (int i = 0; i < outputNeuronsSize; ++i) {
+		cout << "TEST Output[" << i << "] >" << modelNeurons[nbLayer - 1][i] << "<" << endl;
+	}
+
+	input[0] = -1;
+	input[1] = -1;
+	pmcClassifyOneInput(modelWeights, &modelNeurons, modelStruct, nbLayer, input, inputSize, &output, outputNeuronsSize);
+	for (int i = 0; i < outputNeuronsSize; ++i) {
+		cout << "TEST Output[" << i << "] >" << modelNeurons[nbLayer - 1][i] << "<" << endl;
+	}
+
+	input[0] = 1;
+	input[1] = -1.0;
+	pmcClassifyOneInput(modelWeights, &modelNeurons, modelStruct, nbLayer, input, inputSize, &output, outputNeuronsSize);
+	for (int i = 0; i < outputNeuronsSize; ++i) {
+		cout << "TEST Output[" << i << "] >" << modelNeurons[nbLayer - 1][i] << "<" << endl;
+	}
+
+	input[0] = -1;
+	input[1] = 1.0;
+	pmcClassifyOneInput(modelWeights, &modelNeurons, modelStruct, nbLayer, input, inputSize, &output, outputNeuronsSize);
+	for (int i = 0; i < outputNeuronsSize; ++i) {
+		cout << "TEST Output[" << i << "] >" << modelNeurons[nbLayer - 1][i] << "<" << endl;
+	}
+	return 1;
 }
 //////////////// PERCEPTRON MULTI-COUCHES ////////////////////////
 // ModelStruct corresponds to the structure of the model to generate
@@ -396,13 +450,13 @@ void pmcFitOneInput(double**** modelWeights, double** modelNeurons, double*** mo
 	}
 	// CALCULATE ERROR FOR ALL OTHER LAYERS
 	for (int layerNb = nbLayer - 1; layerNb > 0; --layerNb) {
-		for (int neuronNb = 0; neuronNb < modelStruct[layerNb - 1]; ++neuronNb) {
+		for (int leftNeuron = 0; leftNeuron < modelStruct[layerNb - 1]; ++leftNeuron) {
 			sum = 0;
-			for (int leftNeuron = 0; leftNeuron < modelStruct[layerNb - 1] + 1 /*Bias*/; ++leftNeuron) {
+			for (int neuronNb = 0; neuronNb < modelStruct[layerNb] /*Bias*/; ++neuronNb) {
 				sum += (*modelWeights)[layerNb - 1][leftNeuron][neuronNb] * (*modelError)[layerNb][neuronNb];
 			}
-			(*modelError)[layerNb - 1][neuronNb] =
-				(1 - (modelNeurons[layerNb - 1][neuronNb] * modelNeurons[layerNb - 1][neuronNb])) * sum;
+			(*modelError)[layerNb - 1][leftNeuron] =
+				(1 - (modelNeurons[layerNb - 1][leftNeuron] * modelNeurons[layerNb - 1][leftNeuron])) * sum;
 		}
 	}
 	// UPDATE WEIGHTS
@@ -410,7 +464,7 @@ void pmcFitOneInput(double**** modelWeights, double** modelNeurons, double*** mo
 		for (int leftNeuronNb = 0; leftNeuronNb < modelStruct[layerNb - 1] + 1 /*Bias*/; ++leftNeuronNb) {
 			for (int rightNeuronNb = 0; rightNeuronNb < modelStruct[layerNb]; ++rightNeuronNb) {
 				//                cout << "test (" << rightNeuronNb << ") modelNeurons[" << layerNb-1 << "][" << leftNeuronNb << "] >" << modelNeurons[layerNb-1][leftNeuronNb] << "< TOTO modelNeurons[" << layerNb-1 << "][" << leftNeuronNb << "] >"<< modelNeurons[layerNb-1][leftNeuronNb] << endl;
-				(*modelWeights)[layerNb - 1][leftNeuronNb][rightNeuronNb] -= learningRate * modelNeurons[layerNb - 1][leftNeuronNb] * (*modelError)[layerNb][leftNeuronNb];
+				(*modelWeights)[layerNb - 1][leftNeuronNb][rightNeuronNb] -= learningRate * modelNeurons[layerNb - 1][leftNeuronNb] * (*modelError)[layerNb][rightNeuronNb];
 				//                cout << "updating  (*modelWeights)[" << layerNb - 1<< "][" << leftNeuronNb << "][" << rightNeuronNb << "]" <<  (*modelWeights)[layerNb - 1][leftNeuronNb][rightNeuronNb] << endl;
 			}
 		}
@@ -452,9 +506,9 @@ void pmcClassifyOneInput(double*** modelWeights, double*** modelNeurons, int* mo
 		}
 	}
 	// Set the output
-	for (int i = 0; i < outputSize; ++i) {
-		(*oneOutput)[i] = (*modelNeurons)[nbLayer - 1][i];
-	}
+	//for (int i = 0; i < outputSize; ++i) {
+	//    (*oneOutput)[i] = (*modelNeurons)[nbLayer - 1][i];
+	//}
 }
 void pmc_remove_model(double*** model, int* modelStruct, int modelStructSize, int inputSize) {
 	for (int i = 0; i<modelStructSize; i++) {
