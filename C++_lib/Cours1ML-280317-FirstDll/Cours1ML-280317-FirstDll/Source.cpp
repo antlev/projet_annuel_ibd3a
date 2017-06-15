@@ -1,4 +1,5 @@
 #include "Header.h"
+#include "MLP.h"
 #include <iostream>
 #include <stdlib.h>
 #include <time.h>
@@ -40,7 +41,7 @@ double* addBiasToInput(double *input, int inputSize) {
 	return newInput;
 }
 //  ---------- APPLICATION ----------
-// Return the Perceptron's response considering the inputs
+// Return the MLP's response considering the inputs
 // @param model : model used to classify
 // @param input : input to use
 // @param inputSize : size of input array
@@ -99,13 +100,13 @@ int linear_fit_classification_rosenblatt(double *model, double *inputs, int inpu
 			for (int i = 0; i<inputSize; i++) {
 				oneInput[i] = inputs[inputsIterator + i];
 			}
-			// Get the result given by the Perceptron
+			// Get the result given by the MLP
 			linear_classify(model, oneInput, inputSize, oneOutput, outputSize);
 			oneInput = addBiasToInput(oneInput, inputSize);
 			bool* outputIsGood = new bool[outputSize];
 			double* outputError = new double[outputSize];
 			bool allOutputsAreGood = true;
-			// For each output neuron we check that response from perceptron is correct
+			// For each output neuron we check that response from MLP is correct
 			for (int outputIterator = 0; outputIterator < outputSize; outputIterator++) {
 				outputIsGood[outputIterator] = true; // Initialising all response at true
 													 // If one of the output neuron doesn't give the good answer
@@ -116,13 +117,13 @@ int linear_fit_classification_rosenblatt(double *model, double *inputs, int inpu
 					outputError[outputIterator] = expectedOutputs[inputIterator*outputSize + outputIterator] - oneOutput[outputIterator];
 				}
 			}
-			// If at least one of the Perceptron's response is not good
+			// If at least one of the MLP's response is not good
 			if (!allOutputsAreGood) {
-				error++; // We increment the error of the current Perceptron on the data given
+				error++; // We increment the error of the current MLP on the data given
 				for (int outputIterator = 0; outputIterator < outputSize; outputIterator++) {
-					// For each output, if the Perceptron's response ins't good -> We modify the weights affecting the output
+					// For each output, if the MLP's response ins't good -> We modify the weights affecting the output
 					if (!outputIsGood[outputIterator]) {
-						// We adapt every weight of our Perceptron using the Rsoenblatt formula
+						// We adapt every weight of our MLP using the Rsoenblatt formula
 						for (int modelIterator = outputIterator, inputIterator = 0; modelIterator < (inputSize + 1)*outputSize; modelIterator += outputSize, inputIterator++) {
 							model[modelIterator] += step * outputError[outputIterator] * oneInput[inputIterator];
 						}
@@ -211,166 +212,6 @@ void matrixToTab(Eigen::MatrixXd matrix, double *tab, int nbRow, int nbCols) {
 			iterator++;
 		}
 	}
-}
-int main() {
-
-	time_t now;
-	time(&now);
-	srand((unsigned int)now);
-
-	int inputSize = 2;
-	int outputNeuronsSize = 1;
-	int nbData = 4;
-
-	int inputsSize = inputSize * nbData;
-	int outputsSize = outputNeuronsSize*nbData;
-	double* inputs = new double[inputsSize];
-	double* expectedOutputs = new double[outputsSize];
-	//
-	//    inputs[0] = 0;
-	//    inputs[1] = -0.5;
-	//    expectedOutputs[0] = 0.25;
-	//    expectedOutputs[1] = 0.1;
-	//    expectedOutputs[2] = -1;
-	//
-	//    inputs[2] = 0.5;
-	//    inputs[3] = 0.375;
-	//    expectedOutputs[3] = 0.6;
-	//    expectedOutputs[4] = -0.3;
-	//    expectedOutputs[5] = 0.2;
-	//
-	//    inputs[4] = -0.625;
-	//    inputs[5] = 0.25;
-	//    expectedOutputs[6] = 0.1;
-	//    expectedOutputs[7] = -0.1;
-	//    expectedOutputs[8] = -0.8;
-	//
-	//    Eigen::MatrixXd* model = linear_fit_regression(inputs, inputsSize, inputSize, expectedOutputs, outputNeuronsSize);
-	//
-	//    cout << "model : " << *model << " (" << model->rows() << "," << model->cols() << ")" << endl;
-	double* input = new double[inputSize];
-	double* output = new double[outputNeuronsSize];
-	//    input[0] = 0;
-	//    input[1] = -0.5;
-	//    linearPredict(model, input, inputSize, output, outputNeuronsSize);
-	//
-	//    input[0] = 0.5;
-	//    input[1] = 0.375;
-	//    linearPredict(model, input, inputSize, output, outputNeuronsSize);
-	//
-	//    input[0] = -0.625;
-	//    input[1] = 0.25;
-	//    linearPredict(model, input, inputSize, output, outputNeuronsSize);
-
-	double*** modelWeights;
-	double** modelNeurons;
-	double** modelError;
-	int nbLayer = 3;
-	int modelStruct[3] = { 2, 2, 1 };
-	int iterationsMax = 100000;
-	double learningRate = 0.01;
-
-	inputs[0] = -1;
-	inputs[1] = -1;
-	expectedOutputs[0] = 1;
-	//    expectedOutputs[1] = 0.1;
-	//    expectedOutputs[2] = 1;
-
-	inputs[2] = 1;
-	inputs[3] = 1;
-	expectedOutputs[1] = 1;
-
-	//    expectedOutputs[3] = 0.6;
-	//    expectedOutputs[4] = 0.3;
-	//    expectedOutputs[5] = 0.2;
-
-	inputs[4] = -1;
-	inputs[5] = 1;
-	expectedOutputs[2] = -1;
-
-	//    expectedOutputs[6] = 0.1;
-	//    expectedOutputs[7] = 0.1;
-	//    expectedOutputs[8] = 0.8;
-
-	inputs[6] = 1;
-	inputs[7] = -1;
-	expectedOutputs[3] = -1;
-
-	pmcCreateModel(modelStruct, nbLayer, &modelWeights, &modelNeurons, &modelError);
-
-	pmcFit(&modelWeights, &modelNeurons, &modelError, modelStruct, nbLayer, inputs, inputSize, inputsSize, expectedOutputs, outputNeuronsSize, learningRate, iterationsMax, 0);
-
-	input[0] = 1;
-	input[1] = 1;
-	pmcClassifyOneInput(modelWeights, &modelNeurons, modelStruct, nbLayer, input, inputSize, &output, outputNeuronsSize);
-	for (int i = 0; i < outputNeuronsSize; ++i) {
-		cout << "TEST Output[" << i << "] >" << modelNeurons[nbLayer - 1][i] << "<" << endl;
-	}
-
-	input[0] = -1;
-	input[1] = -1;
-	pmcClassifyOneInput(modelWeights, &modelNeurons, modelStruct, nbLayer, input, inputSize, &output, outputNeuronsSize);
-	for (int i = 0; i < outputNeuronsSize; ++i) {
-		cout << "TEST Output[" << i << "] >" << modelNeurons[nbLayer - 1][i] << "<" << endl;
-	}
-
-	input[0] = 1;
-	input[1] = -1.0;
-	pmcClassifyOneInput(modelWeights, &modelNeurons, modelStruct, nbLayer, input, inputSize, &output, outputNeuronsSize);
-	for (int i = 0; i < outputNeuronsSize; ++i) {
-		cout << "TEST Output[" << i << "] >" << modelNeurons[nbLayer - 1][i] << "<" << endl;
-	}
-
-	input[0] = -1;
-	input[1] = 1.0;
-	pmcClassifyOneInput(modelWeights, &modelNeurons, modelStruct, nbLayer, input, inputSize, &output, outputNeuronsSize);
-	for (int i = 0; i < outputNeuronsSize; ++i) {
-		cout << "TEST Output[" << i << "] >" << modelNeurons[nbLayer - 1][i] << "<" << endl;
-	}
-
-	inputs[0] = 0;
-	inputs[1] = 0;
-	expectedOutputs[0] = 0;
-	//    expectedOutputs[1] = 0.1;
-	//    expectedOutputs[2] = 1;
-
-	inputs[2] = 0;
-	inputs[3] = 1;
-	expectedOutputs[1] = 0;
-
-	//    expectedOutputs[3] = 0.6;
-	//    expectedOutputs[4] = 0.3;
-	//    expectedOutputs[5] = 0.2;
-
-	inputs[4] = 1;
-	inputs[5] = 1;
-	expectedOutputs[2] = 0.5;
-	cout << "Regression ! " << endl;
-	pmcFit(&modelWeights, &modelNeurons, &modelError, modelStruct, nbLayer, inputs, inputSize, inputsSize, expectedOutputs, outputNeuronsSize, learningRate, iterationsMax, 0);
-
-
-	input[0] = 0;
-	input[1] = 0;
-	pmcPredictOneInput(modelWeights, &modelNeurons, modelStruct, nbLayer, input, inputSize, &output, outputNeuronsSize);
-	for (int i = 0; i < outputNeuronsSize; ++i) {
-		cout << "TEST Output[" << i << "] >" << modelNeurons[nbLayer - 1][i] << "<" << endl;
-	}
-
-	input[0] = 0;
-	input[1] = 1;
-	pmcPredictOneInput(modelWeights, &modelNeurons, modelStruct, nbLayer, input, inputSize, &output, outputNeuronsSize);
-	for (int i = 0; i < outputNeuronsSize; ++i) {
-		cout << "TEST Output[" << i << "] >" << modelNeurons[nbLayer - 1][i] << "<" << endl;
-	}
-
-	input[0] = 1;
-	input[1] = 1.0;
-	pmcPredictOneInput(modelWeights, &modelNeurons, modelStruct, nbLayer, input, inputSize, &output, outputNeuronsSize);
-	for (int i = 0; i < outputNeuronsSize; ++i) {
-		cout << "TEST Output[" << i << "] >" << modelNeurons[nbLayer - 1][i] << "<" << endl;
-	}
-
-	return 1;
 }
 //////////////// PERCEPTRON MULTI-COUCHES ////////////////////////
 // ModelStruct corresponds to the structure of the model to generate
@@ -555,4 +396,342 @@ void baseTest(double* inputs, double* expected_outputs, int inputSize) {
 		// y = -1
 		expected_outputs[i] = -1;
 	}
+}
+
+int main() {
+
+	time_t now;
+	time(&now);
+	srand((unsigned int)now);
+
+	/*    int inputSize = 2;
+	int outputNeuronsSize = 1;
+	int nbData = 4;
+
+	int inputsSize = inputSize * nbData;
+	int outputsSize = outputNeuronsSize*nbData;
+	double* inputs = new double[inputsSize];
+	double* expectedOutputs = new double[outputsSize];
+	//
+	//    inputs[0] = 0;
+	//    inputs[1] = -0.5;
+	//    expectedOutputs[0] = 0.25;
+	//    expectedOutputs[1] = 0.1;
+	//    expectedOutputs[2] = -1;
+	//
+	//    inputs[2] = 0.5;
+	//    inputs[3] = 0.375;
+	//    expectedOutputs[3] = 0.6;
+	//    expectedOutputs[4] = -0.3;
+	//    expectedOutputs[5] = 0.2;
+	//
+	//    inputs[4] = -0.625;
+	//    inputs[5] = 0.25;
+	//    expectedOutputs[6] = 0.1;
+	//    expectedOutputs[7] = -0.1;
+	//    expectedOutputs[8] = -0.8;
+	//
+	//    Eigen::MatrixXd* model = linear_fit_regression(inputs, inputsSize, inputSize, expectedOutputs, outputNeuronsSize);
+	//
+	//    cout << "model : " << *model << " (" << model->rows() << "," << model->cols() << ")" << endl;
+	double* input = new double[inputSize];
+	double* output = new double[outputNeuronsSize];
+	//    input[0] = 0;
+	//    input[1] = -0.5;
+	//    linearPredict(model, input, inputSize, output, outputNeuronsSize);
+	//
+	//    input[0] = 0.5;
+	//    input[1] = 0.375;
+	//    linearPredict(model, input, inputSize, output, outputNeuronsSize);
+	//
+	//    input[0] = -0.625;
+	//    input[1] = 0.25;
+	//    linearPredict(model, input, inputSize, output, outputNeuronsSize);
+
+	double*** modelWeights;
+	double** modelNeurons;
+	double** modelError;
+	int nbLayer =3;
+	int modelStruct[3] = { 2, 2, 1 };
+	int iterationsMax = 100000;
+	double learningRate = 0.01;
+
+	inputs[0] = -1;
+	inputs[1] = -1;
+	expectedOutputs[0] = 1;
+	//    expectedOutputs[1] = 0.1;
+	//    expectedOutputs[2] = 1;
+
+	inputs[2] = 1;
+	inputs[3] = 1;
+	expectedOutputs[1] = 1;
+
+	//    expectedOutputs[3] = 0.6;
+	//    expectedOutputs[4] = 0.3;
+	//    expectedOutputs[5] = 0.2;
+
+	inputs[4] = -1;
+	inputs[5] = 1;
+	expectedOutputs[2] = -1;
+
+	//    expectedOutputs[6] = 0.1;
+	//    expectedOutputs[7] = 0.1;
+	//    expectedOutputs[8] = 0.8;
+
+	inputs[6] = 1;
+	inputs[7] = -1;
+	expectedOutputs[3] = -1;
+
+	pmcCreateModel(modelStruct, nbLayer, &modelWeights, &modelNeurons, &modelError);
+
+	pmcFit(&modelWeights, &modelNeurons, &modelError, modelStruct, nbLayer, inputs, inputSize, inputsSize, expectedOutputs, outputNeuronsSize, learningRate, iterationsMax, 0);
+
+	input[0] = 1;
+	input[1] = 1;
+	pmcClassifyOneInput(modelWeights, &modelNeurons, modelStruct, nbLayer, input, inputSize, &output, outputNeuronsSize);
+	for (int i = 0; i < outputNeuronsSize; ++i) {
+	cout << "TEST Output[" << i << "] >" << modelNeurons[nbLayer - 1][i] << "<" << endl;
+	}
+
+	input[0] = -1;
+	input[1] = -1;
+	pmcClassifyOneInput(modelWeights, &modelNeurons, modelStruct, nbLayer, input, inputSize, &output, outputNeuronsSize);
+	for (int i = 0; i < outputNeuronsSize; ++i) {
+	cout << "TEST Output[" << i << "] >" << modelNeurons[nbLayer - 1][i] << "<" << endl;
+	}
+
+	input[0] = 1;
+	input[1] = -1.0;
+	pmcClassifyOneInput(modelWeights, &modelNeurons, modelStruct, nbLayer, input, inputSize, &output, outputNeuronsSize);
+	for (int i = 0; i < outputNeuronsSize; ++i) {
+	cout << "TEST Output[" << i << "] >" << modelNeurons[nbLayer - 1][i] << "<" << endl;
+	}
+
+	input[0] = -1;
+	input[1] = 1.0;
+	pmcClassifyOneInput(modelWeights, &modelNeurons, modelStruct, nbLayer, input, inputSize, &output, outputNeuronsSize);
+	for (int i = 0; i < outputNeuronsSize; ++i) {
+	cout << "TEST Output[" << i << "] >" << modelNeurons[nbLayer - 1][i] << "<" << endl;
+	}
+
+	inputs[0] = 0;
+	inputs[1] = 0;
+	expectedOutputs[0] = 0;
+	//    expectedOutputs[1] = 0.1;
+	//    expectedOutputs[2] = 1;
+
+	inputs[2] = 0;
+	inputs[3] = 1;
+	expectedOutputs[1] = 0;
+
+	//    expectedOutputs[3] = 0.6;
+	//    expectedOutputs[4] = 0.3;
+	//    expectedOutputs[5] = 0.2;
+
+	inputs[4] = 1;
+	inputs[5] = 1;
+	expectedOutputs[2] = 0.5;
+	cout << "Regression ! " << endl;
+	pmcFit(&modelWeights, &modelNeurons, &modelError, modelStruct, nbLayer, inputs, inputSize, inputsSize, expectedOutputs, outputNeuronsSize, learningRate, iterationsMax, 0);
+
+
+	input[0] = 0;
+	input[1] = 0;
+	pmcPredictOneInput(modelWeights, &modelNeurons, modelStruct, nbLayer, input, inputSize, &output, outputNeuronsSize);
+	for (int i = 0; i < outputNeuronsSize; ++i) {
+	cout << "TEST Output[" << i << "] >" << modelNeurons[nbLayer - 1][i] << "<" << endl;
+	}
+
+	input[0] = 0;
+	input[1] = 1;
+	pmcPredictOneInput(modelWeights, &modelNeurons, modelStruct, nbLayer, input, inputSize, &output, outputNeuronsSize);
+	for (int i = 0; i < outputNeuronsSize; ++i) {
+	cout << "TEST Output[" << i << "] >" << modelNeurons[nbLayer - 1][i] << "<" << endl;
+	}
+
+	input[0] = 1;
+	input[1] = 1.0;
+	pmcPredictOneInput(modelWeights, &modelNeurons, modelStruct, nbLayer, input, inputSize, &output, outputNeuronsSize);
+	for (int i = 0; i < outputNeuronsSize; ++i) {
+	cout << "TEST Output[" << i << "] >" << modelNeurons[nbLayer - 1][i] << "<" << endl;
+	}*/
+	int nbLayer = 3;
+	int modelStruct[3] = { 2, 2, 1 };
+	int inputSize = 2;
+	int outputSize = 1;
+
+	int nbData = 3;
+
+	double* inputs = new double[inputSize*nbData];
+	double* expectedOutputs = new double[outputSize*nbData];
+	double* oneInput = new double[inputSize];
+	double* oneOutput = new double[outputSize];
+
+	MLP* regressionPerceptron = new MLP(modelStruct, nbLayer);
+
+	inputs[0] = 0;
+	inputs[1] = 0;
+
+	inputs[2] = 0;
+	inputs[3] = 1;
+
+	inputs[4] = 1;
+	inputs[5] = 1;
+
+	expectedOutputs[0] = 0;
+	expectedOutputs[1] = 0;
+	expectedOutputs[2] = 0.5;
+
+	std::cout << "Fitting regression model..." << std::endl;
+	regressionPerceptron->fitRegression(inputs, inputSize, inputSize*nbData, expectedOutputs, outputSize);
+
+	std::cout << "Testing Regression" << std::endl;
+	oneInput[0] = 0;
+	oneInput[1] = 0;
+	regressionPerceptron->predict(oneInput, inputSize, &oneOutput, outputSize);
+	std::cout << "Response for input = [" << oneInput[0] << "][" << oneInput[1] << "] ->" << oneOutput[0] << "<" << std::endl;
+
+	oneInput[0] = 0;
+	oneInput[1] = 1;
+	regressionPerceptron->predict(oneInput, inputSize, &oneOutput, outputSize);
+	std::cout << "Response for input = [" << oneInput[0] << "][" << oneInput[1] << "] ->" << oneOutput[0] << "<" << std::endl;
+
+	oneInput[0] = 1;
+	oneInput[1] = 1;
+	regressionPerceptron->predict(oneInput, inputSize, &oneOutput, outputSize);
+	std::cout << "Response for input = [" << oneInput[0] << "][" << oneInput[1] << "] ->" << oneOutput[0] << "<" << std::endl;
+
+
+	MLP* classificationPerceptron = new MLP(modelStruct, nbLayer);
+
+	inputs[0] = 0;
+	inputs[1] = 0;
+
+	inputs[2] = 0;
+	inputs[3] = 1;
+
+	inputs[4] = 1;
+	inputs[5] = 1;
+
+	expectedOutputs[0] = 0;
+	expectedOutputs[1] = 0;
+	expectedOutputs[2] = 1;
+
+	std::cout << "Fitting Classification model..." << std::endl;
+	regressionPerceptron->fitClassification(inputs, inputSize, inputSize*nbData, expectedOutputs, outputSize);
+
+	std::cout << "Testing Classification" << std::endl;
+	oneInput[0] = 0;
+	oneInput[1] = 0;
+	regressionPerceptron->classify(oneInput, inputSize, &oneOutput, outputSize);
+	std::cout << "Response for input = [" << oneInput[0] << "][" << oneInput[1] << "] ->" << oneOutput[0] << "<" << std::endl;
+
+	oneInput[0] = 0;
+	oneInput[1] = 1;
+	regressionPerceptron->classify(oneInput, inputSize, &oneOutput, outputSize);
+	std::cout << "Response for input = [" << oneInput[0] << "][" << oneInput[1] << "] ->" << oneOutput[0] << "<" << std::endl;
+
+	oneInput[0] = 1;
+	oneInput[1] = 1;
+	regressionPerceptron->classify(oneInput, inputSize, &oneOutput, outputSize);
+	std::cout << "Response for input = [" << oneInput[0] << "][" << oneInput[1] << "] ->" << oneOutput[0] << "<" << std::endl;
+
+	std::cout << "Testing RBF..." << std::endl;
+	int nbExamples = 4;
+	double gamma = 1;
+	inputSize = 2;
+	double* rbfInputs = new double[nbExamples*inputSize];
+	double* rbfOutputs = new double[nbExamples];
+	double rbfOneOutput;
+	rbfInputs[0] = 0.2;
+	rbfInputs[1] = 0.5;
+	rbfOutputs[0] = 1;
+
+	rbfInputs[2] = 0.7;
+	rbfInputs[3] = 0.8;
+	rbfOutputs[1] = 1;
+
+	rbfInputs[4] = 0.6;
+	rbfInputs[5] = 0.2;
+	rbfOutputs[2] = -1;
+
+	rbfInputs[6] = 0.9;
+	rbfInputs[7] = 0.5;
+	rbfOutputs[3] = -1;
+
+	Eigen::MatrixXd weights = naiveLearnWeights(nbExamples, gamma, rbfInputs, inputSize, rbfOutputs);
+
+	oneInput[0] = 0.2;
+	oneInput[1] = 0.5;
+	getRBFResponse(weights, gamma, oneInput, inputSize, &rbfOneOutput, rbfInputs, nbExamples);
+	std::cout << "Response for input = [" << oneInput[0] << "][" << oneInput[1] << "] ->" << rbfOneOutput << "< expected 1" << std::endl;
+	oneInput[0] = 0.7;
+	oneInput[1] = 0.8;
+	getRBFResponse(weights, gamma, oneInput, inputSize, &rbfOneOutput, rbfInputs, nbExamples);
+	std::cout << "Response for input = [" << oneInput[0] << "][" << oneInput[1] << "] ->" << rbfOneOutput << "< expected 1" << std::endl;
+	oneInput[0] = 0.6;
+	oneInput[1] = 0.2;
+	getRBFResponse(weights, gamma, oneInput, inputSize, &rbfOneOutput, rbfInputs, nbExamples);
+	std::cout << "Response for input = [" << oneInput[0] << "][" << oneInput[1] << "] ->" << rbfOneOutput << "< expected -1" << std::endl;
+	oneInput[0] = 0.9;
+	oneInput[1] = 0.5;
+	getRBFResponse(weights, gamma, oneInput, inputSize, &rbfOneOutput, rbfInputs, nbExamples);
+	std::cout << "Response for input = [" << oneInput[0] << "][" << oneInput[1] << "] ->" << rbfOneOutput << "< expected -1" << std::endl;
+
+
+	oneInput[0] = 0.2;
+	oneInput[1] = 0.7;
+	getRBFResponse(weights, gamma, oneInput, inputSize, &rbfOneOutput, rbfInputs, nbExamples);
+	std::cout << "Response for input = [" << oneInput[0] << "][" << oneInput[1] << "] ->" << rbfOneOutput << "< expected 1" << std::endl;
+	oneInput[0] = 0.4;
+	oneInput[1] = 0.8;
+	getRBFResponse(weights, gamma, oneInput, inputSize, &rbfOneOutput, rbfInputs, nbExamples);
+	std::cout << "Response for input = [" << oneInput[0] << "][" << oneInput[1] << "] ->" << rbfOneOutput << "< expected 1" << std::endl;
+	oneInput[0] = 0.5;
+	oneInput[1] = 0.1;
+	getRBFResponse(weights, gamma, oneInput, inputSize, &rbfOneOutput, rbfInputs, nbExamples);
+	std::cout << "Response for input = [" << oneInput[0] << "][" << oneInput[1] << "] ->" << rbfOneOutput << "< expected -1" << std::endl;
+	oneInput[0] = 0.7;
+	oneInput[1] = 0.5;
+	getRBFResponse(weights, gamma, oneInput, inputSize, &rbfOneOutput, rbfInputs, nbExamples);
+	std::cout << "Response for input = [" << oneInput[0] << "][" << oneInput[1] << "] ->" << rbfOneOutput << "< expected -1" << std::endl;
+	return 1;
+}
+
+
+Eigen::MatrixXd naiveLearnWeights(int nbExamples, double gamma, double* X, int inputSize, double* Y) {
+	double distance;
+	Eigen::MatrixXd teta(nbExamples, nbExamples);
+	Eigen::MatrixXd YMatrix(nbExamples, 1);
+	for (int i = 0; i<nbExamples; i++) {
+		YMatrix(i, 0) = Y[i];
+	}
+	for (int i = 0; i < nbExamples; ++i) {
+		for (int j = 0; j < nbExamples; ++j) {
+			distance = 0;
+			for (int k = 0; k<inputSize; k++) {
+				distance += (X[j*inputSize + k] - X[i*inputSize + k])*(X[j*inputSize + k] - X[i*inputSize + k]);
+			}
+			teta(i, j) = exp(-gamma*distance);
+		}
+	}
+	return teta.inverse()*YMatrix;
+}
+double distance(double * A, double* B, int inputSize) {
+	double distance = 0;
+	for (int i = 0; i<inputSize; i++) {
+		distance += (B[i] - A[i])*(B[i] - A[i]);
+	}
+	return sqrt(distance);
+}
+void getRBFResponse(Eigen::MatrixXd weights, double gamma, double* input, int inputSize, double* output, double* X, int nbExamples) {
+	double sum = 0;
+	double* oneX = new double[inputSize];
+	for (int i = 0; i<nbExamples; i++) {
+		for (int j = 0; j<inputSize; j++) {
+			oneX[j] = X[i*inputSize + j];
+		}
+		sum += weights(i, 0)*exp(-gamma*distance(input, oneX, inputSize)*distance(input, oneX, inputSize));
+	}
+	*output = (sum > 0) ? 1 : -1;
 }
