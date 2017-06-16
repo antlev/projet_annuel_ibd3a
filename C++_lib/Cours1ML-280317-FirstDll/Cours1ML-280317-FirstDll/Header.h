@@ -23,6 +23,11 @@ extern "C" {
 	__declspec(dllexport) void pmcClassifyOneInput(double*** modelWeights, double*** modelNeurons, int* modelStruct, int nbLayer, double* oneInput, int inputSize, double** oneOutput, int outputSize);
 	// Predict the output for a single input using model in parameter
 	__declspec(dllexport) void pmcPredictOneInput(double*** modelWeights, double*** modelNeurons, int* modelStruct, int nbLayer, double* oneInput, int inputSize, double** oneOutput, int outputSize);
+	
+	__declspec(dllexport) Eigen::MatrixXd naiveLearnWeights(int nbExamples, double gamma, double* X, int inputSize, double* Y);
+	
+	__declspec(dllexport) void getRBFResponse(Eigen::MatrixXd weights, double gamma, double* input, int inputSize, double* output, double* X, int nbExamples);
+
 }
 // Function only used in C++
 //double learn_classification_rosenblatt(double *model, double* unInput, int inputSize, double expected_result, double step);
@@ -34,5 +39,3 @@ void tabToMatrix(Eigen::MatrixXd* matrix, double* tab, int nbRow, int nbCols);
 void pmcFitOneInput(double**** modelWeights, double** modelNeurons, double*** modelError, int* modelStruct, int nbLayer, double* oneInput, int inputSize, double* oneOutput, int outputSize, double learningRate, int option);
 double sum(double*** modelWeights, double** modelNeurons, int* modelStruct, int layerNb, int neuronNb);
 double distance(double * A, double* B, int inputSize);
-Eigen::MatrixXd naiveLearnWeights(int nbExamples, double gamma, double* X, int inputSize, double* Y);
-void getRBFResponse(Eigen::MatrixXd weights, double gamma, double* input, int inputSize, double* output, double* X, int nbExamples);
