@@ -1,9 +1,9 @@
 ﻿  Source.cpp
      Creating library D:\git\projet_annuel_ibd3a\C++_lib\Cours1ML-280317-FirstDll\x64\Release\Cours1ML-280317-FirstDll.lib and object D:\git\projet_annuel_ibd3a\C++_lib\Cours1ML-280317-FirstDll\x64\Release\Cours1ML-280317-FirstDll.exp
   Generating code
-  57 of 1629 functions ( 3.5%) were compiled, the rest were copied from previous compilation.
-    2 functions were new in current compilation
-    43 functions had inline decision re-evaluated but remain unchanged
+  56 of 1629 functions ( 3.4%) were compiled, the rest were copied from previous compilation.
+    0 functions were new in current compilation
+    215 functions had inline decision re-evaluated but remain unchanged
   Finished generating code
   Cours1ML-280317-FirstDll.vcxproj -> D:\git\projet_annuel_ibd3a\C++_lib\Cours1ML-280317-FirstDll\x64\Release\Cours1ML-280317-FirstDll.dll
   Cours1ML-280317-FirstDll.vcxproj -> D:\git\projet_annuel_ibd3a\C++_lib\Cours1ML-280317-FirstDll\x64\Release\Cours1ML-280317-FirstDll.pdb (Full PDB)

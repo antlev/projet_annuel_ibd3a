@@ -31,6 +31,12 @@ public class LibWrapperMachineLearning
 
 	[DllImport("Cours1ML-280317-FirstDll")]
     public static extern int test();
+
+	[DllImport("Perceptron")]
+	public static extern int MLP(int[] test);
+	[DllImport("Perceptron")]
+	public static extern int MLP(System.IntPtr structure, int nbLayer);
 #endif
+
 
 }

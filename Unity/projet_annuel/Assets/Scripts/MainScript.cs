@@ -107,6 +107,16 @@ public class MainScript : MonoBehaviour {
 				clean();
 			}
 		}
+		if (GUILayout.Button("Test")) {
+			if (!_isRunning)
+			{
+				int[] test = new int[1];
+				test [0] = 0;
+				LibWrapperMachineLearning.MLP (test);
+				Debug.Log("test >>>"+test[0]);
+
+			}
+		}
         if (GUILayout.Button(colorButtonString))
         {
             if (!_isRunning)
@@ -389,7 +399,7 @@ public class MainScript : MonoBehaviour {
 			j++;
 			outputs [j] = data.GetComponent<Renderer> ().material.color.r;
 			j++;
-			toto.GetComponent<Renderer>().material.color.
+//			toto.GetComponent<Renderer>().material.color.
 			outputs [j] = data.GetComponent<Renderer> ().material.color.g;
 			j++;
 		}
