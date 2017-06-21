@@ -108,6 +108,7 @@ public class MainScript : MonoBehaviour {
         {
             if (!_isRunning)
             {
+                Debug.Log("Return 42");
                 Debug.Log(LibWrapperMachineLearning.return42());
 
                 System.IntPtr toto;
@@ -119,8 +120,57 @@ public class MainScript : MonoBehaviour {
                 Debug.Log("REP" + LibWrapperMachineLearning.getOutputsforClassif(model));
 
 
-                Debug.Log("Testing MLP Classification");
+                Debug.Log("Testing Linear Classification");
+                int linear_inputSize = 2;
+                int linear_outputSize = 1;
+                int linear_nbData = 4;
+                double[] linear_inputs = new double[linear_inputSize * linear_nbData];
+                double[] linear_input = new double[linear_inputSize];
+                double[] linear_outputs = new double[linear_outputSize * linear_nbData];
+                double[] linear_output = new double[linear_outputSize];
 
+                int linear_maxIterations = 10000;
+                double linear_step = 0.01;
+
+                linear_inputs[0] = 0;
+                linear_inputs[1] = 0;
+                linear_outputs[0] = -1;
+
+                linear_inputs[2] = 0;
+                linear_inputs[3] = 1;
+                linear_outputs[1] = -1;
+
+                linear_inputs[4] = 1;
+                linear_inputs[5] = 1;
+                linear_outputs[2] = 1;
+
+                linear_inputs[6] = 1;
+                linear_inputs[7] = 0;
+                linear_outputs[3] = 1;
+
+                System.IntPtr linearModel = LibWrapperMachineLearning.createLinearModel(linear_inputSize, linear_outputSize);
+
+                LibWrapperMachineLearning.linearFitClassificationRosenblatt(linearModel, linear_inputs, linear_nbData * linear_inputSize, linear_inputSize, linear_outputs, linear_outputSize, linear_maxIterations, linear_step);
+
+
+                linear_input[0] = 0;
+                linear_input[1] = 0;
+                LibWrapperMachineLearning.linearClassify(linearModel, linear_input, linear_inputSize, linear_output, linear_outputSize);
+                Debug.Log("Return of linear classification for input[" + linear_input[0] + "][" + linear_input[1] + "] >" + linear_output[0] + "< expected -1");
+                linear_input[0] = 0;
+                linear_input[1] = 1;
+                LibWrapperMachineLearning.linearClassify(linearModel, linear_input, linear_inputSize, linear_output, linear_outputSize);
+                Debug.Log("Return of linear classification for input[" + linear_input[0] + "][" + linear_input[1] + "] >" + linear_output[0] + "< expected -1");
+                linear_input[0] = 1;
+                linear_input[1] = 1;
+                LibWrapperMachineLearning.linearClassify(linearModel, linear_input, linear_inputSize, linear_output, linear_outputSize);
+                Debug.Log("Return of linear classification for input[" + linear_input[0] + "][" + linear_input[1] + "] >" + linear_output[0] + "< expected 1");
+                linear_input[0] = 1;
+                linear_input[1] = 0;
+                LibWrapperMachineLearning.linearClassify(linearModel, linear_input, linear_inputSize, linear_output, linear_outputSize);
+                Debug.Log("Return of linear classification for input[" + linear_input[0] + "][" + linear_input[1] + "] >" + linear_output[0] + "< expected 1");
+
+                Debug.Log("Testing MLP Classification");
                 int testClassifMLP_nbLayer = 2;
                 int[] testClassifMLP_modelStruct = new int[2] { 2, 1 };
                 int testClassifMLP_inputSize = 2;
@@ -243,7 +293,6 @@ public class MainScript : MonoBehaviour {
                 generateBaseTest(baseTest, 10);
 
                 double[] input = new double[inputSize];
-                double[] output = new double[outputSize];
 
                 System.IntPtr testRegressionMLP2 = LibWrapperMachineLearning.createMlp(testRegressionMLP_modelStruct, testRegressionMLP_nbLayer);
 
@@ -254,6 +303,53 @@ public class MainScript : MonoBehaviour {
                     LibWrapperMachineLearning.predict(testRegressionMLP2, input, inputSize);
                     data.position = new Vector3(data.position.x, (float) LibWrapperMachineLearning.getOutputsforRegression(testRegressionMLP2), data.position.z); 
                 }
+
+                Debug.Log("Testing RBF Classification");
+                int naiveRbfNbRepresentatives = 4;
+                double naiveRbfGamma = 0.1;
+                int naiveRbfInputSize = 2;
+                int naiveRbfOutputSize = 2;
+                double[] naiveRbfInputs = new double[naiveRbfNbRepresentatives * naiveRbfInputSize];
+                double[] naiveRbfInput = new double[naiveRbfInputSize];
+                double[] naiveRbfOutputs = new double[naiveRbfNbRepresentatives * naiveRbfOutputSize];
+
+                System.IntPtr naiveRbfModel = LibWrapperMachineLearning.createRbfModel(naiveRbfNbRepresentatives);
+
+
+                naiveRbfInputs[0] = 0;
+                naiveRbfInputs[1] = 0;
+                naiveRbfOutputs[0] = 0;
+
+                naiveRbfInputs[2] = 0;
+                naiveRbfInputs[3] = 1;
+                naiveRbfOutputs[1] = 0;
+
+                naiveRbfInputs[4] = 1;
+                naiveRbfInputs[5] = 1;
+                naiveRbfOutputs[2] = 1;
+
+                naiveRbfInputs[6] = 1;
+                naiveRbfInputs[7] = 0;
+                naiveRbfOutputs[3] = 1;
+
+                //LibWrapperMachineLearning.naiveLearnModel(naiveRbfModel, naiveRbfNbRepresentatives, naiveRbfGamma, naiveRbfInputs, naiveRbfInputSize, naiveRbfOutputs);
+
+                //naiveRbfInput[0] = 0;
+                //naiveRbfInput[1] = 0;
+                //LibWrapperMachineLearning.getRbfResponse(naiveRbfModel, naiveRbfGamma, naiveRbfInput, inputSize, naiveRbfOutputs, naiveRbfInputs, naiveRbfNbRepresentatives);
+                //Debug.Log("Response for input = [" + naiveRbfInput[0] + "][" + naiveRbfInput[1] + "]" + naiveRbfOutputs[0] + "< expected : 0");
+                //naiveRbfInput[0] = 0;
+                //naiveRbfInput[1] = 1;
+                //LibWrapperMachineLearning.getRbfResponse(naiveRbfModel, naiveRbfGamma, naiveRbfInput, inputSize, naiveRbfOutputs, naiveRbfInputs, naiveRbfNbRepresentatives);
+                //Debug.Log("Response for input = [" + naiveRbfInput[0] + "][" + naiveRbfInput[1] + "]" + naiveRbfOutputs[0] + "< expected : 0"); naiveRbfInput[0] = 0;
+                //naiveRbfInput[0] = 1;
+                //naiveRbfInput[1] = 1;
+                //LibWrapperMachineLearning.getRbfResponse(naiveRbfModel, naiveRbfGamma, naiveRbfInput, inputSize, naiveRbfOutputs, naiveRbfInputs, naiveRbfNbRepresentatives);
+                //Debug.Log("Response for input = [" + naiveRbfInput[0] + "][" + naiveRbfInput[1] + "]" + naiveRbfOutputs[0] + "< expected : 1"); naiveRbfInput[0] = 0;
+                //naiveRbfInput[0] = 1;
+                //naiveRbfInput[1] = 0;
+                //LibWrapperMachineLearning.getRbfResponse(naiveRbfModel, naiveRbfGamma, naiveRbfInput, inputSize, naiveRbfOutputs, naiveRbfInputs, naiveRbfNbRepresentatives);
+                //Debug.Log("Response for input = [" + naiveRbfInput[0] + "][" + naiveRbfInput[1] + "]" + naiveRbfOutputs[0] + "< expected : 1");
 
             }
         }

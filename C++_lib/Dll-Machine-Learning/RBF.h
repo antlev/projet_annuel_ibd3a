@@ -12,7 +12,7 @@ public:
 	}
 	void naiveLearnModel(int nbExamples, double gamma, double* X, int inputSize, double* Y);
 
-	void learnRbfModel(int nbExamples, double gamma, double* X, Eigen::MatrixXd Y);
+	void learnRbfModel(int nbExamples, double gamma, double* X, double* Y);
 
 	void getRbfResponse(double gamma, double* input, int inputSize, double* output, double* X, int nbExamples);
 

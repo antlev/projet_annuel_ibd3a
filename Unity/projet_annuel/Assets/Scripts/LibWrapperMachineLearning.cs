@@ -4,6 +4,55 @@ public class LibWrapperMachineLearning
 {
 
 #if UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN
+    // Linear Perceptron
+    [DllImport("Dll-Machine-Learning")]
+    public static extern System.IntPtr createLinearModel(int inputDimension, int outputDimension);
+    [DllImport("Dll-Machine-Learning")]
+    public static extern void eraseLinearModel(System.IntPtr pmodel);
+        // Classification
+    [DllImport("Dll-Machine-Learning")]
+    public static extern int linearFitClassificationRosenblatt(System.IntPtr pmodel, double[] inputs, int inputsSize, int inputSize, double[] expectedOutputs, int outputSize, int iterationMax, double step);
+    [DllImport("Dll-Machine-Learning")]
+    public static extern void linearClassify(System.IntPtr pmodel, double[] input, int inputSize, double[] output, int outputDimension);
+        // Regression
+    [DllImport("Dll-Machine-Learning")]
+    public static extern void linearCreateAndFitRegression(System.IntPtr pmodel, double[] inputs, int inputsSize, int inputSize, double[] expectedOutputs, int outputSize);
+    [DllImport("Dll-Machine-Learning")]
+    public static extern void linearPredict(System.IntPtr pmodel, double[] input, int inputSize, double[] output, int outputSize);
+
+    // MLP
+    [DllImport("Dll-Machine-Learning")]
+    public static extern System.IntPtr createMlp(int[] structure, int nbLayer);
+    [DllImport("Dll-Machine-Learning")]
+    public static extern void eraseMlp(System.IntPtr pMLP);
+        // Classification
+    [DllImport("Dll-Machine-Learning")]
+    public static extern void classify(System.IntPtr pMLP, double[] oneInput, int inputSize);
+    [DllImport("Dll-Machine-Learning")]
+    public static extern void fitClassification(System.IntPtr pMLP, double[] inputs, int inputSize, int inputsSize, double[] expectedOutputs, int outputSize);
+    [DllImport("Dll-Machine-Learning")]
+    public static extern double getOutputsforClassif(System.IntPtr pMLP);
+        // Regression
+    [DllImport("Dll-Machine-Learning")]
+    public static extern void fitRegression(System.IntPtr pMLP, double[] inputs, int inputSize, int inputsSize, double[] expectedOutputs, int outputSize);
+    [DllImport("Dll-Machine-Learning")]
+    public static extern void predict(System.IntPtr pMLP, double[] oneInput, int inputSize);
+    [DllImport("Dll-Machine-Learning")]
+    public static extern double getOutputsforRegression(System.IntPtr pMLP);
+
+    // RBF
+    [DllImport("Dll-Machine-Learning")]
+    public static extern System.IntPtr createRbfModel(int nbRepresentatives);
+    [DllImport("Dll-Machine-Learning")]
+    public static extern void naiveLearnModel(System.IntPtr pRBF, int nbExamples, double gamma, double[] X, int inputSize, double[] Y);
+    [DllImport("Dll-Machine-Learning")]
+    public static extern void rbfLearnModel(System.IntPtr pRBF, int nbExamples, double gamma, double[] X, int inputSize, System.IntPtr Y);
+    [DllImport("Dll-Machine-Learning")]
+    public static extern void getRbfResponse(System.IntPtr pRBF, double gamma, double[] input, int inputSize, double[] output, double[] X, int nbExamples);
+
+
+
+    // OLD LIB
     [DllImport("Cours1ML-280317-FirstDll")]
     public static extern System.IntPtr linear_create_model(int inputDimension, int outputDimension);
     [DllImport("Cours1ML-280317-FirstDll")]
@@ -26,32 +75,6 @@ public class LibWrapperMachineLearning
     public static extern System.IntPtr createToto();
     [DllImport("Dll-Machine-Learning")]
     public static extern int getTiti(System.IntPtr toto);
-
-    // MLP
-    [DllImport("Dll-Machine-Learning")]
-    public static extern System.IntPtr createMlp(int[] structure, int nbLayer);
-    [DllImport("Dll-Machine-Learning")]
-    public static extern void eraseMlp(System.IntPtr pMLP);
-        // Classification
-    [DllImport("Dll-Machine-Learning")]
-    public static extern void classify(System.IntPtr pMLP, double[] oneInput, int inputSize);
-    [DllImport("Dll-Machine-Learning")]
-    public static extern void fitClassification(System.IntPtr pMLP, double[] inputs, int inputSize, int inputsSize, double[] expectedOutputs, int outputSize);
-    [DllImport("Dll-Machine-Learning")]
-    public static extern double getOutputsforClassif(System.IntPtr pMLP);
-        // Regression
-    [DllImport("Dll-Machine-Learning")]
-    public static extern void fitRegression(System.IntPtr pMLP, double[] inputs, int inputSize, int inputsSize, double[] expectedOutputs, int outputSize);
-    [DllImport("Dll-Machine-Learning")]
-    public static extern void predict(System.IntPtr pMLP, double[] oneInput, int inputSize);
-
-    [DllImport("Dll-Machine-Learning")]
-    public static extern double getOutputsforRegression(System.IntPtr pMLP);
-
-    // RBF
-
-
-
 #endif
 
 }

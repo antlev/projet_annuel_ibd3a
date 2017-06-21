@@ -102,14 +102,18 @@ void RBF::lloydAlgorithm(double* inputs, int inputSize, int nbData, int nbRepres
 //        calc=0;
 //    }
 //}
-void RBF::learnRbfModel(int nbExamples, double gamma, double* X, Eigen::MatrixXd Y) {
+void RBF::learnRbfModel(int nbExamples, double gamma, double* X, double* Y) {
 	Eigen::MatrixXd teta(nbExamples, nbExamples);
+	Eigen::MatrixXd YMatrix(nbExamples, 1);
+	for (int i = 0; i<nbExamples; i++) {
+		YMatrix(i, 0) = Y[i];
+	}
 	for (int i = 0; i < nbExamples; ++i) {
 		for (int j = 0; j < nbExamples; ++j) {
 			teta(i, j) = exp(-gamma*(X[i] - X[j])*(X[i] - X[j]));
 		}
 	}
-	*weights = teta.inverse()*Y;
+	*weights = teta.inverse()*YMatrix;
 }
 
 void RBF::getRbfResponse(double gamma, double* input, int inputSize, double* output, double* X, int nbExamples) {
