@@ -4,31 +4,31 @@
 // Created by antoine on 14/06/2017.
 //
 #include <cstdlib>
-//#include <tgmath.h>
 #include <vector>
 #include <cfloat>
 #include <iostream>
 
 class MatrixXd;
 
-//double** initRbf(int inputSize, int nbExamples){
-//    double** weights = new double*[inputSize];
-//    for (int input = 0; input < inputSize; ++input) {
-//        weights[input] = new double[nbExamples];
-//        for (int example = 0; example < nbExamples; ++example) {
-//            weights[input][example] = ((float) rand()) / ((float) RAND_MAX) * 2.0 - 1.0;
-//        }
-//    }
-//    return weights;
-//}
-double distance(double * A, double* B, int inputSize) {
-	double distance = 0;
-	for (int i = 0; i<inputSize; i++) {
-		distance += (B[i] - A[i])*(B[i] - A[i]);
+void RBF::naiveLearnModel(int nbExamples, double gamma, double* X, int inputSize, double* Y) {
+	double distance;
+	Eigen::MatrixXd teta(nbExamples, nbExamples);
+	Eigen::MatrixXd YMatrix(nbExamples, 1);
+	for (int i = 0; i<nbExamples; i++) {
+		YMatrix(i, 0) = Y[i];
 	}
-	return sqrt(distance);
+	for (int i = 0; i < nbExamples; ++i) {
+		for (int j = 0; j < nbExamples; ++j) {
+			distance = 0;
+			for (int k = 0; k<inputSize; k++) {
+				distance += (X[j*inputSize + k] - X[i*inputSize + k])*(X[j*inputSize + k] - X[i*inputSize + k]);
+			}
+			teta(i, j) = exp(-gamma*distance);
+		}
+	}
+	*weights = teta.inverse()*YMatrix;
 }
-double* lloydAlgorithm(double* inputs, int inputSize, int nbData, int nbRepresentatives) {
+void RBF::lloydAlgorithm(double* inputs, int inputSize, int nbData, int nbRepresentatives) {
 	double* copyInputs = inputs;
 	double* representative = new double[nbRepresentatives*inputSize];
 	double* copyRepresentative = representative;
@@ -68,7 +68,7 @@ double* lloydAlgorithm(double* inputs, int inputSize, int nbData, int nbRepresen
 			for (int i = 0; i<inputSize; i++) {
 				sumOfX[i] = 0;
 			}
-			for (int i = 0; i<clusters[clusterNb].size(); i++) {
+			for (unsigned int i = 0; i<clusters[clusterNb].size(); i++) {
 				for (int i = 0; i<inputSize; i++) {
 					sumOfX[i] += clusters[clusterNb][i];
 				}
@@ -78,7 +78,8 @@ double* lloydAlgorithm(double* inputs, int inputSize, int nbData, int nbRepresen
 			}
 		}
 	}
-	return representative; // Return a pointer on all kernels
+	representatives = representative;
+	//return representative; // Return a pointer on all kernels
 }
 
 //void classify(double* input, int inputSize, int* outputs, int outputSize, int gamma, double** weights, int nbNeurons){
@@ -101,42 +102,36 @@ double* lloydAlgorithm(double* inputs, int inputSize, int nbData, int nbRepresen
 //        calc=0;
 //    }
 //}
-Eigen::MatrixXd learnModel(int nbExamples, double gamma, double* X, Eigen::MatrixXd Y) {
+void RBF::learnRbfModel(int nbExamples, double gamma, double* X, Eigen::MatrixXd Y) {
 	Eigen::MatrixXd teta(nbExamples, nbExamples);
 	for (int i = 0; i < nbExamples; ++i) {
 		for (int j = 0; j < nbExamples; ++j) {
 			teta(i, j) = exp(-gamma*(X[i] - X[j])*(X[i] - X[j]));
 		}
 	}
+	*weights = teta.inverse()*Y;
+}
 
-	return teta.inverse()*Y;
-}
-Eigen::MatrixXd naiveLearnWeights(int nbExamples, double gamma, double* X, int inputSize, double* Y) {
-	double distance;
-	Eigen::MatrixXd teta(nbExamples, nbExamples);
-	Eigen::MatrixXd YMatrix(nbExamples, 1);
-	for (int i = 0; i<nbExamples; i++) {
-		YMatrix(i, 0) = Y[i];
-	}
-	for (int i = 0; i < nbExamples; ++i) {
-		for (int j = 0; j < nbExamples; ++j) {
-			distance = 0;
-			for (int k = 0; k<inputSize; k++) {
-				distance += (X[j*inputSize + k] - X[i*inputSize + k])*(X[j*inputSize + k] - X[i*inputSize + k]);
-			}
-			teta(i, j) = exp(-gamma*distance);
-		}
-	}
-	return teta.inverse()*YMatrix;
-}
-void getRBFResponse(Eigen::MatrixXd weights, double gamma, double* input, int inputSize, double* output, double* X, int nbExamples) {
+void RBF::getRbfResponse(double gamma, double* input, int inputSize, double* output, double* X, int nbExamples) {
 	double sum = 0;
 	double* oneX = new double[inputSize];
 	for (int i = 0; i<nbExamples; i++) {
 		for (int j = 0; j<inputSize; j++) {
 			oneX[j] = X[i*inputSize + j];
 		}
-		sum += weights(i, 0)*exp(-gamma*distance(input, oneX, inputSize)*distance(input, oneX, inputSize));
+		sum += (*weights)(i, 0)*exp(-gamma*distance(input, oneX, inputSize)*distance(input, oneX, inputSize));
 	}
 	*output = (sum > 0) ? 1 : -1;
+}
+double distance(double * A, double* B, int inputSize) {
+	double distance = 0;
+	for (int i = 0; i<inputSize; i++) {
+		distance += (B[i] - A[i])*(B[i] - A[i]);
+	}
+	return sqrt(distance);
+}
+void RBF::showRepresentative(int inputSize) {
+	for (int i = 0; i<RBF::nbRepresentatives; i += inputSize) {
+		std::cout << "Representant " << i << " = (" << representatives[i] << ";" << representatives[i + 1] << ")" << std::endl;
+	}
 }

@@ -9,16 +9,6 @@ class MatrixXd;
 
 using namespace std;
 
-double* LinearPerceptron::addBiasToInput(double *input, int inputSize) {
-	assert(input != NULL);
-	assert(inputSize > 0);
-	double* newInput = new double[2 + 1];
-	newInput[0] = 1;
-	for (int i = 1; i<inputSize + 1; i++) {
-		newInput[i] = input[i - 1];
-	}
-	return newInput;
-}
 //  ---------- APPLICATION ----------
 // Return the MLP's response considering the inputs
 // @param model : model used to classify
@@ -115,11 +105,6 @@ int LinearPerceptron::linear_fit_classification_rosenblatt(double *inputs, int i
 	}
 }
 
-// Return the pseudo inverse of the matrix passed as a parameter
-Eigen::MatrixXd LinearPerceptron::pinv(Eigen::MatrixXd X) {
-	Eigen::MatrixXd X_Transp = X.transpose();
-	return (((X_Transp * X).inverse()) * X_Transp);
-}
 // Fit a model with all the inputs and outputs WITHOUT bias and concatenate in an double* array
 // Return a pointer on W matrix
 void LinearPerceptron::linear_create_and_fit_regression(double *inputs, int inputsSize, int inputSize, double *expectedOutputs, int outputSize) {
@@ -173,6 +158,16 @@ double* addBiasToInputs(double *inputs, int *inputsSize, int *inputSize) {
 	*inputSize += 1;
 	return newInputs;
 }
+double* addBiasToInput(double *input, int inputSize) {
+	assert(input != NULL);
+	assert(inputSize > 0);
+	double* newInput = new double[2 + 1];
+	newInput[0] = 1;
+	for (int i = 1; i<inputSize + 1; i++) {
+		newInput[i] = input[i - 1];
+	}
+	return newInput;
+}
 // Transform an array of double into a matrix
 void tabToMatrix(Eigen::MatrixXd* matrix, double* tab, int nbRow, int nbCols) {
 	int iterator = 0;
@@ -192,4 +187,9 @@ void matrixToTab(Eigen::MatrixXd matrix, double *tab, int nbRow, int nbCols) {
 			iterator++;
 		}
 	}
+}
+// Return the pseudo inverse of the matrix passed as a parameter
+Eigen::MatrixXd pinv(Eigen::MatrixXd X) {
+	Eigen::MatrixXd X_Transp = X.transpose();
+	return (((X_Transp * X).inverse()) * X_Transp);
 }
