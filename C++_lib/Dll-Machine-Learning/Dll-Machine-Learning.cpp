@@ -18,9 +18,7 @@ public:
 };
 
 	__declspec(dllexport) int return42() { return 42; } 
-
 	__declspec(dllexport) Toto* createToto() { return new Toto() ; }
-
 	__declspec(dllexport) int getTiti(Toto* pToto) { return pToto->getTiti(); }
 
 	// WRAPPER FUNCTIONS

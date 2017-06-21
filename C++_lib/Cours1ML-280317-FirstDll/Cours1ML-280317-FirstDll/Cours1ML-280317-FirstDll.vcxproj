@@ -21,8 +21,9 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>{FA9CDC94-E90A-4A62-BB37-A026E0810540}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>Cours1ML280317FirstDll</RootNamespace>
+    <RootNamespace>projet_annuel</RootNamespace>
     <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+    <ProjectName>projet_annuel</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">

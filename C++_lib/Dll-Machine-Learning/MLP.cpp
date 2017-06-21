@@ -101,6 +101,7 @@ double MLP::getOutputsforClassif() {
 	}
 	else {
 		std::cout << "Sorry you have to train a classification model to call classify" << std::endl;
+		return -1;
 	}
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -206,6 +207,7 @@ double MLP::getOutputsforRegression() {
 	}
 	else {
 		std::cout << "Please train a regression model to call predict" << std::endl;
+		return -1;
 	}
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////

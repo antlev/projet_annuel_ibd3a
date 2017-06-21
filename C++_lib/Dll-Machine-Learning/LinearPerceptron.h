@@ -37,7 +37,9 @@ private:
 
 	Eigen::MatrixXd pinv(Eigen::MatrixXd X);
 	double* addBiasToInput(double *input, int inputSize);
-	double* addBiasToInputs(double *inputs, int *inputsSize, int *inputSize);
-	void tabToMatrix(Eigen::MatrixXd* matrix, double* tab, int nbRow, int nbCols);
-	void matrixToTab(Eigen::MatrixXd matrix, double *tab, int nbRow, int nbCols);
+
 };
+
+double* addBiasToInputs(double *inputs, int *inputsSize, int *inputSize);
+void tabToMatrix(Eigen::MatrixXd* matrix, double* tab, int nbRow, int nbCols);
+void matrixToTab(Eigen::MatrixXd matrix, double *tab, int nbRow, int nbCols);

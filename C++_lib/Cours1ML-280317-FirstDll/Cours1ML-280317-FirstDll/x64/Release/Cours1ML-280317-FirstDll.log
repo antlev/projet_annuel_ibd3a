@@ -1,11 +1,20 @@
-﻿  Source.cpp
-Source.cpp(100): warning C4101: 'inputIterator': unreferenced local variable
-Source.cpp(279): warning C4244: '+=': conversion from 'double' to 'int', possible loss of data
-     Creating library D:\git\projet_annuel_ibd3a\C++_lib\Cours1ML-280317-FirstDll\x64\Release\Cours1ML-280317-FirstDll.lib and object D:\git\projet_annuel_ibd3a\C++_lib\Cours1ML-280317-FirstDll\x64\Release\Cours1ML-280317-FirstDll.exp
-  Generating code
-  6 of 20 functions (30.0%) were compiled, the rest were copied from previous compilation.
-    0 functions were new in current compilation
-    6 functions had inline decision re-evaluated but remain unchanged
-  Finished generating code
-  Cours1ML-280317-FirstDll.vcxproj -> D:\git\projet_annuel_ibd3a\C++_lib\Cours1ML-280317-FirstDll\x64\Release\Cours1ML-280317-FirstDll.dll
-  Cours1ML-280317-FirstDll.vcxproj -> D:\git\projet_annuel_ibd3a\C++_lib\Cours1ML-280317-FirstDll\x64\Release\Cours1ML-280317-FirstDll.pdb (Full PDB)
+﻿C:\Program Files (x86)\MSBuild\Microsoft.Cpp\v4.0\V140\Microsoft.CppBuild.targets(392,5): warning MSB8028: The intermediate directory (x64\Release\) contains files shared from another project (Cours1ML-280317-FirstDll.vcxproj).  This can lead to incorrect clean and rebuild behavior.
+  Source.cpp
+c:\users\antoine\git\projet_annuel_ibd3a\c++_lib\cours1ml-280317-firstdll\cours1ml-280317-firstdll\../MLP.h(87): error C2228: left of '.classify' must have class/struct/union
+  c:\users\antoine\git\projet_annuel_ibd3a\c++_lib\cours1ml-280317-firstdll\cours1ml-280317-firstdll\../MLP.h(87): note: type is 'MLP *'
+  c:\users\antoine\git\projet_annuel_ibd3a\c++_lib\cours1ml-280317-firstdll\cours1ml-280317-firstdll\../MLP.h(87): note: did you intend to use '->' instead?
+c:\users\antoine\git\projet_annuel_ibd3a\c++_lib\cours1ml-280317-firstdll\cours1ml-280317-firstdll\../MLP.h(88): error C2228: left of '.fitClassification' must have class/struct/union
+  c:\users\antoine\git\projet_annuel_ibd3a\c++_lib\cours1ml-280317-firstdll\cours1ml-280317-firstdll\../MLP.h(88): note: type is 'MLP *'
+  c:\users\antoine\git\projet_annuel_ibd3a\c++_lib\cours1ml-280317-firstdll\cours1ml-280317-firstdll\../MLP.h(88): note: did you intend to use '->' instead?
+c:\users\antoine\git\projet_annuel_ibd3a\c++_lib\cours1ml-280317-firstdll\cours1ml-280317-firstdll\../MLP.h(89): error C2228: left of '.fitRegression' must have class/struct/union
+  c:\users\antoine\git\projet_annuel_ibd3a\c++_lib\cours1ml-280317-firstdll\cours1ml-280317-firstdll\../MLP.h(89): note: type is 'MLP *'
+  c:\users\antoine\git\projet_annuel_ibd3a\c++_lib\cours1ml-280317-firstdll\cours1ml-280317-firstdll\../MLP.h(89): note: did you intend to use '->' instead?
+c:\users\antoine\git\projet_annuel_ibd3a\c++_lib\cours1ml-280317-firstdll\cours1ml-280317-firstdll\../MLP.h(90): error C2228: left of '.predict' must have class/struct/union
+  c:\users\antoine\git\projet_annuel_ibd3a\c++_lib\cours1ml-280317-firstdll\cours1ml-280317-firstdll\../MLP.h(90): note: type is 'MLP *'
+  c:\users\antoine\git\projet_annuel_ibd3a\c++_lib\cours1ml-280317-firstdll\cours1ml-280317-firstdll\../MLP.h(90): note: did you intend to use '->' instead?
+c:\users\antoine\git\projet_annuel_ibd3a\c++_lib\cours1ml-280317-firstdll\cours1ml-280317-firstdll\../MLP.h(91): error C2228: left of '.getOutputsforClassif' must have class/struct/union
+  c:\users\antoine\git\projet_annuel_ibd3a\c++_lib\cours1ml-280317-firstdll\cours1ml-280317-firstdll\../MLP.h(91): note: type is 'MLP *'
+  c:\users\antoine\git\projet_annuel_ibd3a\c++_lib\cours1ml-280317-firstdll\cours1ml-280317-firstdll\../MLP.h(91): note: did you intend to use '->' instead?
+c:\users\antoine\git\projet_annuel_ibd3a\c++_lib\cours1ml-280317-firstdll\cours1ml-280317-firstdll\../MLP.h(92): error C2228: left of '.getOutputsforRegression' must have class/struct/union
+  c:\users\antoine\git\projet_annuel_ibd3a\c++_lib\cours1ml-280317-firstdll\cours1ml-280317-firstdll\../MLP.h(92): note: type is 'MLP *'
+  c:\users\antoine\git\projet_annuel_ibd3a\c++_lib\cours1ml-280317-firstdll\cours1ml-280317-firstdll\../MLP.h(92): note: did you intend to use '->' instead?
