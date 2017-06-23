@@ -16,8 +16,8 @@ public class MainScript : MonoBehaviour {
     public Transform[] baseTest;
 
 	public static string nbColorButtonString = "Change to 2 colors";
-	public static bool testWithColor = true;
-    public static string colorButtonString = "Use height";
+	public static bool testWithColor = false;
+    public static string colorButtonString = "Use color";
     public Color marblecolor;
 	public Color blue = Color.blue;
 	public Color red = Color.red;
@@ -332,7 +332,7 @@ public class MainScript : MonoBehaviour {
                 naiveRbfInputs[7] = 0;
                 naiveRbfOutputs[3] = 1;
 
-                //LibWrapperMachineLearning.naiveLearnModel(naiveRbfModel, naiveRbfNbRepresentatives, naiveRbfGamma, naiveRbfInputs, naiveRbfInputSize, naiveRbfOutputs);
+                LibWrapperMachineLearning.naiveLearnModel(naiveRbfModel, naiveRbfNbRepresentatives, naiveRbfGamma, naiveRbfInputs, naiveRbfInputSize, naiveRbfOutputs);
 
                 //naiveRbfInput[0] = 0;
                 //naiveRbfInput[1] = 0;

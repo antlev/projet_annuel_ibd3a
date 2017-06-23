@@ -26,7 +26,7 @@ void RBF::naiveLearnModel(int nbExamples, double gamma, double* X, int inputSize
 			teta(i, j) = exp(-gamma*distance);
 		}
 	}
-	*weights = teta.inverse()*YMatrix;
+	weights = teta.inverse()*YMatrix;
 }
 void RBF::lloydAlgorithm(double* inputs, int inputSize, int nbData, int nbRepresentatives) {
 	double* copyInputs = inputs;
@@ -113,7 +113,7 @@ void RBF::learnRbfModel(int nbExamples, double gamma, double* X, double* Y) {
 			teta(i, j) = exp(-gamma*(X[i] - X[j])*(X[i] - X[j]));
 		}
 	}
-	*weights = teta.inverse()*YMatrix;
+	weights = teta.inverse()*YMatrix;
 }
 
 void RBF::getRbfResponse(double gamma, double* input, int inputSize, double* output, double* X, int nbExamples) {
@@ -123,7 +123,7 @@ void RBF::getRbfResponse(double gamma, double* input, int inputSize, double* out
 		for (int j = 0; j<inputSize; j++) {
 			oneX[j] = X[i*inputSize + j];
 		}
-		sum += (*weights)(i, 0)*exp(-gamma*distance(input, oneX, inputSize)*distance(input, oneX, inputSize));
+		sum += (weights)(i, 0)*exp(-gamma*distance(input, oneX, inputSize)*distance(input, oneX, inputSize));
 	}
 	*output = (sum > 0) ? 1 : -1;
 }

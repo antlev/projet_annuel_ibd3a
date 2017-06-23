@@ -46,7 +46,7 @@ public class LibWrapperMachineLearning
     [DllImport("Dll-Machine-Learning")]
     public static extern void naiveLearnModel(System.IntPtr pRBF, int nbExamples, double gamma, double[] X, int inputSize, double[] Y);
     [DllImport("Dll-Machine-Learning")]
-    public static extern void rbfLearnModel(System.IntPtr pRBF, int nbExamples, double gamma, double[] X, int inputSize, System.IntPtr Y);
+    public static extern void rbfLearnModel(System.IntPtr pRBF, int nbExamples, double gamma, double[] X, int inputSize, double[]  Y);
     [DllImport("Dll-Machine-Learning")]
     public static extern void getRbfResponse(System.IntPtr pRBF, double gamma, double[] input, int inputSize, double[] output, double[] X, int nbExamples);
 

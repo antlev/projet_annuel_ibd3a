@@ -20,7 +20,7 @@ private:
 	int nbRepresentatives;
 	double* representatives;
 
-	Eigen::MatrixXd* weights;
+	Eigen::MatrixXd weights;
 
 	void lloydAlgorithm(double* inputs, int inputSize, int nbData, int nbRepresentatives);
 	void showRepresentative(int inputSize);
