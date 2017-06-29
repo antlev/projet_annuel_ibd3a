@@ -11,3 +11,6 @@ C++_lib/Dll-Machine-Learning/Eigen/
 C++_lib/Dll-Machine-Learning/x64/
 C++_lib/Dll-Machine-Learning/Debug/
 C++_lib/Cours1ML-280317-FirstDll/Cours1ML-280317-FirstDll/Eigen/*
+*.meta
+C++_lib/Dll-Machine-Learning/.vs/
+C++_lib/Dll-Machine-Learning/Dll-Machine-Learning.vcxproj.user

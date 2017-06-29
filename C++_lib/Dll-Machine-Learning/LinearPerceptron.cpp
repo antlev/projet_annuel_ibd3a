@@ -12,7 +12,7 @@ using namespace std;
 //  ---------- APPLICATION ----------
 // Return the MLP's response considering the inputs
 // @param model : model used to classify
-// @param input : input to use
+// @param input : input of one data
 // @param inputSize : size of input array
 // @param outputs : array to write results of all the outputs neurons
 // @param outputDimension : size of output array
