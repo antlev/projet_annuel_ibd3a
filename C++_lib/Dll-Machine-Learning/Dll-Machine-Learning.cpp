@@ -53,11 +53,14 @@ public:
 	__declspec(dllexport) void predict(MLP* pMLP, double* oneInput, int inputSize) { pMLP->MLP::predict(oneInput, inputSize); }
 	__declspec(dllexport) void eraseMlp(MLP* pMLP) { delete pMLP; }
 	__declspec(dllexport) double getOutputsforRegression(MLP* pMLP) { return pMLP->getOutputsforRegression(); }
+	// NAIVE RBF
+	__declspec(dllexport) NAIVE_RBF* createNaiveRbfModel(int nbExamples, double gamma, double* X, int inputSize, double* Y) { return new NAIVE_RBF(nbExamples, gamma, X, inputSize, Y); }
+	__declspec(dllexport) void naiveRbfGetResponse(NAIVE_RBF* pNaiveRBF, double gamma, double* input, int inputSize, double* output, double* X, int nbExamples) { pNaiveRBF->getRbfResponse(gamma, input, inputSize, output, X, nbExamples); }
 	// RBF
-	__declspec(dllexport) RBF* createRbfModel(int nbRepresentatives) { return new RBF(nbRepresentatives); }
-	__declspec(dllexport) void naiveLearnModel(RBF* pRBF, int nbExamples, double gamma, double* X, int inputSize, double* Y) { pRBF->RBF::naiveLearnModel(nbExamples, gamma, X, inputSize, Y); }
-	__declspec(dllexport) void rbfLearnModel(RBF* pRBF, int nbExamples, double gamma, double* X, int inputSize, double* Y) { pRBF->RBF::learnRbfModel(nbExamples, gamma, X, Y); }
-	__declspec(dllexport) void getRbfResponse(RBF* pRBF, double gamma, double* input, int inputSize, double* output, double* X, int nbExamples){ pRBF->RBF::getRbfResponse(gamma, input, inputSize, output, X, nbExamples);	}
+	__declspec(dllexport) RBF* createRbfModel(int nbExamples, double gamma, double* X, int inputSize, double* Y, int nbRepresentatives) { return new RBF(nbExamples, gamma, X, inputSize, Y, nbRepresentatives); }
+	__declspec(dllexport) void getRbfResponse(RBF* pRBF, double gamma, double* input, int inputSize, double* output, double* X, int nbExamples) { pRBF->getRbfResponse(gamma, input, inputSize, output, X, nbExamples); }
+	__declspec(dllexport) void lloydAlgorithm(RBF* pRBF, double* inputs, int inputSize, int nbData, int nbRepresentatives) { pRBF->lloydAlgorithm(inputs, inputSize, nbData, nbRepresentatives);  }
+	__declspec(dllexport) void showRepresentative(RBF* pRBF, int inputSize) { pRBF->showRepresentative(inputSize); }
 }
 
 
