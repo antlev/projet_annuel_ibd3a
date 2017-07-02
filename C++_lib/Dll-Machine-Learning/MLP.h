@@ -1,16 +1,16 @@
 #pragma once
 //
 // Created by antoine on 13/06/2017.
-
+//
 #include <cassert>
 #include <cstdlib>
-//#include <tgmath.h>
 #include <iostream>
 
 class MLP {
 public:
 	MLP(int *structure, int nbLayer) : nbLayer(nbLayer) {
 		assert(nbLayer >= 2);
+		assert(structure != nullptr);
 		for (int i = 0; i < nbLayer; ++i) {
 			assert(structure[i] > 0);
 		}

@@ -1,11 +1,17 @@
-#include "stdafx.h"
-#include "MLP.h"
 //
 // Created by antoine on 13/06/2017.
 //
+#include "stdafx.h"
+#include "MLP.h"
 ////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////// CLASSIFICATION ////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////
+// Function called from outside (the dll) taking all inputs and ouputs to fit the mlp classification model
+// @param inputs : all inputs of the datas, that are concatenated in a single one entry array
+// @param inputsSize : size of the whole array
+// @param inputSize : size of one input
+// @param expectedOutputs : array containing for each input all the output neuron expected response (ex : 2 inputs of 3 outputs : [i=1 o=1][i=1 o=2][i=1 o=2][i=2 o=1][i=2 o=2][i=2 o=2][i=2 o=1][i=3 o=2][i=3 o=3])
+// @param outputSize : size of output neurons
 void MLP::fitClassification(double *inputs, int inputSize, int inputsSize, double *expectedOutputs,
 	int outputSize) {
 	assert(inputs);
@@ -28,14 +34,19 @@ void MLP::fitClassification(double *inputs, int inputSize, int inputsSize, doubl
 			oneExpectedOutput[j] = expectedOutputs[i];
 		}
 		// Classification
-		classify(oneInput, inputSize);
-		fitClassifOneInput(oneInput, inputSize,
+		classify(oneInput, inputSize); // Classify
+		fitClassifOneInput(oneInput, inputSize, // Backpropagation
 			oneExpectedOutput, outputSize);
 		if (iterations++ >= maxIterations) {
 			break;
 		}
 	}
 }
+// Backpropagation for classification using a single input
+// @param Oneinput : input of one data
+// @param inputSize : size of input array
+// @param oneOutput : array to write result
+// @param outputSize : size of output array
 void MLP::fitClassifOneInput(double *oneInput, int inputSize, double *oneOutput, int outputSize) {
 	assert(oneInput);
 	assert(oneOutput);
@@ -69,7 +80,8 @@ void MLP::fitClassifOneInput(double *oneInput, int inputSize, double *oneOutput,
 	}
 }
 // Set all the neurons considering the input and weight
-// Set the oneOutput variable
+// @param Oneinput : input of one data
+// @param inputSize : size of input array
 void MLP::classify(double *oneInput, int inputSize) {
 	assert(oneInput);
 	assert(inputSize > 0);
@@ -95,6 +107,8 @@ void MLP::classify(double *oneInput, int inputSize) {
 		std::cout << "Sorry you have to train a classification model to call classify" << std::endl;
 	}
 }
+// Function to use to get the result after using classify
+// @return : value of the output
 double MLP::getOutputsforClassif() {
 	if (modelLearned == 1) {
 		return (neurons[nbLayer - 1][0] < 0) ? -1 : 1;
@@ -107,6 +121,12 @@ double MLP::getOutputsforClassif() {
 ////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////// REGRESSION //////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////
+// Function called from outside (the dll) taking all inputs and ouputs to fit the mlp regression model
+// @param inputs : all inputs of the datas, that are concatenated in a single one entry array
+// @param inputSize : size of one input
+// @param inputsSize : size of the whole array
+// @param expectedOutputs : array containing for each input all the output neuron expected response (ex : 2 inputs of 3 outputs : [i=1 o=1][i=1 o=2][i=1 o=2][i=2 o=1][i=2 o=2][i=2 o=2][i=2 o=1][i=3 o=2][i=3 o=3])
+// @param outputSize : size of output neurons
 void MLP::fitRegression(double *inputs, int inputSize, int inputsSize, double *expectedOutputs,
 	int outputSize) {
 	assert(inputs);
@@ -137,6 +157,11 @@ void MLP::fitRegression(double *inputs, int inputSize, int inputsSize, double *e
 		}
 	}
 }
+// Backpropagation for regression using a single input
+// @param Oneinput : input of one data
+// @param inputSize : size of input array
+// @param oneOutput : array to write result
+// @param outputSize : size of output array
 void MLP::fitRegreOneInput(double *oneInput, int inputSize, double *oneOutput, int outputSize) {
 	double sum;
 	assert(oneInput);
@@ -170,7 +195,8 @@ void MLP::fitRegreOneInput(double *oneInput, int inputSize, double *oneOutput, i
 	}
 }
 // Set all the neurons considering the input and weight
-// Set the oneOutput variable
+// @param Oneinput : input of one data
+// @param inputSize : size of input array
 void MLP::predict(double* oneInput, int inputSize) {
 	assert(oneInput);
 	assert(inputSize > 0);
@@ -201,6 +227,8 @@ void MLP::predict(double* oneInput, int inputSize) {
 		std::cout << "Please train a regression model to call predict" << std::endl;
 	}
 }
+// Function to use to get the result after using predict
+// @return : value of the output
 double MLP::getOutputsforRegression() {
 	if (modelLearned == 2) {
 		return neurons[nbLayer - 1][0];
@@ -214,6 +242,9 @@ double MLP::getOutputsforRegression() {
 ///////////////////////////////////////////// UTILS ////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////
 // Calculate the sum of the weights * the previous neuron layer, using the model struct, layerNb and neuronNb to set
+// @param layerNb : layer number of the neuron to calculate sum (col)
+// @param neuronNb : number of the neuron to calculate sum (line)
+// @return : the value of the sum
 double MLP::sum(int layerNb, int neuronNb) {
 	double sum = 0;
 	for (int i = 0; i < structure[layerNb - 1] + 1; ++i) {

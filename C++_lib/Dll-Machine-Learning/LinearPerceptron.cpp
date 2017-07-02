@@ -1,4 +1,7 @@
-﻿#include "stdafx.h"
+﻿//
+// Created by antoine on 14/06/2017.
+//
+#include "stdafx.h"
 #include <iostream>
 #include <stdlib.h>
 #include <cassert>
@@ -6,41 +9,39 @@
 #include "LinearPerceptron.h"
 
 class MatrixXd;
-
 using namespace std;
 
-//  ---------- APPLICATION ----------
 // Return the MLP's response considering the inputs
-// @param model : model used to classify
-// @param input : input to use
+// @param input : input of one data
 // @param inputSize : size of input array
 // @param outputs : array to write results of all the outputs neurons
-// @param outputDimension : size of output array
-void LinearPerceptron::linear_classify(double* input, int inputSize, double* output, int outputDimension) {
+// @param outputSize : size of output array
+double LinearPerceptron::linear_classify(double* input, int inputSize, double* output, int outputSize) {
 	assert(input != NULL);
 	assert(inputSize > 0);
 	assert(output != NULL);
-	assert(outputDimension > 0);
+	assert(outputSize > 0);
 	double sum_weigths_inputs;
 	double* inputWithBias = addBiasToInput(input, inputSize);
-	for (int outputIterator = 0; outputIterator < outputDimension; outputIterator++) {
+	for (int outputIterator = 0; outputIterator < outputSize; outputIterator++) {
 		sum_weigths_inputs = 0;
-		for (int modelIterator = outputIterator, inputIterator = 0; modelIterator < (inputSize + 1)*outputDimension && inputIterator < inputSize + 1; inputIterator++, modelIterator += outputDimension) {
+		for (int modelIterator = outputIterator, inputIterator = 0; 
+				modelIterator < (inputSize + 1)*outputSize && inputIterator < inputSize + 1;
+				inputIterator++, modelIterator += outputSize) {
 			sum_weigths_inputs += classifModel[modelIterator] * inputWithBias[inputIterator];
 		}
 		output[outputIterator] = (sum_weigths_inputs >= 0 ? 1 : -1);
 	}
+	return output[0];
 }
-// ---------- APPRENTSSAGE ----------
-// Function called from C# taking all inputs and ouputs to learn rosenblatt to a model
-// @param model : model used to classify
-// @param inputs :
-// @param inputsSize :
-// @param inputSize :
+// Function called from outside (the dll) taking all inputs and ouputs to learn rosenblatt to a model
+// @param inputs : all inputs of the datas, that are concatenated in a single one entry array
+// @param inputsSize : size of the whole array
+// @param inputSize : size of one input
 // @param expectedOutputs : array containing for each input all the output neuron expected response (ex : 2 inputs of 3 outputs : [i=1 o=1][i=1 o=2][i=1 o=2][i=2 o=1][i=2 o=2][i=2 o=2][i=2 o=1][i=3 o=2][i=3 o=3])
-// @param outputSize : size oh output neurons
+// @param outputSize : size of output neurons
 // @param iterationMax : number of max of iterations
-// @param step : step
+// @param step : step that will be use for learning
 int LinearPerceptron::linear_fit_classification_rosenblatt(double *inputs, int inputsSize, int inputSize, double *expectedOutputs, int outputSize, int iterationMax, double step) {
 	assert(classifModel != NULL);
 	assert(inputs != NULL);
@@ -58,7 +59,6 @@ int LinearPerceptron::linear_fit_classification_rosenblatt(double *inputs, int i
 			return 1;
 		}
 		iterations++;
-
 		error = 0;
 		double* oneInput = new double[inputSize];
 		double* oneOutput = new double[outputSize];
@@ -104,10 +104,18 @@ int LinearPerceptron::linear_fit_classification_rosenblatt(double *inputs, int i
 		}
 	}
 }
-
 // Fit a model with all the inputs and outputs WITHOUT bias and concatenate in an double* array
-// Return a pointer on W matrix
+// Put a pointer on W matrix in regressionModel
+// @param inputs : all inputs of the datas, that are concatenated in a single one entry array
+// @param inputsSize : size of the whole array
+// @param inputSize : size of one input
+// @param expectedOutputs : array containing for each input all the output neuron expected response (ex : 2 inputs of 3 outputs : [i=1 o=1][i=1 o=2][i=1 o=2][i=2 o=1][i=2 o=2][i=2 o=2][i=2 o=1][i=3 o=2][i=3 o=3])
+// @param outputSize : size of output neurons
 void LinearPerceptron::linear_create_and_fit_regression(double *inputs, int inputsSize, int inputSize, double *expectedOutputs, int outputSize) {
+	assert(inputs != NULL);
+	assert(inputSize > 0);
+	assert(expectedOutputs != NULL);
+	assert(outputSize > 0);
 	inputs = addBiasToInputs(inputs, &inputsSize, &inputSize);
 	// Build X and Y
 	int nbInput = inputsSize / inputSize;
@@ -120,10 +128,13 @@ void LinearPerceptron::linear_create_and_fit_regression(double *inputs, int inpu
 	regressionModel = new Eigen::MatrixXd(pinv(X) * Y);
 }
 
-// For a trained model, this function calculate the output of the single input passed as a paramter
-// The output array will be filled
+// For a trained model, this function calculate the output of the single input passed as a parameter
+// @param input : input of one data
+// @param inputSize : size of input array
+// @param output : array to write result
+// @param outputSize : size of output array
 void LinearPerceptron::linearPredict(double* input, int inputSize, double* output, int outputSize) {
-	//	assert(model != NULL);
+	assert(regressionModel != NULL);
 	assert(input != NULL);
 	assert(inputSize > 0);
 	assert(output != NULL);
@@ -141,8 +152,13 @@ void LinearPerceptron::linearPredict(double* input, int inputSize, double* outpu
 
 // Add bias to the inputs
 // Modify inputSize and inputsSize
-// Return the new input
+// @param input : input of one data
+// @param inputSize : size of input array
+// @return the new input
 double* addBiasToInputs(double *inputs, int *inputsSize, int *inputSize) {
+	assert(inputs != NULL);
+	assert(inputsSize >= inputSize);
+	assert(inputSize > 0);
 	int nbData = *inputsSize / *inputSize;
 	*inputsSize += nbData;
 	double* newInputs = new double[*inputsSize + nbData];
@@ -158,6 +174,11 @@ double* addBiasToInputs(double *inputs, int *inputsSize, int *inputSize) {
 	*inputSize += 1;
 	return newInputs;
 }
+// Add bias to one input
+// Do not modify inputSize and inputsSize
+// @param input : input of one data
+// @param inputSize : size of input array
+// @return the new input
 double* addBiasToInput(double *input, int inputSize) {
 	assert(input != NULL);
 	assert(inputSize > 0);
@@ -169,7 +190,14 @@ double* addBiasToInput(double *input, int inputSize) {
 	return newInput;
 }
 // Transform an array of double into a matrix
+// @param matrix : Eigen matrix to fill
+// @param tab : array to convert to matrix
+// @param nbRow : number of rows of the matrix to fill 
+// @param nbCols : number of columns of the matrix to fill 
 void tabToMatrix(Eigen::MatrixXd* matrix, double* tab, int nbRow, int nbCols) {
+	assert(matrix != NULL);
+	assert(tab != NULL);
+	assert(nbRow > 0 && nbCols > 0);
 	int iterator = 0;
 	for (int i = 0; i<nbRow; i++) {
 		for (int j = 0; j<nbCols; ++j) {
@@ -179,7 +207,15 @@ void tabToMatrix(Eigen::MatrixXd* matrix, double* tab, int nbRow, int nbCols) {
 	}
 }
 // Transform a matrix into a array of double
+// @param matrix : Eigen matrix to fill
+// @param tab : array to fill
+// @param nbRow : number of rows of the matrix
+// @param nbCols : number of columns of the matrix
 void matrixToTab(Eigen::MatrixXd matrix, double *tab, int nbRow, int nbCols) {
+	assert(tab != NULL);
+	assert(nbRow > 0 && nbCols > 0); 
+	//assert(matrix.row == nbRow);// TODO
+	//assert(matrix.col == nbCols); 
 	int iterator = 0;
 	for (int i = 0; i<nbRow; ++i) {
 		for (int j = 0; j<nbCols; ++j) {
@@ -189,6 +225,8 @@ void matrixToTab(Eigen::MatrixXd matrix, double *tab, int nbRow, int nbCols) {
 	}
 }
 // Return the pseudo inverse of the matrix passed as a parameter
+// @param X : matrix to manipulate
+// @return : pseudo-inverse of the given matrix
 Eigen::MatrixXd pinv(Eigen::MatrixXd X) {
 	Eigen::MatrixXd X_Transp = X.transpose();
 	return (((X_Transp * X).inverse()) * X_Transp);

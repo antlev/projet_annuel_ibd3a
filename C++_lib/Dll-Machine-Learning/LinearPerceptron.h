@@ -1,8 +1,8 @@
 #pragma once
-#include "Eigen/Dense"
 //
 // Created by antoine on 14/06/2017.
 //
+#include "Eigen/Dense"
 
 class LinearPerceptron {
 public:
@@ -10,10 +10,8 @@ public:
 		assert(inputDimension > 0);
 		assert(outputDimension > 0);
 		modelLearned = 1;
-		// Création du modèle en mémoire
-		// On a autant de poids que d'input (sans oublier le neurone de biais) fois le nombre d'output
+		// Create the model
 		classifModel = new double[(inputDimension + 1) * outputDimension];
-		// On affecte les poids à une valeur entre -1 et 1
 		for (int i = 0; i < (inputDimension + 1) * outputDimension; ++i) {
 			classifModel[i] = ((float)rand()) / ((float)RAND_MAX) * 2.0 - 1.0;
 		}
@@ -21,11 +19,11 @@ public:
 	~LinearPerceptron() {
 		modelLearned = 0;
 		if (classifModel) { delete classifModel; }
-		// if (modelLearned) { delete regressionModel; } // TODO
+		if (modelLearned) { delete regressionModel; }
 	}
 	// Classification
 	int linear_fit_classification_rosenblatt(double *inputs, int inputsSize, int inputSize, double *expectedOutputs, int outputSize, int iterationMax, double step);
-	void linear_classify(double* input, int inputSize, double* output, int outputDimension);
+	double linear_classify(double* input, int inputSize, double* output, int outputDimension);
 	// Regression
 	void linear_create_and_fit_regression(double *inputs, int inputsSize, int inputSize, double *expectedOutputs, int outputSize);
 	void linearPredict(double* input, int inputSize, double* output, int outputSize);
@@ -35,7 +33,6 @@ private:
 	Eigen::MatrixXd* regressionModel;
 	int modelLearned;
 };
-
 Eigen::MatrixXd pinv(Eigen::MatrixXd X);
 double* addBiasToInput(double *input, int inputSize);
 double* addBiasToInputs(double *inputs, int *inputsSize, int *inputSize);
