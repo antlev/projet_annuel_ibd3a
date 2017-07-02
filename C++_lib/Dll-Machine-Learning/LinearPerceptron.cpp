@@ -16,7 +16,7 @@ using namespace std;
 // @param inputSize : size of input array
 // @param outputs : array to write results of all the outputs neurons
 // @param outputSize : size of output array
-void LinearPerceptron::linear_classify(double* input, int inputSize, double* output, int outputSize) {
+double LinearPerceptron::linear_classify(double* input, int inputSize, double* output, int outputSize) {
 	assert(input != NULL);
 	assert(inputSize > 0);
 	assert(output != NULL);
@@ -32,6 +32,7 @@ void LinearPerceptron::linear_classify(double* input, int inputSize, double* out
 		}
 		output[outputIterator] = (sum_weigths_inputs >= 0 ? 1 : -1);
 	}
+	return output[0];
 }
 // Function called from outside (the dll) taking all inputs and ouputs to learn rosenblatt to a model
 // @param inputs : all inputs of the datas, that are concatenated in a single one entry array
