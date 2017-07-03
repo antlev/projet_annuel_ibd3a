@@ -311,18 +311,19 @@ public class MainScript : MonoBehaviour {
                 int naiveRbfOutputSize = 2;
                 double[] naiveRbfInputs = new double[naiveRbfNbRepresentatives * naiveRbfInputSize];
                 double[] naiveRbfInput = new double[naiveRbfInputSize];
-                double[] naiveRbfOutputs = new double[naiveRbfNbRepresentatives * naiveRbfOutputSize];
+				double[] naiveRbfOutput = new double[naiveRbfOutputSize];
+				double[] naiveRbfOutputs = new double[naiveRbfNbRepresentatives * naiveRbfOutputSize];
 
                 System.IntPtr naiveRbfModel = LibWrapperMachineLearning.createRbfModel(naiveRbfNbRepresentatives);
 
 
                 naiveRbfInputs[0] = 0;
                 naiveRbfInputs[1] = 0;
-                naiveRbfOutputs[0] = 0;
+                naiveRbfOutputs[0] = -1;
 
                 naiveRbfInputs[2] = 0;
                 naiveRbfInputs[3] = 1;
-                naiveRbfOutputs[1] = 0;
+                naiveRbfOutputs[1] = -1;
 
                 naiveRbfInputs[4] = 1;
                 naiveRbfInputs[5] = 1;
@@ -334,22 +335,22 @@ public class MainScript : MonoBehaviour {
 
                 LibWrapperMachineLearning.naiveLearnModel(naiveRbfModel, naiveRbfNbRepresentatives, naiveRbfGamma, naiveRbfInputs, naiveRbfInputSize, naiveRbfOutputs);
 
-                //naiveRbfInput[0] = 0;
-                //naiveRbfInput[1] = 0;
-                //LibWrapperMachineLearning.getRbfResponse(naiveRbfModel, naiveRbfGamma, naiveRbfInput, inputSize, naiveRbfOutputs, naiveRbfInputs, naiveRbfNbRepresentatives);
-                //Debug.Log("Response for input = [" + naiveRbfInput[0] + "][" + naiveRbfInput[1] + "]" + naiveRbfOutputs[0] + "< expected : 0");
-                //naiveRbfInput[0] = 0;
-                //naiveRbfInput[1] = 1;
-                //LibWrapperMachineLearning.getRbfResponse(naiveRbfModel, naiveRbfGamma, naiveRbfInput, inputSize, naiveRbfOutputs, naiveRbfInputs, naiveRbfNbRepresentatives);
-                //Debug.Log("Response for input = [" + naiveRbfInput[0] + "][" + naiveRbfInput[1] + "]" + naiveRbfOutputs[0] + "< expected : 0"); naiveRbfInput[0] = 0;
-                //naiveRbfInput[0] = 1;
-                //naiveRbfInput[1] = 1;
-                //LibWrapperMachineLearning.getRbfResponse(naiveRbfModel, naiveRbfGamma, naiveRbfInput, inputSize, naiveRbfOutputs, naiveRbfInputs, naiveRbfNbRepresentatives);
-                //Debug.Log("Response for input = [" + naiveRbfInput[0] + "][" + naiveRbfInput[1] + "]" + naiveRbfOutputs[0] + "< expected : 1"); naiveRbfInput[0] = 0;
-                //naiveRbfInput[0] = 1;
-                //naiveRbfInput[1] = 0;
-                //LibWrapperMachineLearning.getRbfResponse(naiveRbfModel, naiveRbfGamma, naiveRbfInput, inputSize, naiveRbfOutputs, naiveRbfInputs, naiveRbfNbRepresentatives);
-                //Debug.Log("Response for input = [" + naiveRbfInput[0] + "][" + naiveRbfInput[1] + "]" + naiveRbfOutputs[0] + "< expected : 1");
+                naiveRbfInput[0] = 0;
+                naiveRbfInput[1] = 0;
+                LibWrapperMachineLearning.getRbfResponse(naiveRbfModel, naiveRbfGamma, naiveRbfInput, inputSize, naiveRbfOutputs, naiveRbfInputs, naiveRbfNbRepresentatives);
+                Debug.Log("Response for input = [" + naiveRbfInput[0] + "][" + naiveRbfInput[1] + "]" + naiveRbfOutputs[0] + "< expected : -1");
+                naiveRbfInput[0] = 0;
+                naiveRbfInput[1] = 1;
+                LibWrapperMachineLearning.getRbfResponse(naiveRbfModel, naiveRbfGamma, naiveRbfInput, inputSize, naiveRbfOutputs, naiveRbfInputs, naiveRbfNbRepresentatives);
+                Debug.Log("Response for input = [" + naiveRbfInput[0] + "][" + naiveRbfInput[1] + "]" + naiveRbfOutputs[0] + "< expected : -1"); naiveRbfInput[0] = 0;
+                naiveRbfInput[0] = 1;
+                naiveRbfInput[1] = 1;
+                LibWrapperMachineLearning.getRbfResponse(naiveRbfModel, naiveRbfGamma, naiveRbfInput, inputSize, naiveRbfOutputs, naiveRbfInputs, naiveRbfNbRepresentatives);
+                Debug.Log("Response for input = [" + naiveRbfInput[0] + "][" + naiveRbfInput[1] + "]" + naiveRbfOutputs[0] + "< expected : 1"); naiveRbfInput[0] = 0;
+                naiveRbfInput[0] = 1;
+                naiveRbfInput[1] = 0;
+                LibWrapperMachineLearning.getRbfResponse(naiveRbfModel, naiveRbfGamma, naiveRbfInput, inputSize, naiveRbfOutputs, naiveRbfInputs, naiveRbfNbRepresentatives);
+                Debug.Log("Response for input = [" + naiveRbfInput[0] + "][" + naiveRbfInput[1] + "]" + naiveRbfOutputs[0] + "< expected : 1");
 
             }
         }
