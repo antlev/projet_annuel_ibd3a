@@ -34,6 +34,12 @@ NAIVE_RBF::NAIVE_RBF(int nbExamples, double gamma, double* X, int inputSize, dou
 	naiveWeights = teta.inverse()*YMatrix;
 }
 void NAIVE_RBF::getRbfResponse(double gamma, double* input, int inputSize, double* output, double* X, int nbExamples) {
+	assert(nbExamples > 0);
+	assert(gamma > 0);
+	assert(inputSize > 0);
+	assert(input != nullptr);
+	assert(X != nullptr);
+	assert(output != nullptr);
 	double sum = 0;
 	double* oneX = new double[inputSize];
 	for (int i = 0; i<nbExamples; i++) {
@@ -45,7 +51,12 @@ void NAIVE_RBF::getRbfResponse(double gamma, double* input, int inputSize, doubl
 	*output = (sum > 0) ? 1 : -1;
 }
 RBF::RBF(int nbExamples, double gamma, double* X, int inputSize, double* Y, int nbRepresentatives) {
-
+	assert(nbExamples > 0);
+	assert(nbRepresentatives > 0);
+	assert(gamma > 0);
+	assert(inputSize > 0);
+	assert(X != nullptr);
+	assert(Y != nullptr);
 	lloydAlgorithm(X, inputSize, nbExamples, nbRepresentatives);
 
 	Eigen::MatrixXd teta(nbRepresentatives, nbExamples);
@@ -61,6 +72,12 @@ RBF::RBF(int nbExamples, double gamma, double* X, int inputSize, double* Y, int 
 	weights = pinv2(teta)*YMatrix;
 }
 void RBF::getRbfResponse(double gamma, double* input, int inputSize, double* output, double* X, int nbExamples) {
+	assert(nbExamples > 0);
+	assert(nbRepresentatives > 0);
+	assert(gamma > 0);
+	assert(inputSize > 0);
+	assert(X != nullptr);
+	assert(output != nullptr); 
 	double sum = 0;
 	double* oneX = new double[inputSize];
 	for (int i = 0; i<nbExamples; i++) {
@@ -72,6 +89,10 @@ void RBF::getRbfResponse(double gamma, double* input, int inputSize, double* out
 	*output = (sum > 0) ? 1 : -1;
 }
 void RBF::lloydAlgorithm(double* inputs, int inputSize, int nbData, int nbRepresentatives) {
+	assert(nbData > 0);
+	assert(nbRepresentatives > 0);
+	assert(inputSize > 0);
+	assert(inputs != nullptr);
 	double* input = new double[inputSize];
 	double* representatives = new double[nbRepresentatives*inputSize];
 	double* copyRepresentatives = representatives;
@@ -124,6 +145,7 @@ void RBF::lloydAlgorithm(double* inputs, int inputSize, int nbData, int nbRepres
 	this->representatives = representatives;
 }
 void RBF::showRepresentative(int inputSize) {
+	assert(inputSize > 0);
 	for (int i = 0; i<RBF::nbRepresentatives*inputSize; i += inputSize) {
 		std::cout << "Representant " << i / inputSize << " = (" << representatives[i] << ";" << representatives[i + 1] << ")" << std::endl;
 	}
@@ -134,6 +156,9 @@ Eigen::MatrixXd pinv2(Eigen::MatrixXd X) {
 	return (((X_Transp * X).inverse()) * X_Transp);
 }
 double distance(double * A, double* B, int inputSize) {
+	assert(A != nullptr);
+	assert(B != nullptr);
+	assert(inputSize > 0);
 	double distance = 0;
 	for (int i = 0; i<inputSize; i++) {
 		distance += (B[i] - A[i])*(B[i] - A[i]);

@@ -14,12 +14,9 @@ private:
 class RBF {
 public:
 	RBF(int nbExamples, double gamma, double* X, int inputSize, double* Y, int nbRepresentatives);
-
 	void getRbfResponse(double gamma, double* input, int inputSize, double* output, double* X, int nbExamples);
 	void lloydAlgorithm(double* inputs, int inputSize, int nbData, int nbRepresentatives);
 	void showRepresentative(int inputSize);
-
-
 private:
 	int nbRepresentatives;
 	double* representatives;
