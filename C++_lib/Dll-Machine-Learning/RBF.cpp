@@ -10,6 +10,7 @@
 
 class MatrixXd;
 
+// Implementation of a native RBF that consider all inputs given
 NAIVE_RBF::NAIVE_RBF(int nbExamples, double gamma, double* X, int inputSize, double* Y) {
 	assert(nbExamples > 0);
 	assert(gamma > 0);
@@ -50,6 +51,7 @@ void NAIVE_RBF::getRbfResponse(double gamma, double* input, int inputSize, doubl
 	}
 	*output = (sum > 0) ? 1 : -1;
 }
+// Implementation of RBF that uses Lloyd algorithm to select some representatives
 RBF::RBF(int nbExamples, double gamma, double* X, int inputSize, double* Y, int nbRepresentatives) {
 	assert(nbExamples > 0);
 	assert(nbRepresentatives > 0);
@@ -57,9 +59,11 @@ RBF::RBF(int nbExamples, double gamma, double* X, int inputSize, double* Y, int 
 	assert(inputSize > 0);
 	assert(X != nullptr);
 	assert(Y != nullptr);
+	this->nbRepresentatives = nbRepresentatives;
+	// Select representatives using LLoyd algorithm, representatives are set as object atribute
 	lloydAlgorithm(X, inputSize, nbExamples, nbRepresentatives);
 
-	Eigen::MatrixXd teta(nbRepresentatives, nbExamples);
+	Eigen::MatrixXd teta(nbExamples, nbRepresentatives);
 	Eigen::MatrixXd YMatrix(nbExamples, 1);
 	for (int i = 0; i<nbExamples; i++) {
 		YMatrix(i, 0) = Y[i];
@@ -77,7 +81,7 @@ void RBF::getRbfResponse(double gamma, double* input, int inputSize, double* out
 	assert(gamma > 0);
 	assert(inputSize > 0);
 	assert(X != nullptr);
-	assert(output != nullptr); 
+	assert(output != nullptr);
 	double sum = 0;
 	double* oneX = new double[inputSize];
 	for (int i = 0; i<nbExamples; i++) {
@@ -100,12 +104,12 @@ void RBF::lloydAlgorithm(double* inputs, int inputSize, int nbData, int nbRepres
 	std::vector< std::vector<int> > clusters(nbRepresentatives, std::vector<int>(0, 0));
 	for (int i = 0; i<nbRepresentatives; i++) {
 		for (int j = 0; j<inputSize; j++) {
-			representatives[i*inputSize + j] = (float)rand() / RAND_MAX * 2.0 - 1.0;
+			representatives[i*inputSize + j] = (float)rand() / RAND_MAX;
 		}
 	}
 	while (iterations  < 10000) {
 		// associates representatives to clusters
-		clusters.empty();
+		clusters.clear();
 		for (int dataNb = 0; dataNb<nbData; dataNb++) {
 			double distanceToRepr;
 			int reprNbToPutInCluster;
@@ -115,12 +119,12 @@ void RBF::lloydAlgorithm(double* inputs, int inputSize, int nbData, int nbRepres
 			representatives = copyRepresentatives;
 
 			for (int representativeNb = 0; representativeNb<nbRepresentatives; representativeNb++) {
-				representatives += inputSize;
 				distanceToRepr = distance(input, representatives, inputSize);
 				if (distanceToRepr < minDist) {
 					minDist = distanceToRepr;
 					reprNbToPutInCluster = representativeNb;
 				}
+				representatives += inputSize;
 			}
 			clusters[reprNbToPutInCluster].push_back(dataNb);
 		}
@@ -133,7 +137,8 @@ void RBF::lloydAlgorithm(double* inputs, int inputSize, int nbData, int nbRepres
 			}
 			for (unsigned int i = 0; i<clusters[clusterNb].size(); i++) {
 				for (int j = 0; j<inputSize; j++) {
-					sumOfX[j] += inputs[clusters[clusterNb][i] + j];
+					auto tmp = inputs[clusters[clusterNb][i] * inputSize + j];
+					sumOfX[j] += tmp;
 				}
 			}
 			for (int i = 0; i<inputSize; i++) {
@@ -164,4 +169,63 @@ double distance(double * A, double* B, int inputSize) {
 		distance += (B[i] - A[i])*(B[i] - A[i]);
 	}
 	return sqrt(distance);
+}
+
+void lloydAlgorithm2(double* inputs, int inputSize, int nbData, int nbRepresentatives) {
+	assert(nbData > 0);
+	assert(nbRepresentatives > 0);
+	assert(inputSize > 0);
+	assert(inputs != nullptr);
+	double* input = new double[inputSize];
+	double* representatives = new double[nbRepresentatives*inputSize];
+	double* copyRepresentatives = representatives;
+	int iterations = 0;
+	std::vector< std::vector<int> > clusters(nbRepresentatives, std::vector<int>(0, 0));
+	for (int i = 0; i<nbRepresentatives; i++) {
+		for (int j = 0; j<inputSize; j++) {
+			representatives[i*inputSize + j] = (float)rand() / RAND_MAX;
+		}
+	}
+	while (iterations  < 10000) {
+		// associates representatives to clusters
+		clusters.clear();
+		for (int dataNb = 0; dataNb<nbData; dataNb++) {
+			double distanceToRepr;
+			int reprNbToPutInCluster;
+
+			double minDist = DBL_MAX;
+			input = inputs + dataNb*inputSize;
+			representatives = copyRepresentatives;
+
+			for (int representativeNb = 0; representativeNb<nbRepresentatives; representativeNb++) {
+				distanceToRepr = distance(input, representatives, inputSize);
+				if (distanceToRepr < minDist) {
+					minDist = distanceToRepr;
+					reprNbToPutInCluster = representativeNb;
+				}
+				representatives += inputSize;
+			}
+			clusters[reprNbToPutInCluster].push_back(dataNb);
+		}
+		representatives = copyRepresentatives;
+		// elect n representatives
+		for (int clusterNb = 0; clusterNb<nbRepresentatives; clusterNb++) {
+			double* sumOfX = new double[inputSize];
+			for (int i = 0; i<inputSize; i++) {
+				sumOfX[i] = 0;
+			}
+			for (unsigned int i = 0; i<clusters[clusterNb].size(); i++) {
+				for (int j = 0; j<inputSize; j++) {
+					auto tmp = inputs[clusters[clusterNb][i] * inputSize + j];
+					sumOfX[j] += tmp;
+				}
+			}
+			for (int i = 0; i<inputSize; i++) {
+				representatives[clusterNb*inputSize + i] = sumOfX[i] / (double)clusters[clusterNb].size();
+			}
+		}
+		iterations++;
+	}
+	std::cout << "TEST >>" << representatives[0] << " " << representatives[1] << std::endl;
+	std::cout << "TEST >>" << representatives[2] << " " << representatives[3] << std::endl;
 }
