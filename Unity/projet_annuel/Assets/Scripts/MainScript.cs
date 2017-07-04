@@ -176,72 +176,77 @@ public class MainScript : MonoBehaviour {
 				Marshal.Copy (pRes, res, 0, linear_outputSize);
 				Debug.Log("Return of linear classification for input[" + linear_input[0] + "][" + linear_input[1] + "] >" + res[0] + "< expected 1");
 
-//                Debug.Log("Testing MLP Classification");
-//                int testClassifMLP_nbLayer = 2;
-//                int[] testClassifMLP_modelStruct = new int[2] { 2, 1 };
-//                int testClassifMLP_inputSize = 2;
-//                int testClassifMLP_outputSize = 1;
-//                int testClassifMLP_nbData = 4;
-//
-//                double[] testClassifMLP_inputs = new double[testClassifMLP_inputSize * testClassifMLP_nbData];
-//                double[] testClassifMLP_expectedOutputs = new double[testClassifMLP_outputSize * testClassifMLP_nbData];
-//                double[] testClassifMLP_oneInput = new double[testClassifMLP_inputSize];
-//
-//                System.IntPtr mlpModel = LibWrapperMachineLearning.createMlp(testClassifMLP_modelStruct, testClassifMLP_nbLayer);
-//
-//                testClassifMLP_inputs[0] = 0;
-//                testClassifMLP_inputs[1] = 0;
-//
-//                testClassifMLP_inputs[2] = 0;
-//                testClassifMLP_inputs[3] = 1;
-//
-//                testClassifMLP_inputs[4] = 1;
-//                testClassifMLP_inputs[5] = 1;
-//
-//                testClassifMLP_inputs[6] = 1;
-//                testClassifMLP_inputs[7] = 0;
-//
-//                testClassifMLP_expectedOutputs[0] = 1;
-//                testClassifMLP_expectedOutputs[1] = 1;
-//                testClassifMLP_expectedOutputs[2] = -1;
-//                testClassifMLP_expectedOutputs[3] = -1;
-//
-//                Debug.Log("Fitting Classification model with linear inputs");
-//
-//
-//
-//                LibWrapperMachineLearning.fitClassification(mlpModel, testClassifMLP_inputs, testClassifMLP_inputSize, testClassifMLP_inputSize * testClassifMLP_nbData,
-//                                                  testClassifMLP_expectedOutputs, testClassifMLP_outputSize);
-//
-//                testClassifMLP_oneInput[0] = 0;
-//                testClassifMLP_oneInput[1] = 0;
-//
-//                LibWrapperMachineLearning.classify(mlpModel, testClassifMLP_oneInput, testClassifMLP_inputSize);
-//                Debug.Log("Response for input = [" + testClassifMLP_oneInput[0] + "][" + testClassifMLP_oneInput[1] +
-//                                "] ->" + LibWrapperMachineLearning.getOutputsforClassif(mlpModel) + "< expected : 1");
-//
-//                testClassifMLP_oneInput[0] = 0;
-//                testClassifMLP_oneInput[1] = 1;
-//
-//                LibWrapperMachineLearning.classify(mlpModel, testClassifMLP_oneInput, testClassifMLP_inputSize);
-//                Debug.Log("Response for input = [" + testClassifMLP_oneInput[0] + "][" + testClassifMLP_oneInput[1] +
-//                                "] ->" + LibWrapperMachineLearning.getOutputsforClassif(mlpModel) + "< expected : 1");
-//
-//                testClassifMLP_oneInput[0] = 1;
-//                testClassifMLP_oneInput[1] = 1;
-//
-//                LibWrapperMachineLearning.classify(mlpModel, testClassifMLP_oneInput, testClassifMLP_inputSize);
-//                Debug.Log("Response for input = [" + testClassifMLP_oneInput[0] + "][" + testClassifMLP_oneInput[1] +
-//                                "] ->" + LibWrapperMachineLearning.getOutputsforClassif(mlpModel) + "< expected : -1");
-//
-//                testClassifMLP_oneInput[0] = 1;
-//                testClassifMLP_oneInput[1] = 0;
-//
-//                LibWrapperMachineLearning.classify(mlpModel, testClassifMLP_oneInput, testClassifMLP_inputSize);
-//                Debug.Log("Response for input = [" + testClassifMLP_oneInput[0] + "][" + testClassifMLP_oneInput[1] +
-//                                "] ->" + LibWrapperMachineLearning.getOutputsforClassif(mlpModel) + "< expected : -1");
-//
-//
+                Debug.Log("Testing MLP Classification");
+                int testClassifMLP_nbLayer = 2;
+                int[] testClassifMLP_modelStruct = new int[2] { 2, 1 };
+                int testClassifMLP_inputSize = 2;
+                int testClassifMLP_outputSize = 1;
+                int testClassifMLP_nbData = 4;
+				double[] testClassifMLP_output = new double[testClassifMLP_outputSize];
+
+                double[] testClassifMLP_inputs = new double[testClassifMLP_inputSize * testClassifMLP_nbData];
+                double[] testClassifMLP_expectedOutputs = new double[testClassifMLP_outputSize * testClassifMLP_nbData];
+                double[] testClassifMLP_oneInput = new double[testClassifMLP_inputSize];
+
+                System.IntPtr mlpModel = LibWrapperMachineLearning.createMlp(testClassifMLP_modelStruct, testClassifMLP_nbLayer);
+
+                testClassifMLP_inputs[0] = 0;
+                testClassifMLP_inputs[1] = 0;
+
+                testClassifMLP_inputs[2] = 0;
+                testClassifMLP_inputs[3] = 1;
+
+                testClassifMLP_inputs[4] = 1;
+                testClassifMLP_inputs[5] = 1;
+
+                testClassifMLP_inputs[6] = 1;
+                testClassifMLP_inputs[7] = 0;
+
+                testClassifMLP_expectedOutputs[0] = 1;
+                testClassifMLP_expectedOutputs[1] = 1;
+                testClassifMLP_expectedOutputs[2] = -1;
+                testClassifMLP_expectedOutputs[3] = -1;
+
+                Debug.Log("Fitting Classification model with linear inputs");
+
+
+
+                LibWrapperMachineLearning.fitClassification(mlpModel, testClassifMLP_inputs, testClassifMLP_inputSize * testClassifMLP_nbData,
+                                                  testClassifMLP_expectedOutputs);
+
+                testClassifMLP_oneInput[0] = 0;
+                testClassifMLP_oneInput[1] = 0;
+                LibWrapperMachineLearning.classify(mlpModel, testClassifMLP_oneInput);
+				pRes = LibWrapperMachineLearning.getOutputsforClassif (mlpModel);
+				Marshal.Copy (pRes, testClassifMLP_output, 0, testClassifMLP_outputSize);
+                Debug.Log("Response for input = [" + testClassifMLP_oneInput[0] + "][" + testClassifMLP_oneInput[1] +
+					"] ->" + testClassifMLP_output[0] + "< expected : 1");
+
+                testClassifMLP_oneInput[0] = 0;
+                testClassifMLP_oneInput[1] = 1;
+                LibWrapperMachineLearning.classify(mlpModel, testClassifMLP_oneInput);
+				pRes = LibWrapperMachineLearning.getOutputsforClassif (mlpModel);
+				Marshal.Copy (pRes, testClassifMLP_output, 0, testClassifMLP_outputSize);
+				Debug.Log("Response for input = [" + testClassifMLP_oneInput[0] + "][" + testClassifMLP_oneInput[1] +
+					"] ->" + testClassifMLP_output[0] + "< expected : 1");
+				
+                testClassifMLP_oneInput[0] = 1;
+                testClassifMLP_oneInput[1] = 1;
+				LibWrapperMachineLearning.classify(mlpModel, testClassifMLP_oneInput);
+				pRes = LibWrapperMachineLearning.getOutputsforClassif (mlpModel);
+				Marshal.Copy (pRes, testClassifMLP_output, 0, testClassifMLP_outputSize);
+				Debug.Log("Response for input = [" + testClassifMLP_oneInput[0] + "][" + testClassifMLP_oneInput[1] +
+					"] ->" + testClassifMLP_output[0] + "< expected : -1");
+				
+                testClassifMLP_oneInput[0] = 1;
+                testClassifMLP_oneInput[1] = 0;
+				LibWrapperMachineLearning.classify(mlpModel, testClassifMLP_oneInput);
+				pRes = LibWrapperMachineLearning.getOutputsforClassif (mlpModel);
+				Marshal.Copy (pRes, testClassifMLP_output, 0, testClassifMLP_outputSize);
+				Debug.Log("Response for input = [" + testClassifMLP_oneInput[0] + "][" + testClassifMLP_oneInput[1] +
+					"] ->" + testClassifMLP_output[0] + "< expected : -1");
+
+
 //
 //                Debug.Log("Testing MLP Regression");
 //

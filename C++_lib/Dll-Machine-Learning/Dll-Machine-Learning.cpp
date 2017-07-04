@@ -42,17 +42,17 @@ public:
 	}
 	// MLP
 	__declspec(dllexport) MLP* createMlp(int *structure, int nbLayer) { return new MLP(structure, nbLayer); }
-	__declspec(dllexport) void classify(MLP* pMLP, double *oneInput, int inputSize) { pMLP->MLP::classify(oneInput, inputSize); }
-	__declspec(dllexport) void fitClassification(MLP* pMLP, double *inputs, int inputSize, int inputsSize, double *expectedOutputs, int outputSize) {
-		pMLP->MLP::fitClassification(inputs, inputSize, inputsSize, expectedOutputs, outputSize); 
+	__declspec(dllexport) void classify(MLP* pMLP, double *oneInput) { pMLP->MLP::classify(oneInput); }
+	__declspec(dllexport) void fitClassification(MLP* pMLP, double *inputs, int inputsSize, double *expectedOutputs) {
+		pMLP->MLP::fitClassification(inputs, inputsSize, expectedOutputs); 
 	}
-	__declspec(dllexport) double getOutputsforClassif(MLP* pMLP) { return pMLP->getOutputsforClassif(); }
-	__declspec(dllexport) void fitRegression(MLP* pMLP, double *inputs, int inputSize, int inputsSize, double *expectedOutputs, int outputSize) {
-		pMLP->MLP::fitRegression(inputs, inputSize, inputsSize, expectedOutputs, outputSize);
+	__declspec(dllexport) double* getOutputsforClassif(MLP* pMLP) { return pMLP->getOutputsforClassif(); }
+	__declspec(dllexport) void fitRegression(MLP* pMLP, double *inputs, int inputsSize, double *expectedOutputs) {
+		pMLP->MLP::fitRegression(inputs, inputsSize, expectedOutputs);
 	}
-	__declspec(dllexport) void predict(MLP* pMLP, double* oneInput, int inputSize) { pMLP->MLP::predict(oneInput, inputSize); }
+	__declspec(dllexport) void predict(MLP* pMLP, double* oneInput) { pMLP->MLP::predict(oneInput); }
 	__declspec(dllexport) void eraseMlp(MLP* pMLP) { delete pMLP; }
-	__declspec(dllexport) double getOutputsforRegression(MLP* pMLP) { return pMLP->getOutputsforRegression(); }
+	__declspec(dllexport) double* getOutputsforRegression(MLP* pMLP) { return pMLP->getOutputsforRegression(); }
 	// NAIVE RBF
 	__declspec(dllexport) NAIVE_RBF* createNaiveRbfModel(int nbExamples, double gamma, double* X, int inputSize, double* Y) { return new NAIVE_RBF(nbExamples, gamma, X, inputSize, Y); }
 	__declspec(dllexport) void naiveRbfGetResponse(NAIVE_RBF* pNaiveRBF, double gamma, double* input, int inputSize, double* output, double* X, int nbExamples) { pNaiveRBF->getRbfResponse(gamma, input, inputSize, output, X, nbExamples); }
