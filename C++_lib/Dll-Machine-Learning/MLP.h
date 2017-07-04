@@ -61,8 +61,6 @@ public:
 	void fitClassification(double *inputs, int inputsSize, double *expectedOutputs);
 	void fitRegression(double *inputs, int inputsSize, double *expectedOutputs);
 	double* predict(double* oneInput);
-	double* getOutputsforClassif();
-	double* getOutputsforRegression();
 
 private:
 	double ***weights;
@@ -78,6 +76,8 @@ private:
 	int nbLayer;
 	int modelLearned;
 
+	double* getOutputsforClassif();
+	double* getOutputsforRegression();
 	void fitClassifOneInput(double *oneInput, double* oneOutput);
 	void fitRegreOneInput(double *oneInput, double *oneOutput);
 	double sum(int layerNb, int neuronNb);

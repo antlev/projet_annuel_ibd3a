@@ -27,18 +27,14 @@ public class LibWrapperMachineLearning
     public static extern void eraseMlp(System.IntPtr pMLP);
         // Classification
     [DllImport("Dll-Machine-Learning")]
-    public static extern void classify(System.IntPtr pMLP, double[] oneInput);
+	public static extern System.IntPtr classify(System.IntPtr pMLP, double[] oneInput);
     [DllImport("Dll-Machine-Learning")]
     public static extern void fitClassification(System.IntPtr pMLP, double[] inputs, int inputsSize, double[] expectedOutputs);
-    [DllImport("Dll-Machine-Learning")]
-	public static extern System.IntPtr getOutputsforClassif(System.IntPtr pMLP);
         // Regression
     [DllImport("Dll-Machine-Learning")]
     public static extern void fitRegression(System.IntPtr pMLP, double[] inputs, int inputsSize, double[] expectedOutputs);
     [DllImport("Dll-Machine-Learning")]
-    public static extern void predict(System.IntPtr pMLP, double[] oneInput);
-    [DllImport("Dll-Machine-Learning")]
-	public static extern System.IntPtr getOutputsforRegression(System.IntPtr pMLP);
+	public static extern System.IntPtr predict(System.IntPtr pMLP, double[] oneInput);
 
     // RBF
     [DllImport("Dll-Machine-Learning")]
