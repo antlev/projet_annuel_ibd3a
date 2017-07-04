@@ -23,10 +23,10 @@ public:
 	}
 	// Classification
 	int linear_fit_classification_rosenblatt(double *inputs, int inputsSize, int inputSize, double *expectedOutputs, int outputSize, int iterationMax, double step);
-	double linear_classify(double* input, int inputSize, double* output, int outputDimension);
+	double* linear_classify(double* input, int inputSize, int outputSize);
 	// Regression
 	void linear_create_and_fit_regression(double *inputs, int inputsSize, int inputSize, double *expectedOutputs, int outputSize);
-	void linearPredict(double* input, int inputSize, double* output, int outputSize);
+	double* linearPredict(double* input, int inputSize, int outputSize);
 
 private:
 	double* classifModel;

@@ -30,15 +30,15 @@ public:
 	__declspec(dllexport) int linearFitClassificationRosenblatt(LinearPerceptron* pmodel, double *inputs, int inputsSize, int inputSize, double *expectedOutputs, int outputSize, int iterationMax, double step) {
 		return pmodel->LinearPerceptron::linear_fit_classification_rosenblatt(inputs, inputsSize, inputSize, expectedOutputs, outputSize, iterationMax, step);
 	}
-	__declspec(dllexport) double linearClassify(LinearPerceptron* pmodel, double* input, int inputSize, double* output, int outputDimension) {
-		return pmodel->LinearPerceptron::linear_classify(input, inputSize, output, outputDimension);
+	__declspec(dllexport) double* linearClassify(LinearPerceptron* pmodel, double* input, int inputSize, int outputDimension) {
+		return pmodel->LinearPerceptron::linear_classify(input, inputSize, outputDimension);
 	}
-	// Regression
+		// Regression
 	__declspec(dllexport) void linearCreateAndFitRegression(LinearPerceptron* pmodel, double *inputs, int inputsSize, int inputSize, double *expectedOutputs, int outputSize) {
 		pmodel->LinearPerceptron::linear_create_and_fit_regression(inputs, inputsSize, inputSize, expectedOutputs, outputSize);
 	}
-	__declspec(dllexport) void linearPredict(LinearPerceptron* pmodel, double* input, int inputSize, double* output, int outputSize) {
-		pmodel->LinearPerceptron::linearPredict(input, inputSize, output, outputSize);
+	__declspec(dllexport) double* linearPredict(LinearPerceptron* pmodel, double* input, int inputSize, double* output, int outputSize) {
+		return pmodel->LinearPerceptron::linearPredict(input, inputSize, outputSize);
 	}
 	// MLP
 	__declspec(dllexport) MLP* createMlp(int *structure, int nbLayer) { return new MLP(structure, nbLayer); }

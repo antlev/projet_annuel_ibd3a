@@ -14,15 +14,14 @@ using namespace std;
 // Return the MLP's response considering the inputs
 // @param input : input of one data
 // @param inputSize : size of input array
-// @param outputs : array to write results of all the outputs neurons
 // @param outputSize : size of output array
-double LinearPerceptron::linear_classify(double* input, int inputSize, double* output, int outputSize) {
+double* LinearPerceptron::linear_classify(double* input, int inputSize, int outputSize){
 	assert(input != NULL);
 	assert(inputSize > 0);
-	assert(output != NULL);
 	assert(outputSize > 0);
 	double sum_weigths_inputs;
 	double* inputWithBias = addBiasToInput(input, inputSize);
+	double* output = new double[outputSize];
 	for (int outputIterator = 0; outputIterator < outputSize; outputIterator++) {
 		sum_weigths_inputs = 0;
 		for (int modelIterator = outputIterator, inputIterator = 0; 
@@ -32,7 +31,7 @@ double LinearPerceptron::linear_classify(double* input, int inputSize, double* o
 		}
 		output[outputIterator] = (sum_weigths_inputs >= 0 ? 1 : -1);
 	}
-	return output[0];
+	return output;
 }
 // Function called from outside (the dll) taking all inputs and ouputs to learn rosenblatt to a model
 // @param inputs : all inputs of the datas, that are concatenated in a single one entry array
@@ -69,7 +68,7 @@ int LinearPerceptron::linear_fit_classification_rosenblatt(double *inputs, int i
 				oneInput[i] = inputs[inputsIterator + i];
 			}
 			// Get the result given by the MLP
-			linear_classify(oneInput, inputSize, oneOutput, outputSize);
+			double* oneOutput = linear_classify(oneInput, inputSize, outputSize);
 			oneInput = addBiasToInput(oneInput, inputSize);
 			bool* outputIsGood = new bool[outputSize];
 			double* outputError = new double[outputSize];
@@ -133,13 +132,13 @@ void LinearPerceptron::linear_create_and_fit_regression(double *inputs, int inpu
 // @param inputSize : size of input array
 // @param output : array to write result
 // @param outputSize : size of output array
-void LinearPerceptron::linearPredict(double* input, int inputSize, double* output, int outputSize) {
+double* LinearPerceptron::linearPredict(double* input, int inputSize, int outputSize) {
 	assert(regressionModel != NULL);
 	assert(input != NULL);
 	assert(inputSize > 0);
-	assert(output != NULL);
 	assert(outputSize > 0);
 	double* inputWithBias = addBiasToInput(input, inputSize);
+	double* output = new double[outputSize];
 
 	Eigen::MatrixXd inputMatrix(1, inputSize + 1);
 	for (int i = 0; i<inputSize + 1; i++) {
@@ -148,6 +147,7 @@ void LinearPerceptron::linearPredict(double* input, int inputSize, double* outpu
 	Eigen::MatrixXd outputMatrix(outputSize, 1);
 	outputMatrix = inputMatrix * (*regressionModel);
 	matrixToTab(outputMatrix, output, 1, outputSize);
+	return output;
 }
 
 // Add bias to the inputs
