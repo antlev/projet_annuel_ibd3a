@@ -15,10 +15,9 @@ using namespace std;
 // @param input : input of one data
 // @param inputSize : size of input array
 // @param outputSize : size of output array
-double* LinearPerceptron::linear_classify(double* input, int inputSize, int outputSize){
+double* LinearPerceptronClassif::linear_classify(double* input){
 	assert(input != NULL);
-	assert(inputSize > 0);
-	assert(outputSize > 0);
+	assert(this->model != nullptr);
 	double sum_weigths_inputs;
 	double* inputWithBias = addBiasToInput(input, inputSize);
 	double* output = new double[outputSize];
@@ -27,7 +26,7 @@ double* LinearPerceptron::linear_classify(double* input, int inputSize, int outp
 		for (int modelIterator = outputIterator, inputIterator = 0; 
 				modelIterator < (inputSize + 1)*outputSize && inputIterator < inputSize + 1;
 				inputIterator++, modelIterator += outputSize) {
-			sum_weigths_inputs += classifModel[modelIterator] * inputWithBias[inputIterator];
+			sum_weigths_inputs += model[modelIterator] * inputWithBias[inputIterator];
 		}
 		output[outputIterator] = (sum_weigths_inputs >= 0 ? 1 : -1);
 	}
@@ -41,14 +40,11 @@ double* LinearPerceptron::linear_classify(double* input, int inputSize, int outp
 // @param outputSize : size of output neurons
 // @param iterationMax : number of max of iterations
 // @param step : step that will be use for learning
-int LinearPerceptron::linear_fit_classification_rosenblatt(double *inputs, int inputsSize, int inputSize, double *expectedOutputs, int outputSize, int iterationMax, double step) {
-	assert(classifModel != NULL);
+int LinearPerceptronClassif::linear_fit_classification_rosenblatt(double *inputs, int inputsSize, double *expectedOutputs, int iterationMax, double step) {
+	assert(this->model != NULL);
 	assert(inputs != NULL);
-	assert(inputSize > 0);
 	assert(inputsSize >= inputSize);
-	assert(inputSize > 0);
 	assert(expectedOutputs != NULL);
-	assert(outputSize > 0);
 	assert(iterationMax > 0);
 	assert(step > 0);
 	int iterations(0);
@@ -68,7 +64,7 @@ int LinearPerceptron::linear_fit_classification_rosenblatt(double *inputs, int i
 				oneInput[i] = inputs[inputsIterator + i];
 			}
 			// Get the result given by the MLP
-			double* oneOutput = linear_classify(oneInput, inputSize, outputSize);
+			double* oneOutput = linear_classify(oneInput);
 			oneInput = addBiasToInput(oneInput, inputSize);
 			bool* outputIsGood = new bool[outputSize];
 			double* outputError = new double[outputSize];
@@ -92,7 +88,7 @@ int LinearPerceptron::linear_fit_classification_rosenblatt(double *inputs, int i
 					if (!outputIsGood[outputIterator]) {
 						// We adapt every weight of our MLP using the Rsoenblatt formula
 						for (int modelIterator = outputIterator, inputIterator = 0; modelIterator < (inputSize + 1)*outputSize; modelIterator += outputSize, inputIterator++) {
-							classifModel[modelIterator] += step * outputError[outputIterator] * oneInput[inputIterator];
+							model[modelIterator] += step * outputError[outputIterator] * oneInput[inputIterator];
 						}
 					}
 				}
@@ -103,40 +99,14 @@ int LinearPerceptron::linear_fit_classification_rosenblatt(double *inputs, int i
 		}
 	}
 }
-// Fit a model with all the inputs and outputs WITHOUT bias and concatenate in an double* array
-// Put a pointer on W matrix in regressionModel
-// @param inputs : all inputs of the datas, that are concatenated in a single one entry array
-// @param inputsSize : size of the whole array
-// @param inputSize : size of one input
-// @param expectedOutputs : array containing for each input all the output neuron expected response (ex : 2 inputs of 3 outputs : [i=1 o=1][i=1 o=2][i=1 o=2][i=2 o=1][i=2 o=2][i=2 o=2][i=2 o=1][i=3 o=2][i=3 o=3])
-// @param outputSize : size of output neurons
-void LinearPerceptron::linear_create_and_fit_regression(double *inputs, int inputsSize, int inputSize, double *expectedOutputs, int outputSize) {
-	assert(inputs != NULL);
-	assert(inputSize > 0);
-	assert(expectedOutputs != NULL);
-	assert(outputSize > 0);
-	inputs = addBiasToInputs(inputs, &inputsSize, &inputSize);
-	// Build X and Y
-	int nbInput = inputsSize / inputSize;
-	Eigen::MatrixXd X(nbInput, inputSize);
-	Eigen::MatrixXd Y(nbInput, outputSize);
-
-	tabToMatrix(&X, inputs, nbInput, inputSize);
-	tabToMatrix(&Y, expectedOutputs, nbInput, outputSize);
-	// return the calculated result as a matrix
-	regressionModel = new Eigen::MatrixXd(pinv(X) * Y);
-}
-
 // For a trained model, this function calculate the output of the single input passed as a parameter
 // @param input : input of one data
 // @param inputSize : size of input array
 // @param output : array to write result
 // @param outputSize : size of output array
-double* LinearPerceptron::linearPredict(double* input, int inputSize, int outputSize) {
-	assert(regressionModel != NULL);
-	assert(input != NULL);
-	assert(inputSize > 0);
-	assert(outputSize > 0);
+double* LinearPerceptronRegression::linearPredict(double* input) {
+	assert(input != nullptr);
+	assert(model != nullptr);
 	double* inputWithBias = addBiasToInput(input, inputSize);
 	double* output = new double[outputSize];
 
@@ -145,7 +115,7 @@ double* LinearPerceptron::linearPredict(double* input, int inputSize, int output
 		inputMatrix(0, i) = inputWithBias[i];
 	}
 	Eigen::MatrixXd outputMatrix(outputSize, 1);
-	outputMatrix = inputMatrix * (*regressionModel);
+	outputMatrix = inputMatrix * (*model);
 	matrixToTab(outputMatrix, output, 1, outputSize);
 	return output;
 }

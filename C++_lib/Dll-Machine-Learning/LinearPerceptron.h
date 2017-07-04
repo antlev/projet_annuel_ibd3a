@@ -3,38 +3,65 @@
 // Created by antoine on 14/06/2017.
 //
 #include "Eigen/Dense"
-
-class LinearPerceptron {
-public:
-	LinearPerceptron(int inputDimension, int outputDimension){
-		assert(inputDimension > 0);
-		assert(outputDimension > 0);
-		modelLearned = 1;
-		// Create the model
-		classifModel = new double[(inputDimension + 1) * outputDimension];
-		for (int i = 0; i < (inputDimension + 1) * outputDimension; ++i) {
-			classifModel[i] = ((float)rand()) / ((float)RAND_MAX) * 2.0 - 1.0;
-		}
-	}
-	~LinearPerceptron() {
-		modelLearned = 0;
-		if (classifModel) { delete classifModel; }
-		if (modelLearned) { delete regressionModel; }
-	}
-	// Classification
-	int linear_fit_classification_rosenblatt(double *inputs, int inputsSize, int inputSize, double *expectedOutputs, int outputSize, int iterationMax, double step);
-	double* linear_classify(double* input, int inputSize, int outputSize);
-	// Regression
-	void linear_create_and_fit_regression(double *inputs, int inputsSize, int inputSize, double *expectedOutputs, int outputSize);
-	double* linearPredict(double* input, int inputSize, int outputSize);
-
-private:
-	double* classifModel;
-	Eigen::MatrixXd* regressionModel;
-	int modelLearned;
-};
 Eigen::MatrixXd pinv(Eigen::MatrixXd X);
 double* addBiasToInput(double *input, int inputSize);
 double* addBiasToInputs(double *inputs, int *inputsSize, int *inputSize);
 void tabToMatrix(Eigen::MatrixXd* matrix, double* tab, int nbRow, int nbCols);
 void matrixToTab(Eigen::MatrixXd matrix, double *tab, int nbRow, int nbCols);
+
+class LinearPerceptronClassif {
+public:
+	LinearPerceptronClassif(int inputSize, int outputSize){
+		assert(inputSize > 0);
+		assert(outputSize > 0);
+		// Create the model
+		model = new double[(inputSize + 1) * outputSize];
+		for (int i = 0; i < (inputSize + 1) * outputSize; ++i) {
+			model[i] = ((float)rand()) / ((float)RAND_MAX) * 2.0 - 1.0;
+		}
+		this->inputSize = inputSize;
+		this->outputSize = outputSize;
+	}
+	~LinearPerceptronClassif() {
+		if (model) { delete model; }
+	}
+	// Classification
+	int linear_fit_classification_rosenblatt(double *inputs, int inputsSize, double *expectedOutputs, int iterationMax, double step);
+	double* linear_classify(double* input);
+private:
+	double* model;
+	int inputSize;
+	int outputSize;
+};
+class LinearPerceptronRegression {
+public:
+	LinearPerceptronRegression(double *inputs, int inputSize, int inputsSize, double *expectedOutputs, int outputSize) {
+		assert(inputSize > 0);
+		assert(outputSize > 0);
+		// Create the model
+		assert(inputs != NULL);
+		assert(inputSize > 0);
+		assert(expectedOutputs != NULL);
+		assert(outputSize > 0);
+		inputs = addBiasToInputs(inputs, &inputsSize, &inputSize);
+		// Build X and Y
+		int nbInput = inputsSize / inputSize;
+		Eigen::MatrixXd X(nbInput, inputSize);
+		Eigen::MatrixXd Y(nbInput, outputSize);
+
+		tabToMatrix(&X, inputs, nbInput, inputSize);
+		tabToMatrix(&Y, expectedOutputs, nbInput, outputSize);
+		// return the calculated result as a matrix
+		model = new Eigen::MatrixXd(pinv(X) * Y);
+	}
+	~LinearPerceptronRegression() {
+		if (model) { delete model; }
+	}
+	// Regression
+	double* linearPredict(double* input);
+
+private:
+	Eigen::MatrixXd* model;
+	int inputSize;
+	int outputSize;
+};
