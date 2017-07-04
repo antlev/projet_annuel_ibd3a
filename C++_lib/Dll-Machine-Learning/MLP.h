@@ -58,8 +58,8 @@ public:
 		}
 	}
 	double* MLP::classify(double *oneInput);
-	void fitClassification(double *inputs, int inputsSize, double *expectedOutputs);
-	void fitRegression(double *inputs, int inputsSize, double *expectedOutputs);
+	void fitClassification(double *inputs, int nbData, double *expectedOutputs);
+	void fitRegression(double *inputs, int nbData, double *expectedOutputs);
 	double* predict(double* oneInput);
 
 private:

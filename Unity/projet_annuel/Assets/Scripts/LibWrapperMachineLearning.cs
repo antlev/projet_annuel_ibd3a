@@ -36,11 +36,17 @@ public class LibWrapperMachineLearning
     [DllImport("Dll-Machine-Learning")]
 	public static extern System.IntPtr predict(System.IntPtr pMLP, double[] oneInput);
 
-    // RBF
-    [DllImport("Dll-Machine-Learning")]
-    public static extern System.IntPtr createRbfModel(int nbRepresentatives);
-    [DllImport("Dll-Machine-Learning")]
-    public static extern void naiveLearnModel(System.IntPtr pRBF, int nbExamples, double gamma, double[] X, int inputSize, double[] Y);
+    // NAIVE RBF
+	[DllImport("Dll-Machine-Learning")]
+	public static extern System.IntPtr createNaiveRbfModel(int nbExamples, double gamma, double[] inputs, int inputSize, double[] expectedOutputs);
+	[DllImport("Dll-Machine-Learning")]
+	public static extern double naiveRbfGetResponseClassif(System.IntPtr pNaiveRBF, double[] input);	
+	[DllImport("Dll-Machine-Learning")]
+	public static extern double naiveRbfGetResponseRegression(System.IntPtr pNaiveRBF, double[] input);
+
+	//  RBF
+	[DllImport("Dll-Machine-Learning")]
+	public static extern System.IntPtr createRbfModel(int nbExamples, double gamma, double[] inputs, int inputSize, double[] expectedOutputs, int nbRepresentatives);
     [DllImport("Dll-Machine-Learning")]
     public static extern void rbfLearnModel(System.IntPtr pRBF, int nbExamples, double gamma, double[] X, int inputSize, double[]  Y);
     [DllImport("Dll-Machine-Learning")]

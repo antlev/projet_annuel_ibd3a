@@ -7,9 +7,16 @@
 class NAIVE_RBF {
 public:
 	NAIVE_RBF(int nbExamples, double gamma, double* X, int inputSize, double* Y);
-	void getRbfResponse(double gamma, double* input, int inputSize, double* output, double* X, int nbExamples);
+	double getRbfResponseClassif(double* input);
+	double getRbfResponseRegression(double* input);
 private:
 	Eigen::MatrixXd naiveWeights;
+	double gamma;
+	int inputSize;
+	int nbExamples;
+	double* X;
+
+	double getRbfResponse(double* input);
 };
 class RBF {
 public:
