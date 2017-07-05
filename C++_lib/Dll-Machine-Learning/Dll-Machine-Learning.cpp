@@ -53,13 +53,16 @@ public:
 	__declspec(dllexport) void eraseMlp(MLP* pMLP) { delete pMLP; }
 	// NAIVE RBF
 	__declspec(dllexport) NAIVE_RBF* createNaiveRbfModel(int nbExamples, double gamma, double* X, int inputSize, double* Y) { return new NAIVE_RBF(nbExamples, gamma, X, inputSize, Y); }
-	__declspec(dllexport) double naiveRbfGetResponseClassif(NAIVE_RBF* pNaiveRBF, double* input) { return pNaiveRBF->getRbfResponseClassif(input); }
-	__declspec(dllexport) double naiveRbfGetResponseRegression(NAIVE_RBF* pNaiveRBF, double* input) { return pNaiveRBF->getRbfResponseRegression(input); }
+	__declspec(dllexport) double getNaiveRbfResponseClassif(NAIVE_RBF* pNaiveRBF, double* input) { return pNaiveRBF->getRbfResponseClassif(input); }
+	__declspec(dllexport) double getNaiveRbfResponseRegression(NAIVE_RBF* pNaiveRBF, double* input) { return pNaiveRBF->getRbfResponseRegression(input); }
 	// RBF
-	__declspec(dllexport) RBF* createRbfModel(int nbExamples, double gamma, double* X, int inputSize, double* Y, int nbRepresentatives) { return new RBF(nbExamples, gamma, X, inputSize, Y, nbRepresentatives); }
-	__declspec(dllexport) void getRbfResponse(RBF* pRBF, double gamma, double* input, int inputSize, double* output, double* X, int nbExamples) { pRBF->getRbfResponse(gamma, input, inputSize, output, X, nbExamples); }
-	__declspec(dllexport) void lloydAlgorithm(RBF* pRBF, double* inputs, int inputSize, int nbData, int nbRepresentatives) { pRBF->lloydAlgorithm(inputs, inputSize, nbData, nbRepresentatives);  }
-	__declspec(dllexport) void showRepresentative(RBF* pRBF, int inputSize) { pRBF->showRepresentative(inputSize); }
+	__declspec(dllexport) RBF* createRbfModel(int nbExamples, double gamma, double* X, int inputSize, double* Y, int nbRepresentatives) { 
+			return new RBF(nbExamples, gamma, X, inputSize, Y, nbRepresentatives); }
+	__declspec(dllexport) double getRbfResponseClassif(RBF* pRBF, double* input) { return pRBF->getRbfResponseClassif(input); }
+	__declspec(dllexport) double getRbfResponseRegression(RBF* pRBF, double* input) { return pRBF->getRbfResponseRegression(input); }
+	__declspec(dllexport) void lloydAlgorithm(RBF* pRBF, double* inputs, int inputSize, int nbData, int nbRepresentatives) { 
+			pRBF->lloydAlgorithm(inputs, inputSize, nbData, nbRepresentatives);  }
+	__declspec(dllexport) void showRepresentative(RBF* pRBF) { pRBF->showRepresentative(); }
 }
 
 

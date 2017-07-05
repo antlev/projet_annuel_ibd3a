@@ -21,15 +21,21 @@ private:
 class RBF {
 public:
 	RBF(int nbExamples, double gamma, double* X, int inputSize, double* Y, int nbRepresentatives);
-	void getRbfResponse(double gamma, double* input, int inputSize, double* output, double* X, int nbExamples);
+	double getRbfResponseClassif(double* input);
+	double getRbfResponseRegression(double* input);
+
 	void lloydAlgorithm(double* inputs, int inputSize, int nbData, int nbRepresentatives);
-	void showRepresentative(int inputSize);
+	void showRepresentative();
 private:
 	int nbRepresentatives;
+	double gamma;
+	double* X;
+	int inputSize;
 	double* representatives;
-
 	Eigen::MatrixXd expectedResults;
 	Eigen::MatrixXd weights;
+
+	double getRbfResponse(double* input);
 };
 Eigen::MatrixXd pinv2(Eigen::MatrixXd X);
 double distance(double * A, double* B, int inputSize);
