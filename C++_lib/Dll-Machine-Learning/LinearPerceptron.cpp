@@ -10,7 +10,22 @@
 
 class MatrixXd;
 using namespace std;
-
+// Instantiate a simple Perceptron (without any hidden layer)
+// @param inputSize : number of neuron input of the perceptron
+// @param outputSize : number of neuron output of the perceptron
+LinearPerceptronClassif::LinearPerceptronClassif(int inputSize, int outputSize)  : inputSize(inputSize), outputSize(outputSize){
+	assert(inputSize > 0);
+	assert(outputSize > 0);
+	// Create the model
+	model = new double[(inputSize + 1) * outputSize];
+	for (int i = 0; i < (inputSize + 1) * outputSize; ++i) {
+		model[i] = ((float)rand()) / ((float)RAND_MAX) * 2.0 - 1.0;
+	}
+}
+// Delete a perceptron from the memory
+LinearPerceptronClassif::~LinearPerceptronClassif() {
+	if (model) { delete model; }
+}
 // Return the MLP's response considering the inputs
 // @param input : input of one data
 // @param inputSize : size of input array

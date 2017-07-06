@@ -11,20 +11,8 @@ void matrixToTab(Eigen::MatrixXd matrix, double *tab, int nbRow, int nbCols);
 
 class LinearPerceptronClassif {
 public:
-	LinearPerceptronClassif(int inputSize, int outputSize){
-		assert(inputSize > 0);
-		assert(outputSize > 0);
-		// Create the model
-		model = new double[(inputSize + 1) * outputSize];
-		for (int i = 0; i < (inputSize + 1) * outputSize; ++i) {
-			model[i] = ((float)rand()) / ((float)RAND_MAX) * 2.0 - 1.0;
-		}
-		this->inputSize = inputSize;
-		this->outputSize = outputSize;
-	}
-	~LinearPerceptronClassif() {
-		if (model) { delete model; }
-	}
+	LinearPerceptronClassif(int inputSize, int outputSize);
+	~LinearPerceptronClassif();
 	// Classification
 	int linear_fit_classification_rosenblatt(double *inputs, int inputsSize, double *expectedOutputs, int iterationMax, double step);
 	double* linear_classify(double* input);

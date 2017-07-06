@@ -11,16 +11,13 @@
 class MatrixXd;
 
 // Implementation of a native RBF that consider all inputs given
-NAIVE_RBF::NAIVE_RBF(int nbExamples, double gamma, double* X, int inputSize, double* Y) {
+NAIVE_RBF::NAIVE_RBF(int nbExamples, double gamma, double* X, int inputSize, double* Y) 
+			:nbExamples(nbExamples), gamma(gamma), X(X), inputSize(inputSize) {
 	assert(nbExamples > 0);
 	assert(gamma > 0);
 	assert(inputSize > 0);
 	assert(X != nullptr);
 	assert(Y != nullptr);
-	this->nbExamples = nbExamples;
-	this->gamma = gamma;
-	this->X = X;
-	this->inputSize = inputSize;
 
 	double distance;
 	Eigen::MatrixXd teta(nbExamples, nbExamples);
@@ -58,17 +55,14 @@ double NAIVE_RBF::getRbfResponse(double* input) {
 	return sum;
 }
 // Implementation of RBF that uses Lloyd algorithm to select some representatives
-RBF::RBF(int nbExamples, double gamma, double* X, int inputSize, double* Y, int nbRepresentatives) {
+RBF::RBF(int nbExamples, double gamma, double* X, int inputSize, double* Y, int nbRepresentatives) 
+			: gamma(gamma), X(X), inputSize(inputSize), nbRepresentatives(nbRepresentatives) {
 	assert(nbExamples > 0);
 	assert(gamma > 0);
 	assert(X != nullptr);
 	assert(inputSize > 0);
 	assert(Y != nullptr);
 	assert(nbRepresentatives > 0);
-	this->gamma = gamma;
-	this->inputSize = inputSize;
-	this->X = X;
-	this->nbRepresentatives = nbRepresentatives;
 
 	// Select representatives using LLoyd algorithm, representatives are set as object atribute
 	lloydAlgorithm(X, inputSize, nbExamples, nbRepresentatives);
