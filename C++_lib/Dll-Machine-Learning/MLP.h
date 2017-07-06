@@ -14,6 +14,8 @@ public:
 		for (int i = 0; i < nbLayer; ++i) {
 			assert(structure[i] > 0);
 		}
+		inputSize = structure[0];
+		outputSize = structure[nbLayer - 1];
 		maxIterations = 10000;
 		learningRate = 0.1;
 		modelLearned = 0; //Model untrained
@@ -55,27 +57,28 @@ public:
 			}
 		}
 	}
-	void classify(double *oneInput, int inputSize);
-	void fitClassification(double *inputs, int inputSize, int inputsSize, double *expectedOutputs,
-		int outputSize);
-	void fitRegression(double *inputs, int inputSize, int inputsSize, double *expectedOutputs,
-		int outputSize);
-	void predict(double* oneInput, int inputSize);
-	double getOutputsforClassif();
-	double getOutputsforRegression();
+	double* MLP::classify(double *oneInput);
+	void fitClassification(double *inputs, int nbData, double *expectedOutputs);
+	void fitRegression(double *inputs, int nbData, double *expectedOutputs);
+	double* predict(double* oneInput);
 
 private:
 	double ***weights;
 	double **neurons;
 	double **gradient;
 	int *structure;
+	
 	double learningRate;
+	int inputSize;
+	int outputSize;
 
 	int maxIterations;
 	int nbLayer;
 	int modelLearned;
 
-	void fitClassifOneInput(double *oneInput, int inputSize, double *oneOutput, int outputSize);
-	void fitRegreOneInput(double *oneInput, int inputSize, double *oneOutput, int outputSize);
+	double* getOutputsforClassif();
+	double* getOutputsforRegression();
+	void fitClassifOneInput(double *oneInput, double* oneOutput);
+	void fitRegreOneInput(double *oneInput, double *oneOutput);
 	double sum(int layerNb, int neuronNb);
 };
