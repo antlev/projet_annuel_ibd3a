@@ -18,9 +18,12 @@ public:
 	}
 };
 
+
 	__declspec(dllexport) int return42() { return 42; } 
 	__declspec(dllexport) Toto* createToto() { return new Toto() ; }
 	__declspec(dllexport) int getTiti(Toto* pToto) { return pToto->getTiti(); }
+
+	__declspec(dllexport) int* returnTab() { return new int[2] { 42,1664 }; }
 
 	// WRAPPER FUNCTIONS
 	// LinearPerceptron

@@ -52,8 +52,6 @@ public class LibWrapperMachineLearning
     [DllImport("Dll-Machine-Learning")]
     public static extern double getRbfResponseRegression(System.IntPtr pRBF, double[] input);
 
-
-
     // OLD LIB
     [DllImport("Cours1ML-280317-FirstDll")]
     public static extern System.IntPtr linear_create_model(int inputDimension, int outputDimension);

@@ -753,20 +753,29 @@ public class MainScript : MonoBehaviour {
         testRegressionMLP_oneInput[1] = 0;
         pRes = LibWrapperMachineLearning.predict(testRegressionMLP, testRegressionMLP_oneInput);
         Marshal.Copy (pRes, testRegressionMLP_oneOutput, 0, testRegressionMLP_outputSize);
-        if(testRegressionMLP_oneOutput[0] < 0 || testRegressionMLP_oneOutput[0] > 0.001){ return testRegressionMLP_oneOutput[0]; }
+        if(testRegressionMLP_oneOutput[0] < -0.001 || testRegressionMLP_oneOutput[0] > 0.001){ 
+            Debug.Log("response for input ["+testRegressionMLP_oneInput[0]+";"+testRegressionMLP_oneInput[1]+"] = "+testRegressionMLP_oneOutput[0] +"  expected 0");
+            return 1; 
+        }
 
         testRegressionMLP_oneInput[0] = 0;
         testRegressionMLP_oneInput[1] = 1;
         pRes = LibWrapperMachineLearning.predict(testRegressionMLP, testRegressionMLP_oneInput);
         Marshal.Copy (pRes, testRegressionMLP_oneOutput, 0, testRegressionMLP_outputSize);
-        if(testRegressionMLP_oneOutput[0] < 0 || testRegressionMLP_oneOutput[0] > 0.001){ return 2; }
+        if(testRegressionMLP_oneOutput[0] < -0.001 || testRegressionMLP_oneOutput[0] > 0.001){ 
+            Debug.Log("response for input ["+testRegressionMLP_oneInput[0]+";"+testRegressionMLP_oneInput[1]+"] = "+testRegressionMLP_oneOutput[0] +"  expected 0");
+            return 2; 
+        }
 
         
         testRegressionMLP_oneInput[0] = 1;
         testRegressionMLP_oneInput[1] = 1;
         pRes = LibWrapperMachineLearning.predict(testRegressionMLP, testRegressionMLP_oneInput);
         Marshal.Copy (pRes, testRegressionMLP_oneOutput, 0, testRegressionMLP_outputSize);
-        if(testRegressionMLP_oneOutput[0] !=  0.5){ return 3; }
+        if(testRegressionMLP_oneOutput[0] != (double) 0.5 ){ 
+            Debug.Log("response for input ["+testRegressionMLP_oneInput[0]+";"+testRegressionMLP_oneInput[1]+"] = "+testRegressionMLP_oneOutput[0] +"  expected 0.5");
+            return 3; 
+        }
 
 
         double[] testRegressionMLPInput = new double[inputSize * baseApprentissage.Length];
@@ -873,20 +882,32 @@ public class MainScript : MonoBehaviour {
         naiveRbfInput[0] = 0;
         naiveRbfInput[1] = 0;
         naiveRbfOutput = LibWrapperMachineLearning.getNaiveRbfResponseRegression(naiveRbfModelRegression, naiveRbfInput);
-        if(naiveRbfOutput != 0.2){ return 1; }
+        if(naiveRbfOutput != 0.2){ 
+            Debug.Log("response for input ["+naiveRbfInput[0]+";"+naiveRbfInput[1]+"] = "+naiveRbfOutput +"  expected 0.2");
+            // return 1; 
+        }
         naiveRbfInput[0] = 0;
         naiveRbfInput[1] = 1;
         naiveRbfOutput = LibWrapperMachineLearning.getNaiveRbfResponseRegression(naiveRbfModelRegression, naiveRbfInput);
-        if(naiveRbfOutput != 0.5){ return 1; }
+        if(naiveRbfOutput != 0.5){ 
+            Debug.Log("response for input ["+naiveRbfInput[0]+";"+naiveRbfInput[1]+"] = "+naiveRbfOutput +"  expected 0.5");
+            // return 2; 
+        }        
         naiveRbfInput[0] = 1;
         naiveRbfInput[1] = 1;
         naiveRbfOutput = LibWrapperMachineLearning.getNaiveRbfResponseRegression(naiveRbfModelRegression, naiveRbfInput);
-        if(naiveRbfOutput != 1){ return 1; }
+        if(naiveRbfOutput != 1){ 
+            Debug.Log("response for input ["+naiveRbfInput[0]+";"+naiveRbfInput[1]+"] = "+naiveRbfOutput +"  expected 1");
+            // return 3; 
+        }                
         naiveRbfInput[0] = 1;
         naiveRbfInput[1] = 0;
         naiveRbfOutput = LibWrapperMachineLearning.getNaiveRbfResponseRegression(naiveRbfModelRegression, naiveRbfInput);
-        if(naiveRbfOutput != -0.5){ return 1; }
-        return 0;
+        if(naiveRbfOutput != 1){ 
+            Debug.Log("response for input ["+naiveRbfInput[0]+";"+naiveRbfInput[1]+"] = "+naiveRbfOutput +"  expected 1");
+            // return 3; 
+        }          
+        return 1;
     }
 
     private int RBFClassificationTest(){
