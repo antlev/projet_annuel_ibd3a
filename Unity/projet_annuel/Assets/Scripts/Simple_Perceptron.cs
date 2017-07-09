@@ -45,15 +45,6 @@ public class Simple_Perceptron : MonoBehaviour {
 		iterationNumber = (int) GUI.VerticalScrollbar(new Rect(1025, 25, 250, 500), iterationNumber, 0.1F, 10000, 0);
 		GUI.TextArea (new Rect (950, 475, 40, 30), " step");
 		GUI.TextArea (new Rect (1050, 475, 75, 30), "iterations");
-
-
-        if (GUILayout.Button("TEST"))
-        {
-            if (!_isRunning)
-            {
-                executeAllTests();
-            }
-        }
         if (GUILayout.Button("Create Model for classification"))
         {
             if (!_isRunning)
@@ -293,70 +284,6 @@ public class Simple_Perceptron : MonoBehaviour {
 		}
 		return 0;
 	}
-	private void test(){
-		_isRunning = true;
-		Debug.Log("LAUNCHING TEST FUNCTION");
-
-//		Debug.Log("DEBUG baseApprentissage >" + baseApprentissage.Length + "<");
-//		Debug.Log("DEBUG baseTest >" + baseTest.Length + "<");
-//
-//		double[] inputs = new double[inputSize * baseApprentissage.Length];
-//        double[] outputs = new double[baseApprentissage.Length];
-//
-//		getInputs (baseApprentissage, inputs);
-//		Debug.Log ("before");
-//		foreach (var data in inputs) {
-//
-//			Debug.Log (data);
-//		}
-//		double[] inputs = new double[] {10, 1, 7.5, 2, 5, 3, 2.5, 4, 0, 5};
-//		serialiseInputs (inputs);
-//		Debug.Log ("after");
-//
-//		foreach (var data in inputs) {
-//				
-//			Debug.Log (data);
-//		}
-//        int inputsSize = inputs.Length;
-//
-//		// Create model
-//		create_model();
-//
-////		// Création des pointeurs
-//		var inputsPtr = default(GCHandle);
-//        try
-//        {
-//            inputsPtr = GCHandle.Alloc(inputs, GCHandleType.Pinned);
-//			Debug.Log("Learning hebb to model ! step > "  + step);
-//			LibWrapperMachineLearning.linear_fit_classification_hebb(model, inputsPtr.AddrOfPinnedObject(), inputsSize, inputSize, iterationNumber, step);
-//		}
-//        finally
-//        {
-//            if (inputsPtr.IsAllocated) inputsPtr.Free();
-//        }
-//
-//		Debug.Log("Generating testBase !");        
-//        double[] input = new double[inputSize];
-//		generateBaseTest (baseTest, 10);
-//
-//		foreach (var data in baseTest)
-//        {
-//			var inputPtr = default(GCHandle);
-//			getInputs (data, input);
-//            try
-//			{
-//				inputPtr = GCHandle.Alloc(input, GCHandleType.Pinned);
-//				data.position = new Vector3(data.position.x, (float) LibWrapperMachineLearning.linear_classify(model, inputPtr.AddrOfPinnedObject(), inputSize), data.position.z);
-//            }
-//            finally
-//            {
-//                if (inputPtr.IsAllocated) inputPtr.Free();
-//            }
-//        }
-//		erase_model();
-		Debug.Log ("Test Function finished !");
-		_isRunning = false;
-    }
 	// Place a square with equally reparted marbles 
 	// separation gives the number of marble by size f the square
 	private void generateBaseTest(Transform[] testObject, int separation){
@@ -418,93 +345,5 @@ public class Simple_Perceptron : MonoBehaviour {
 			Debug.Log ("baseApprentissage ne contien pas le bon nombre d'objets");
 		}
 	}
-    // TEST FUNCTION
-    private void executeAllTests(){
-        int code;
-        if(return42Test() == 0){
-            Debug.Log("Test >return42< : OK");
-        }else{
-            Debug.Log("Test >return42< : FAILED");
-        }
-        if(objectTest() == 0){
-            Debug.Log("Test >object< : OK");
-        }else{
-            Debug.Log("Test >object< : FAILED");
-        }
-        if(simplePerceptronClassificationTest() == 0){
-            Debug.Log("Test >simplePerceptronClassification< : OK");
-        }else{
-            Debug.Log("Test >simplePerceptronClassification< : FAILED");
-        }
-    }
-    private int return42Test(){
-        if(LibWrapperMachineLearning.return42() == 42){
-            return 0;
-        }
-        return 1;
-    }
-    private int objectTest(){
-        System.IntPtr toto = System.IntPtr.Zero;
-        toto = LibWrapperMachineLearning.createToto();
-        int titi = LibWrapperMachineLearning.getTiti(toto);
-        int[] test = new int[2] { 2, 2 };
-        if(toto != System.IntPtr.Zero && titi == 42){
-            return 0;
-        }
-        return 1;
-    }
-    private int simplePerceptronClassificationTest(){
-        int linear_inputSize = 2;
-        int linear_outputSize = 1;
-        int linear_nbData = 4;
-        double[] linear_inputs = new double[linear_inputSize * linear_nbData];
-        double[] linear_input = new double[linear_inputSize];
-        double[] linear_outputs = new double[linear_outputSize * linear_nbData];
 
-        int linear_maxIterations = 10000;
-        double linear_step = 0.01;
-
-        linear_inputs[0] = 0;
-        linear_inputs[1] = 0;
-        linear_outputs[0] = -1;
-
-        linear_inputs[2] = 0;
-        linear_inputs[3] = 1;
-        linear_outputs[1] = -1;
-
-        linear_inputs[4] = 1;
-        linear_inputs[5] = 1;
-        linear_outputs[2] = 1;
-
-        linear_inputs[6] = 1;
-        linear_inputs[7] = 0;
-        linear_outputs[3] = 1;
-
-        System.IntPtr linearModel = LibWrapperMachineLearning.createLinearModelClassif(linear_inputSize, linear_outputSize);
-        LibWrapperMachineLearning.linearFitClassificationRosenblatt(linearModel, linear_inputs, linear_nbData * linear_inputSize, linear_outputs, linear_maxIterations, linear_step);
-
-        System.IntPtr pRes;
-        double[] res = new double[linear_outputSize];
-        linear_input[0] = 0;
-        linear_input[1] = 0;
-        pRes = LibWrapperMachineLearning.linearClassify(linearModel, linear_input);
-        Marshal.Copy (pRes, res, 0, linear_outputSize);
-        if(res[0] != -1){ return 1; }
-        linear_input[0] = 0;
-        linear_input[1] = 1;
-        pRes = LibWrapperMachineLearning.linearClassify(linearModel, linear_input);
-        Marshal.Copy (pRes, res, 0, linear_outputSize);
-        if(res[0] != -1){ return 1; }
-        linear_input[0] = 1;
-        linear_input[1] = 1;
-        pRes = LibWrapperMachineLearning.linearClassify(linearModel, linear_input);
-        Marshal.Copy (pRes, res, 0, linear_outputSize);
-        if(res[0] != 1){ return 1; }
-        linear_input[0] = 1;
-        linear_input[1] = 0;
-        pRes = LibWrapperMachineLearning.linearClassify(linearModel, linear_input);
-        Marshal.Copy (pRes, res, 0, linear_outputSize);
-        if(res[0] != 1){ return 1; }
-        return 0;
-    }
 }
