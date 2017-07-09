@@ -38,7 +38,7 @@ public class LibWrapperMachineLearning
 
     // NAIVE RBF
 	[DllImport("Dll-Machine-Learning")]
-	public static extern System.IntPtr createNaiveRbfModel(int nbExamples, double gamma, double[] inputs, int inputSize, double[] expectedOutputs);
+	public static extern System.IntPtr createNaiveRbfModel(int nbExamples, double[] gamma, double[] inputs, int inputSize, double[] expectedOutputs);
 	[DllImport("Dll-Machine-Learning")]
 	public static extern double getNaiveRbfResponseClassif(System.IntPtr pNaiveRBF, double[] input);	
 	[DllImport("Dll-Machine-Learning")]
@@ -46,29 +46,13 @@ public class LibWrapperMachineLearning
 
 	//  RBF
 	[DllImport("Dll-Machine-Learning")]
-	public static extern System.IntPtr createRbfModel(int nbExamples, double gamma, double[] inputs, int inputSize, double[] expectedOutputs, int nbRepresentatives);
+	public static extern System.IntPtr createRbfModel(int nbExamples, double[] gamma, double[] inputs, int inputSize, double[] expectedOutputs, int nbRepresentatives);
     [DllImport("Dll-Machine-Learning")]
 	public static extern double getRbfResponseClassif(System.IntPtr pRBF, double[] input);
     [DllImport("Dll-Machine-Learning")]
     public static extern double getRbfResponseRegression(System.IntPtr pRBF, double[] input);
 
-    // OLD LIB
-    [DllImport("Cours1ML-280317-FirstDll")]
-    public static extern System.IntPtr linear_create_model(int inputDimension, int outputDimension);
-    [DllImport("Cours1ML-280317-FirstDll")]
-    public static extern void linear_remove_model(System.IntPtr model);
-    [DllImport("Cours1ML-280317-FirstDll")]
-    public static extern int linear_fit_regression(System.IntPtr model, double[] inputs, int inputsSize, int inputSize, double[] outputs, int nb_iterations_max, double learning_rate);
-    [DllImport("Cours1ML-280317-FirstDll")]
-    public static extern int linear_fit_classification_hebb(System.IntPtr model, double[] inputs, int inputsSize, int inputSize, int iterationNumber, double step);
-    [DllImport("Cours1ML-280317-FirstDll")]
-    public static extern int linear_fit_classification_rosenblatt(System.IntPtr model, double[] inputs, int inputsSize, int inputSize, double[] outputs, int outputSize, int iterationNumber, double step);
-    [DllImport("Cours1ML-280317-FirstDll")]
-    public static extern double linear_classify(System.IntPtr model, double[] input, int inputSize, double[] expectedOutputs, int outputDimension);
-    [DllImport("Cours1ML-280317-FirstDll")]
-    public static extern double linear_predict(System.IntPtr model, double[] input, int inputSize);
-    [DllImport("Cours1ML-280317-FirstDll")]
-    public static extern int test();
+    // TEST
     [DllImport("Dll-Machine-Learning")]
     public static extern int return42();
     [DllImport("Dll-Machine-Learning")]

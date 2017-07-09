@@ -11,15 +11,15 @@
 class MatrixXd;
 
 // Implementation of a native RBF that consider all inputs given
-NAIVE_RBF::NAIVE_RBF(int nbExamples, double gamma, double* X, int inputSize, double* Y) 
-			:nbExamples(nbExamples), gamma(gamma), X(X), inputSize(inputSize) {
+NAIVE_RBF::NAIVE_RBF(int nbExamples, double* gamma, double* X, int inputSize, double* Y)
+	:nbExamples(nbExamples), gamma(gamma), X(X), inputSize(inputSize) {
 	assert(nbExamples > 0);
 	assert(gamma > 0);
 	assert(inputSize > 0);
 	assert(X != nullptr);
 	assert(Y != nullptr);
-
-	double distance;
+	double* copyX = X;
+	//double distance;
 	Eigen::MatrixXd teta(nbExamples, nbExamples);
 	Eigen::MatrixXd YMatrix(nbExamples, 1);
 	for (int i = 0; i<nbExamples; i++) {
@@ -27,11 +27,7 @@ NAIVE_RBF::NAIVE_RBF(int nbExamples, double gamma, double* X, int inputSize, dou
 	}
 	for (int i = 0; i < nbExamples; ++i) {
 		for (int j = 0; j < nbExamples; ++j) {
-			distance = 0;
-			for (int k = 0; k<inputSize; k++) {
-				distance += (X[j*inputSize + k] - X[i*inputSize + k]) * (X[j*inputSize + k] - X[i*inputSize + k]);
-			}
-			teta(i, j) = exp(-gamma*distance);
+			teta(i, j) = exp(-gamma[i] * distance(copyX + i*inputSize, copyX + j*inputSize, inputSize));
 		}
 	}
 	naiveWeights = teta.inverse()*YMatrix;
@@ -50,16 +46,16 @@ double NAIVE_RBF::getRbfResponse(double* input) {
 		for (int j = 0; j<inputSize; j++) {
 			oneX[j] = X[i*inputSize + j];
 		}
-		sum += (naiveWeights)(i, 0)*exp(-gamma*distance(input, oneX, inputSize));
+		sum += (naiveWeights)(i, 0)*exp(-gamma[i] * distance(input, oneX, inputSize));
 	}
 	return sum;
 }
 // Implementation of RBF that uses Lloyd algorithm to select some representatives
-RBF::RBF(int nbExamples, double gamma, double* X, int inputSize, double* Y, int nbRepresentatives) 
-			: gamma(gamma), X(X), inputSize(inputSize), nbRepresentatives(nbRepresentatives) {
+RBF::RBF(int nbExamples, double* gamma, double* X, int inputSize, double* Y, int nbRepresentatives)
+	: gamma(gamma), X(X), inputSize(inputSize), nbRepresentatives(nbRepresentatives) {
 	assert(nbExamples > 0);
-	assert(gamma > 0);
 	assert(X != nullptr);
+	assert(this->gamma != nullptr);
 	assert(inputSize > 0);
 	assert(Y != nullptr);
 	assert(nbRepresentatives > 0);
@@ -78,7 +74,7 @@ RBF::RBF(int nbExamples, double gamma, double* X, int inputSize, double* Y, int 
 		XCopy = X + i*inputSize;
 		for (int j = 0; j < nbRepresentatives; ++j) {
 			representativesCopy = representatives + j*inputSize;
-			teta(i, j) = exp(-gamma*distance(XCopy, representativesCopy, inputSize));
+			teta(i, j) = exp(-gamma[j] * distance(XCopy, representativesCopy, inputSize));
 		}
 	}
 	weights = pinv2(teta)*YMatrix;
@@ -99,7 +95,7 @@ double RBF::getRbfResponse(double* input) {
 		for (int j = 0; j<inputSize; j++) {
 			oneX[j] = representatives[i*inputSize + j];
 		}
-		sum += (weights)(i, 0)*exp(-gamma*distance(input, oneX, inputSize));
+		sum += (weights)(i, 0)*exp(-gamma[i] * distance(input, oneX, inputSize));
 	}
 	return sum;
 }

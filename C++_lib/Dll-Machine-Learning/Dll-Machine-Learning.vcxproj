@@ -146,6 +146,7 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Genetic.h" />
     <ClInclude Include="LinearPerceptron.h" />
     <ClInclude Include="MLP.h" />
     <ClInclude Include="RBF.h" />
@@ -171,6 +172,7 @@
     <ClCompile Include="LinearPerceptron.cpp" />
     <ClCompile Include="MLP.cpp" />
     <ClCompile Include="RBF.cpp" />
+    <ClCompile Include="Genetic.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
