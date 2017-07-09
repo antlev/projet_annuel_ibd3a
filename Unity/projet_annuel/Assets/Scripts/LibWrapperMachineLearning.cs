@@ -11,7 +11,7 @@ public class LibWrapperMachineLearning
     public static extern void eraseLinearModel(System.IntPtr pmodel);
         // Classification
     [DllImport("Dll-Machine-Learning")]
-    public static extern int linearFitClassificationRosenblatt(System.IntPtr pmodel, double[] inputs, int inputsSize, double[] expectedOutputs, int iterationMax, double step);
+    public static extern int linearFitClassificationRosenblatt(System.IntPtr pmodel, double[] inputs, int nbData, double[] expectedOutputs, int iterationMax, double step);
     [DllImport("Dll-Machine-Learning")]
 	public static extern System.IntPtr linearClassify(System.IntPtr pmodel, double[] input);
         // Regression

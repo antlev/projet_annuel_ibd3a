@@ -30,8 +30,8 @@ public:
 	__declspec(dllexport) LinearPerceptronClassif* createLinearModelClassif(int inputDimension, int outputDimension) { return new LinearPerceptronClassif(inputDimension, outputDimension); }
 	__declspec(dllexport) void eraseLinearModel(LinearPerceptronClassif* pmodel) { delete pmodel; }
 		// Classification
-	__declspec(dllexport) int linearFitClassificationRosenblatt(LinearPerceptronClassif* pmodel, double *inputs, int inputsSize, double *expectedOutputs, int iterationMax, double step) {
-		return pmodel->LinearPerceptronClassif::linear_fit_classification_rosenblatt(inputs, inputsSize, expectedOutputs, iterationMax, step);
+	__declspec(dllexport) int linearFitClassificationRosenblatt(LinearPerceptronClassif* pmodel, double *inputs, int nbData, double *expectedOutputs, int iterationMax, double step) {
+		return pmodel->LinearPerceptronClassif::linear_fit_classification_rosenblatt(inputs, nbData, expectedOutputs, iterationMax, step);
 	}
 	__declspec(dllexport) double* linearClassify(LinearPerceptronClassif* pmodel, double* input) {
 		return pmodel->LinearPerceptronClassif::linear_classify(input);

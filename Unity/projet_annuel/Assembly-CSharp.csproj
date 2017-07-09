@@ -48,6 +48,7 @@
   <ItemGroup>
      <Compile Include="Assets\Scripts\LibWrapperMachineLearning.cs" />
      <Compile Include="Assets\Scripts\MainScript.cs" />
+     <Compile Include="Assets\Scripts\Simple_Perceptron.cs" />
  <Reference Include="UnityEngine.Advertisements">
  <HintPath>D:/Unity/Editor/Data/UnityExtensions/Unity/Advertisements/UnityEngine.Advertisements.dll</HintPath>
  </Reference>

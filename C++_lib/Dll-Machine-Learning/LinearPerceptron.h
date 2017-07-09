@@ -14,7 +14,7 @@ public:
 	LinearPerceptronClassif(int inputSize, int outputSize);
 	~LinearPerceptronClassif();
 	// Classification
-	int linear_fit_classification_rosenblatt(double *inputs, int inputsSize, double *expectedOutputs, int iterationMax, double step);
+	int linear_fit_classification_rosenblatt(double *inputs, int nbData, double *expectedOutputs, int iterationMax, double step);
 	double* linear_classify(double* input);
 private:
 	double* model;

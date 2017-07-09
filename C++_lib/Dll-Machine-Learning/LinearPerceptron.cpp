@@ -55,15 +55,16 @@ double* LinearPerceptronClassif::linear_classify(double* input){
 // @param outputSize : size of output neurons
 // @param iterationMax : number of max of iterations
 // @param step : step that will be use for learning
-int LinearPerceptronClassif::linear_fit_classification_rosenblatt(double *inputs, int inputsSize, double *expectedOutputs, int iterationMax, double step) {
+int LinearPerceptronClassif::linear_fit_classification_rosenblatt(double *inputs, int nbData, double *expectedOutputs, int iterationMax, double step) {
 	assert(this->model != NULL);
 	assert(inputs != NULL);
-	assert(inputsSize >= inputSize);
+	assert(nbData > 0);
 	assert(expectedOutputs != NULL);
 	assert(iterationMax > 0);
 	assert(step > 0);
 	int iterations(0);
 	int error;
+	int inputsSize = nbData * inputSize;
 	while (true) {
 		if (iterations > iterationMax) {
 			return 1;
