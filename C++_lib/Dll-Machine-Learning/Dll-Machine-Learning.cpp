@@ -55,11 +55,11 @@ public:
 	__declspec(dllexport) void predict(MLP* pMLP, double* oneInput) { pMLP->MLP::predict(oneInput); }
 	__declspec(dllexport) void eraseMlp(MLP* pMLP) { delete pMLP; }
 	// NAIVE RBF
-	__declspec(dllexport) NAIVE_RBF* createNaiveRbfModel(int nbExamples, double gamma, double* X, int inputSize, double* Y) { return new NAIVE_RBF(nbExamples, gamma, X, inputSize, Y); }
+	__declspec(dllexport) NAIVE_RBF* createNaiveRbfModel(int nbExamples, double* gamma, double* X, int inputSize, double* Y) { return new NAIVE_RBF(nbExamples, gamma, X, inputSize, Y); }
 	__declspec(dllexport) double getNaiveRbfResponseClassif(NAIVE_RBF* pNaiveRBF, double* input) { return pNaiveRBF->getRbfResponseClassif(input); }
 	__declspec(dllexport) double getNaiveRbfResponseRegression(NAIVE_RBF* pNaiveRBF, double* input) { return pNaiveRBF->getRbfResponseRegression(input); }
 	// RBF
-	__declspec(dllexport) RBF* createRbfModel(int nbExamples, double gamma, double* X, int inputSize, double* Y, int nbRepresentatives) { 
+	__declspec(dllexport) RBF* createRbfModel(int nbExamples, double* gamma, double* X, int inputSize, double* Y, int nbRepresentatives) { 
 			return new RBF(nbExamples, gamma, X, inputSize, Y, nbRepresentatives); }
 	__declspec(dllexport) double getRbfResponseClassif(RBF* pRBF, double* input) { return pRBF->getRbfResponseClassif(input); }
 	__declspec(dllexport) double getRbfResponseRegression(RBF* pRBF, double* input) { return pRBF->getRbfResponseRegression(input); }

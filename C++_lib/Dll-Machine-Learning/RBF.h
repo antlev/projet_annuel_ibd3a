@@ -6,12 +6,12 @@
 #include <iostream>
 class NAIVE_RBF {
 public:
-	NAIVE_RBF(int nbExamples, double gamma, double* X, int inputSize, double* Y);
+	NAIVE_RBF(int nbExamples, double* gamma, double* X, int inputSize, double* Y);
 	double getRbfResponseClassif(double* input);
 	double getRbfResponseRegression(double* input);
 private:
 	Eigen::MatrixXd naiveWeights;
-	double gamma;
+	double* gamma;
 	int inputSize;
 	int nbExamples;
 	double* X;
@@ -20,7 +20,7 @@ private:
 };
 class RBF {
 public:
-	RBF(int nbExamples, double gamma, double* X, int inputSize, double* Y, int nbRepresentatives);
+	RBF(int nbExamples, double* gamma, double* X, int inputSize, double* Y, int nbRepresentatives);
 	double getRbfResponseClassif(double* input);
 	double getRbfResponseRegression(double* input);
 
@@ -28,7 +28,7 @@ public:
 	void showRepresentative();
 private:
 	int nbRepresentatives;
-	double gamma;
+	double* gamma;
 	double* X;
 	int inputSize;
 	double* representatives;
