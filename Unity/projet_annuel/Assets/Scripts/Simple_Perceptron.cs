@@ -25,8 +25,6 @@ public class Simple_Perceptron : MonoBehaviour {
 	public static bool transformInput = false;
 	public static string transformButtonString = "Use Transformation";
 
-	public Camera cam1;
-
 	/// <summary>
 	/// Indique si un algorithme est en cours d'exécution
 	/// </summary>

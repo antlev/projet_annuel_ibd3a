@@ -32,8 +32,6 @@ public class MainScript : MonoBehaviour {
 	public static string transformButtonString = "Use Transformation";
 	public static int nbOutputNeuron = 6;
 
-	public Camera cam1;
-	public Camera cam2;
 
 	/// <summary>
 	/// Indique si un algorithme est en cours d'exécution
@@ -41,8 +39,6 @@ public class MainScript : MonoBehaviour {
 	private bool _isRunning = false;
 
 	public void Start(){
-		cam1.enabled = true;
-		cam2.enabled = false;
 	}
 	/// <summary>
 	/// Méthode utilisée pour gérer les informations et 
@@ -71,22 +67,6 @@ public class MainScript : MonoBehaviour {
                 executeAllTests();
             }
         }
-        if (GUILayout.Button(colorButtonString))
-        {
-            if (!_isRunning)
-            {
-                if (testWithColor)
-                {
-                    testWithColor = false;
-                    colorButtonString = "Use color";
-                }
-                else
-                {
-                    testWithColor = true;
-                    colorButtonString = "Use height";
-                }
-            }
-        }
 		if (GUILayout.Button(transformButtonString))
         {
             if (!_isRunning)
@@ -102,34 +82,10 @@ public class MainScript : MonoBehaviour {
 					transformButtonString = "Don't Use Transformation";
 				}            }
         }
-        if (GUILayout.Button("Switch Cam")) {
-			if (!_isRunning) {
-
-				if (cam1.enabled == true) {
-
-					cam1.enabled = false;
-					cam2.enabled = true;
-				}else{
-					cam1.enabled = true;
-					cam2.enabled = false;		
-				}
-			}
-		}
 		GUILayout.TextArea ("     step >" + step + "<");
 		GUILayout.TextArea ("     iterations >" + iterationNumber + "<");
 		GUILayout.TextArea ("     size of input >" + inputSize + "<");
 		GUILayout.TextArea ("     size of output >" + nbOutputNeuron + "<");
-		if (testWithColor && model == System.IntPtr.Zero) {
-			if (GUILayout.Button (nbColorButtonString)) {
-				if (nbColor == 2) {
-					nbColor = 3;
-					nbColorButtonString = "Change to 2 colors";
-				} else {
-					nbColor = 2;
-					nbColorButtonString = "Change to 3 colors";
-				}
-			}
-		}
 
 		// Fin de la liste de composants visuels verticale
 		GUILayout.EndVertical();
