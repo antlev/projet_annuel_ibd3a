@@ -115,6 +115,34 @@ int LinearPerceptronClassif::linear_fit_classification_rosenblatt(double *inputs
 		}
 	}
 }
+// Instantiate and learn a dataSet for a simple linear Percetron
+// @param inputs : array containing flatten inputs data
+// @param inputSize : size of input array
+// @param nbData : number of data
+// @param expectedOutputs : array containing flatten outputs data
+// @param outputSize : size of output array
+LinearPerceptronRegression::LinearPerceptronRegression(double *inputs, int inputSize, int nbData, double *expectedOutputs, int outputSize){
+	assert(inputSize > 0);
+	assert(outputSize > 0);
+	// Create the model
+	assert(inputs != NULL);
+	assert(inputSize > 0);
+	assert(expectedOutputs != NULL);
+	assert(outputSize > 0);
+	inputs = addBiasToInputs(inputs, nbData, &inputSize);
+	// Build X and Y
+	Eigen::MatrixXd X(nbData, inputSize);
+	Eigen::MatrixXd Y(nbData, outputSize);
+
+	tabToMatrix(&X, inputs, nbData, inputSize);
+	tabToMatrix(&Y, expectedOutputs, nbData, outputSize);
+	// return the calculated result as a matrix
+	model = new Eigen::MatrixXd(pinv(X) * Y);
+}
+// Delete the mlp
+LinearPerceptronRegression::~LinearPerceptronRegression() {
+	if (model) { delete model; }
+}
 // For a trained model, this function calculate the output of the single input passed as a parameter
 // @param input : input of one data
 // @param inputSize : size of input array
@@ -141,23 +169,21 @@ double* LinearPerceptronRegression::linearPredict(double* input) {
 // @param input : input of one data
 // @param inputSize : size of input array
 // @return the new input
-double* addBiasToInputs(double *inputs, int *inputsSize, int *inputSize) {
+double* addBiasToInputs(double *inputs, int nbData, int *inputSize) {
 	assert(inputs != NULL);
-	assert(inputsSize >= inputSize);
+	assert(nbData >= 0);
 	assert(inputSize > 0);
-	int nbData = *inputsSize / *inputSize;
-	*inputsSize += nbData;
-	double* newInputs = new double[*inputsSize + nbData];
+	*inputSize += 1; // Bias
+	double* newInputs = new double[*inputSize*nbData];
 	int inputIterator = 0;
-	for (int newinputIterator = 0; newinputIterator < (*inputsSize); newinputIterator++) {
-		if (newinputIterator % (*inputSize + 1) == 0) {
+	for (int newinputIterator = 0; newinputIterator < (*inputSize*nbData); newinputIterator++) {
+		if (newinputIterator % (*inputSize) == 0) {
 			newInputs[newinputIterator] = 1;
 			newinputIterator++;
 		}
 		newInputs[newinputIterator] = inputs[inputIterator];
 		inputIterator++;
 	}
-	*inputSize += 1;
 	return newInputs;
 }
 // Add bias to one input

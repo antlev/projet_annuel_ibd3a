@@ -5,7 +5,7 @@
 #include "Eigen/Dense"
 Eigen::MatrixXd pinv(Eigen::MatrixXd X);
 double* addBiasToInput(double *input, int inputSize);
-double* addBiasToInputs(double *inputs, int *inputsSize, int *inputSize);
+double* addBiasToInputs(double *inputs, int nbData, int *inputSize);
 void tabToMatrix(Eigen::MatrixXd* matrix, double* tab, int nbRow, int nbCols);
 void matrixToTab(Eigen::MatrixXd matrix, double *tab, int nbRow, int nbCols);
 
@@ -23,28 +23,8 @@ private:
 };
 class LinearPerceptronRegression {
 public:
-	LinearPerceptronRegression(double *inputs, int inputSize, int inputsSize, double *expectedOutputs, int outputSize) {
-		assert(inputSize > 0);
-		assert(outputSize > 0);
-		// Create the model
-		assert(inputs != NULL);
-		assert(inputSize > 0);
-		assert(expectedOutputs != NULL);
-		assert(outputSize > 0);
-		inputs = addBiasToInputs(inputs, &inputsSize, &inputSize);
-		// Build X and Y
-		int nbInput = inputsSize / inputSize;
-		Eigen::MatrixXd X(nbInput, inputSize);
-		Eigen::MatrixXd Y(nbInput, outputSize);
-
-		tabToMatrix(&X, inputs, nbInput, inputSize);
-		tabToMatrix(&Y, expectedOutputs, nbInput, outputSize);
-		// return the calculated result as a matrix
-		model = new Eigen::MatrixXd(pinv(X) * Y);
-	}
-	~LinearPerceptronRegression() {
-		if (model) { delete model; }
-	}
+	LinearPerceptronRegression(double *inputs, int inputSize, int nbData, double *expectedOutputs, int outputSize);
+	~LinearPerceptronRegression();
 	// Regression
 	double* linearPredict(double* input);
 

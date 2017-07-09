@@ -37,8 +37,8 @@ public:
 		return pmodel->LinearPerceptronClassif::linear_classify(input);
 	}
 		// Regression
-	__declspec(dllexport) LinearPerceptronRegression* linearCreateAndFitRegression(double *inputs, int inputsSize, int inputSize, double *expectedOutputs, int outputSize) {
-		return new LinearPerceptronRegression(inputs, inputSize, inputsSize, expectedOutputs, outputSize);
+	__declspec(dllexport) LinearPerceptronRegression* linearCreateAndFitRegression(double *inputs, int nbData, int inputSize, double *expectedOutputs, int outputSize) {
+		return new LinearPerceptronRegression(inputs, inputSize, nbData, expectedOutputs, outputSize);
 	}
 	__declspec(dllexport) double* linearPredict(LinearPerceptronRegression* pmodel, double* input) {
 		return pmodel->LinearPerceptronRegression::linearPredict(input);
