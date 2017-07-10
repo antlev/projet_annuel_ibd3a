@@ -33,6 +33,9 @@
     <ClInclude Include="LinearPerceptron.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Genetic.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">

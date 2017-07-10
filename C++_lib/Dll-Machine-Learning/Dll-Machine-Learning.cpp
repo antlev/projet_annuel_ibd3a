@@ -4,6 +4,7 @@
 #include "LinearPerceptron.h"
 #include "MLP.h"
 #include "RBF.h"
+#include "Genetic.h"
 
 extern "C" {
 
@@ -17,7 +18,6 @@ public:
 		return titi;
 	}
 };
-
 
 	__declspec(dllexport) int return42() { return 42; } 
 	__declspec(dllexport) Toto* createToto() { return new Toto() ; }
