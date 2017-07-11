@@ -49,6 +49,8 @@
      <Compile Include="Assets\Scripts\LibWrapperMachineLearning.cs" />
      <Compile Include="Assets\Scripts\MainScript.cs" />
      <Compile Include="Assets\Scripts\Mlp.cs" />
+     <Compile Include="Assets\Scripts\Naive_Rbf.cs" />
+     <Compile Include="Assets\Scripts\Rbf.cs" />
      <Compile Include="Assets\Scripts\Simple_Perceptron.cs" />
      <Compile Include="Assets\Scripts\TestScript.cs" />
  <Reference Include="UnityEngine.Advertisements">
