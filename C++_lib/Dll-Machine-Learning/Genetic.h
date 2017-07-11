@@ -40,14 +40,35 @@ template<typename _Trait>
 struct EvalRbf
 {
 	double evaluate(Chromosome<_Trait>& chromosome) {
-		// Build gamma array using chromosome
-		double* gamma = new double[nbRepresentative];
+		// set gamma array using chromosome
+		double* gamma = new double[nbRepresenta inputtive];
 		for (int i = 0; i < nbRepresentative; i++) {
 			gamma = chromosome.genes[i];
 		}
+		int nbData = 15;
+		int inputSize = 1;
+		double* learningSample = new double[nbData*inputSize];
+		double* learningSampleExpectedOutputs = new double[nbData];
+		double* testSample = new double[nbTestSample*inputSize];
+		double* testSampleExpectedOutput = new double[nbTestSample];
+		double* input = new double[inputSize];
+		int nbTestSample = 50;
 		double fitness = 0;
-		// TODO
-		RBF* rbf = new RBF(nbExamples, gamma, X, int inputSize, double* Y, int nbRepresentatives)
+
+		initSample(learningSample, learningSampleExpectedOutputs, testSample, testSampleExpectedOutput);
+
+		// Instantiate a new rbf to solve the problem
+		RBF* rbf = new RBF(nbData, gamma, learningSample, inputSize, learningSampleExpectedOutputs, nbRepresentatives);
+		// For each testSample data, add the difference between the value found and the value expected to the fitness
+		double response;
+		for (int i = 0; i < nbTestSample; i++) {
+			input = testSample + i*inputSize;
+			if (response = getRbfResponseClassif(testSample) > testSampleExpectedOutput[i]) {
+				fitness += response - testSampleExpectedOutput[i];
+			} else {
+				fitness += testSampleExpectedOutput[i] - response;
+			}
+		}
 		return fitness;
 	}
 };
