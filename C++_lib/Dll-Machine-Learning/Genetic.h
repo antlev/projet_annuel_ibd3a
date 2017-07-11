@@ -7,8 +7,102 @@
 #include <algorithm>
 #include <cassert>
 #include <fstream>
+#include <stdio.h>
 
-struct MyGene;
+struct Trait;
+
+template<typename _Trait>
+struct RbfGene {
+	MyRandom& random;
+	double gamma;
+
+	RbfGene(MyRandom& random) : random(random) {
+		gamma = getRealRange(0.01, 10);
+	}
+	RbfGene(const RbfGene& rbfGene) : random(rbfGene.random), gamma(gamma) {
+	}
+	RbfGene& operator=(const RbfGene& rbfGene) {
+		random = rbfGene.random;
+		gamma = rbfGene.gamma;
+		return *this;
+	}
+	std::string toString() const noexcept {
+		std::stringstream ss;
+		ss << gamma;
+		return ss.str();
+	}
+	void mutation() {
+		gamma = getRealRange(0.01, 10);
+	}
+
+};
+template<typename _Trait>
+struct EvalRbf
+{
+	double evaluate(Chromosome<_Trait>& chromosome) {
+		// Build gamma array using chromosome
+		double* gamma = new double[nbRepresentative];
+		for (int i = 0; i < nbRepresentative; i++) {
+			gamma = chromosome.genes[i];
+		}
+		double fitness = 0;
+		// TODO
+		RBF* rbf = new RBF(nbExamples, gamma, X, int inputSize, double* Y, int nbRepresentatives)
+		return fitness;
+	}
+};
+
+struct Trait {
+
+	static constexpr int NB_GENES = 30;
+	static constexpr const long MAX_ERROR = 100000;
+
+	// Configuration
+	static constexpr int POP_SIZE = 12;
+	static constexpr long MAX_ITERATIONS = 10000;
+	static constexpr double CROSSOVER_RATE = 0.90; // % of children produce from a crossover
+	static constexpr double BEST_SELECTION_RATE = 0.25; // % of population consider as best
+	static constexpr double MUTATION_RATE = 0.70;
+	static constexpr int LIMIT_STAGNATION = 50000;
+
+	using Random = MyRandom;
+
+	using Selection = SimpleSelection<Trait>;
+	using Crossover = SinglePointCrossover<Trait>;
+	using Mutation = SimpleMutation<Trait>;
+	using Sort = Minimise<Trait>;
+	using Evaluate = EvalRbf<Trait>;
+	using BuildHeader = BuildMyHeader<Trait>;
+	using RecoverHeader = RecoverMyHeader<Trait>;
+	using Gene = RbfGene<Trait>;
+
+	static Random random;
+
+	static constexpr const char* SAVE_FILE_PATH = "/tmp/state.save";
+
+	static bool isFinished(long bestFitness, size_t iterations, int stagnation) {
+		return false;
+	}
+};
+Trait::Random Trait::random;
+
+int main(int argc, char* argv[]) {
+	if (argc > 1) {
+		GeneticAlgo<Trait> gen(1);
+		gen.start();
+	}
+	else {
+		GeneticAlgo<Trait> gen;
+		gen.start();
+	}
+	return 0;
+}
+
+std::ostream& operator<<(std::ostream& os, const Chromosome<Trait>& c) {
+	os << c.toString();
+	return os;
+}
+
 struct MyRandom {
 	static constexpr int ASCII_DOWN_LIMIT = 32;
 	static constexpr int ASCII_UP_LIMIT = 126;
@@ -35,7 +129,10 @@ struct MyRandom {
 	int getIntRange(int downlimit, int uplimit) {
 		return std::uniform_int_distribution<int>(downlimit, uplimit)(gen);
 	}
-
+	// Return a random double between downlimit and uplimit included
+	double getRealRange(double downlimit, double uplimit) {
+		return std::uniform_real_distribution<double>(downlimit, uplimit)(gen);
+	}
 private:
 	std::random_device r;
 	std::mt19937 gen;
