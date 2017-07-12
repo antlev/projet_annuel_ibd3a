@@ -8,122 +8,10 @@
 #include <cassert>
 #include <fstream>
 #include <stdio.h>
+#include <unistd.h>
+#include "RBF.h"
 
 struct Trait;
-
-template<typename _Trait>
-struct RbfGene {
-	MyRandom& random;
-	double gamma;
-
-	RbfGene(MyRandom& random) : random(random) {
-		gamma = getRealRange(0.01, 10);
-	}
-	RbfGene(const RbfGene& rbfGene) : random(rbfGene.random), gamma(gamma) {
-	}
-	RbfGene& operator=(const RbfGene& rbfGene) {
-		random = rbfGene.random;
-		gamma = rbfGene.gamma;
-		return *this;
-	}
-	std::string toString() const noexcept {
-		std::stringstream ss;
-		ss << gamma;
-		return ss.str();
-	}
-	void mutation() {
-		gamma = getRealRange(0.01, 10);
-	}
-
-};
-template<typename _Trait>
-struct EvalRbf
-{
-	double evaluate(Chromosome<_Trait>& chromosome) {
-		// set gamma array using chromosome
-		double* gamma = new double[nbRepresenta inputtive];
-		for (int i = 0; i < nbRepresentative; i++) {
-			gamma = chromosome.genes[i];
-		}
-		int nbData = 15;
-		int inputSize = 1;
-		double* learningSample = new double[nbData*inputSize];
-		double* learningSampleExpectedOutputs = new double[nbData];
-		double* testSample = new double[nbTestSample*inputSize];
-		double* testSampleExpectedOutput = new double[nbTestSample];
-		double* input = new double[inputSize];
-		int nbTestSample = 50;
-		double fitness = 0;
-
-		initSample(learningSample, learningSampleExpectedOutputs, testSample, testSampleExpectedOutput);
-
-		// Instantiate a new rbf to solve the problem
-		RBF* rbf = new RBF(nbData, gamma, learningSample, inputSize, learningSampleExpectedOutputs, nbRepresentatives);
-		// For each testSample data, add the difference between the value found and the value expected to the fitness
-		double response;
-		for (int i = 0; i < nbTestSample; i++) {
-			input = testSample + i*inputSize;
-			if (response = getRbfResponseClassif(testSample) > testSampleExpectedOutput[i]) {
-				fitness += response - testSampleExpectedOutput[i];
-			} else {
-				fitness += testSampleExpectedOutput[i] - response;
-			}
-		}
-		return fitness;
-	}
-};
-
-struct Trait {
-
-	static constexpr int NB_GENES = 30;
-	static constexpr const long MAX_ERROR = 100000;
-
-	// Configuration
-	static constexpr int POP_SIZE = 12;
-	static constexpr long MAX_ITERATIONS = 10000;
-	static constexpr double CROSSOVER_RATE = 0.90; // % of children produce from a crossover
-	static constexpr double BEST_SELECTION_RATE = 0.25; // % of population consider as best
-	static constexpr double MUTATION_RATE = 0.70;
-	static constexpr int LIMIT_STAGNATION = 50000;
-
-	using Random = MyRandom;
-
-	using Selection = SimpleSelection<Trait>;
-	using Crossover = SinglePointCrossover<Trait>;
-	using Mutation = SimpleMutation<Trait>;
-	using Sort = Minimise<Trait>;
-	using Evaluate = EvalRbf<Trait>;
-	using BuildHeader = BuildMyHeader<Trait>;
-	using RecoverHeader = RecoverMyHeader<Trait>;
-	using Gene = RbfGene<Trait>;
-
-	static Random random;
-
-	static constexpr const char* SAVE_FILE_PATH = "/tmp/state.save";
-
-	static bool isFinished(long bestFitness, size_t iterations, int stagnation) {
-		return false;
-	}
-};
-Trait::Random Trait::random;
-
-int main(int argc, char* argv[]) {
-	if (argc > 1) {
-		GeneticAlgo<Trait> gen(1);
-		gen.start();
-	}
-	else {
-		GeneticAlgo<Trait> gen;
-		gen.start();
-	}
-	return 0;
-}
-
-std::ostream& operator<<(std::ostream& os, const Chromosome<Trait>& c) {
-	os << c.toString();
-	return os;
-}
-
 struct MyRandom {
 	static constexpr int ASCII_DOWN_LIMIT = 32;
 	static constexpr int ASCII_UP_LIMIT = 126;
@@ -161,7 +49,6 @@ private:
 	std::uniform_int_distribution<int> get_int_ascii;
 	std::uniform_int_distribution<int> get_int_between_one_and_zero;
 };
-
 template<typename _Trait>
 struct Chromosome : _Trait::Evaluate {
 	using Gene = typename _Trait::Gene;
@@ -220,6 +107,85 @@ struct Chromosome : _Trait::Evaluate {
 		}
 	}
 };
+template<typename _Trait>
+struct RbfGene {
+	MyRandom& random;
+	double gamma;
+
+	RbfGene(MyRandom& random) : random(random) {
+		gamma = random.getRealRange(0, 10);
+	}
+	RbfGene(const RbfGene& rbfGene) : random(rbfGene.random), gamma(gamma) {
+	}
+	RbfGene& operator=(const RbfGene& rbfGene) {
+		random = rbfGene.random;
+		gamma = rbfGene.gamma;
+		return *this;
+	}
+	std::string toString() const noexcept {
+		std::stringstream ss;
+		ss << gamma;
+		return ss.str();
+	}
+	void mutation() {
+		gamma = random.getRealRange(0, 10);
+	}
+
+};
+template<typename _Trait>
+struct EvalRbf
+{
+	double evaluate(Chromosome<_Trait>& chromosome) {
+		int nbData = 2;
+		int nbRepresentatives = 1;
+		int inputSize = 1;
+		// set gamma array using chromosome
+		double* gamma = new double[nbRepresentatives];
+		for (int i = 0; i < nbRepresentatives; i++) {
+			gamma = chromosome.genes[i];
+		}
+		double* learningSample = new double[nbData*inputSize];
+		double* learningSampleExpectedOutputs = new double[nbData];
+		int nbTestSample = 50;
+		double* testSample = new double[nbTestSample*inputSize];
+		double* testSampleExpectedOutput = new double[nbTestSample];
+		double* input = new double[inputSize];
+		double fitness = 0;
+
+		learningSample[0] = 1;
+		learningSample[1] = 2;
+		learningSampleExpectedOutputs[0] = 1;
+		learningSampleExpectedOutputs[1] = 1;
+
+		testSample[0] = 0.5;
+		testSample[1] = 1;
+		testSample[2] = 1.5;
+		testSample[3] = 2;
+		testSampleExpectedOutput[0] = 0.5;
+		testSampleExpectedOutput[1] = 1;
+		testSampleExpectedOutput[2] = 1.3;
+		testSampleExpectedOutput[3] = 1;
+
+		// Instantiate a new rbf to solve the problem
+		RBF* rbf = new RBF(nbData, gamma, learningSample, inputSize, learningSampleExpectedOutputs, nbRepresentatives);
+		// For each testSample data, add the difference between the value found and the value expected to the fitness
+		double response;
+		for (int i = 0; i < nbTestSample; i++) {
+			input = testSample + i*inputSize;
+			if (response = rbf->getRbfResponseClassif(testSample) > testSampleExpectedOutput[i]) {
+				fitness += response - testSampleExpectedOutput[i];
+			}
+			else {
+				fitness += testSampleExpectedOutput[i] - response;
+			}
+		}
+		return fitness;
+	}
+};
+std::ostream& operator<<(std::ostream& os, const Chromosome<Trait>& c) {
+	os << c.toString();
+	return os;
+}
 ////////////////////////////////////////// SORT //////////////////////////////////////////
 template<typename _Trait>
 struct Minimise
@@ -275,7 +241,7 @@ struct RouletteSelection {
 		// TODO
 	}
 };
-////////////////////////////////////////// CROSSOVER ////////////////////////////////////////// 
+////////////////////////////////////////// CROSSOVER //////////////////////////////////////////
 template<typename _Trait>
 struct SinglePointCrossover {
 	static std::pair<Chromosome<_Trait>&, Chromosome<_Trait>&> crossover(std::pair<Chromosome<_Trait>&, Chromosome<_Trait>&>& parents, MyRandom* random) {
@@ -302,9 +268,9 @@ struct SinglePointCrossover {
 		return std::pair<Chromosome<_Trait>&, Chromosome<_Trait>&>(child1, child2);
 	}
 };
-// template<typename _Trait> 
+// template<typename _Trait>
 // struct TwoPointCrossover{
-// 	static std::pair<Chromosome<_Trait>, Chromosome<_Trait>> crossover(std::pair<Chromosome<_Trait>, Chromosome<_Trait>> parents, MyRandom* random){		
+// 	static std::pair<Chromosome<_Trait>, Chromosome<_Trait>> crossover(std::pair<Chromosome<_Trait>, Chromosome<_Trait>> parents, MyRandom* random){
 // 		std::pair<Chromosome<_Trait>, Chromosome<_Trait>> children;
 // 		int randomCursor = *random->getIntRange(1, _Trait::NB_GENES - 3);
 // 		int randomCursor2 = *random->getIntRange(randomCursor+1, _Trait::NB_GENES - 2);
@@ -380,6 +346,41 @@ struct RecoverMyHeader {
 		}
 	}
 };
+
+struct Trait {
+
+	static constexpr int NB_GENES = 30;
+	static constexpr const long MAX_ERROR = 100000;
+
+	// Configuration
+	static constexpr int POP_SIZE = 12;
+	static constexpr long MAX_ITERATIONS = 10000;
+	static constexpr double CROSSOVER_RATE = 0.90; // % of children produce from a crossover
+	static constexpr double BEST_SELECTION_RATE = 0.25; // % of population consider as best
+	static constexpr double MUTATION_RATE = 0.70;
+	static constexpr int LIMIT_STAGNATION = 50000;
+
+	using Random = MyRandom;
+
+	using Selection = SimpleSelection<Trait>;
+	using Crossover = SinglePointCrossover<Trait>;
+	using Mutation = SimpleMutation<Trait>;
+	using Sort = Minimise<Trait>;
+	using Evaluate = EvalRbf<Trait>;
+	using BuildHeader = BuildMyHeader<Trait>;
+	using RecoverHeader = RecoverMyHeader<Trait>;
+	using Gene = RbfGene<Trait>;
+
+	static Random random;
+
+	static constexpr const char* SAVE_FILE_PATH = "/tmp/state.save";
+
+	static bool isFinished(long bestFitness, size_t iterations, int stagnation) {
+		return false;
+	}
+};
+Trait::Random Trait::random;
+
 template<typename _Trait>
 class GeneticAlgo : _Trait::Selection, _Trait::Crossover, _Trait::Mutation {
 	using Random = typename _Trait::Random;
@@ -488,7 +489,7 @@ private:
 		if (random.getRealBetweenOneAndZero() < _Trait::MUTATION_RATE) {
 #ifndef NDEBUG
 			std::cout << "MUTATION !!! " << std::endl;
-#endif		
+#endif
 			_Trait::Mutation::mutation(ch, &random);
 		}
 	}
@@ -501,12 +502,12 @@ private:
 			std::pair<Chromosome<_Trait>&, Chromosome<_Trait>&> children = _Trait::Crossover::crossover(parents, &random);
 #ifndef NDEBUG
 			// std::cout << "Children produced by crossover  : child 1 : " << children.first.toString() << " child 2 : " << children.second.toString() << std::endl;
-#endif		
+#endif
 			mutation(children.first);
 			mutation(children.second);
 #ifndef NDEBUG
 			// std::cout << "        Children after mutation : child 1 : " << children.first.toString() << " child 2 : " << children.second.toString() << std::endl;
-#endif		
+#endif
 			population2.push_back(children.first);
 			population2.push_back(children.second);
 
@@ -524,7 +525,7 @@ private:
 		std::sort(population.begin(), population.end(), _Trait::Sort::sort);
 	}
 	void saveState() {
-		// Build header 
+		// Build header
 		_Trait::BuildHeader::buildHeader();
 
 		for (size_t i = 0; i<_Trait::POP_SIZE; i++) {
