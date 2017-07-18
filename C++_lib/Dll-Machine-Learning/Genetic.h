@@ -8,7 +8,7 @@
 #include <cassert>
 #include <fstream>
 #include <stdio.h>
-#include <unistd.h>
+//#include <unistd.h>
 #include "RBF.h"
 
 struct Trait;
@@ -61,8 +61,9 @@ struct Chromosome : _Trait::Evaluate {
 
 	Chromosome(Random& random) : random(random), genes(), fitness(_Trait::MAX_ERROR) {
 		std::cout << "Chromosome::Chromosome()" << std::endl;
+		std::cout << "genes >>" << &genes << std::endl;
 		for (int i = 0; i < _Trait::NB_GENES; ++i) {
-			genes.push_back(Gene(random));
+			genes.emplace_back(random);
 		}
 	}
 
@@ -80,6 +81,8 @@ struct Chromosome : _Trait::Evaluate {
 	std::string toString() const {
 		std::stringstream ss;
 		ss << "fitness >" << std::to_string(fitness) << "< chromosome : ";
+		std::cout << "genes >>>" << &genes << std::endl;
+
 		for (size_t i = 0; i<genes.size(); i++) {
 			ss << genes[i].toString() << " ";
 		}
@@ -113,7 +116,7 @@ struct RbfGene {
 	double gamma;
 
 	RbfGene(MyRandom& random) : random(random) {
-		gamma = random.getRealRange(0, 10);
+		this->gamma = random.getRealRange(0, 10);
 	}
 	RbfGene(const RbfGene& rbfGene) : random(rbfGene.random), gamma(gamma) {
 	}
@@ -142,7 +145,7 @@ struct EvalRbf
 		// set gamma array using chromosome
 		double* gamma = new double[nbRepresentatives];
 		for (int i = 0; i < nbRepresentatives; i++) {
-			gamma = chromosome.genes[i];
+			gamma[i] = chromosome.genes[i].gamma;
 		}
 		double* learningSample = new double[nbData*inputSize];
 		double* learningSampleExpectedOutputs = new double[nbData];
@@ -182,10 +185,7 @@ struct EvalRbf
 		return fitness;
 	}
 };
-std::ostream& operator<<(std::ostream& os, const Chromosome<Trait>& c) {
-	os << c.toString();
-	return os;
-}
+
 ////////////////////////////////////////// SORT //////////////////////////////////////////
 template<typename _Trait>
 struct Minimise
@@ -381,6 +381,11 @@ struct Trait {
 };
 Trait::Random Trait::random;
 
+std::ostream& operator<<(std::ostream& os, const Chromosome<Trait>& c) {
+	os << c.toString();
+	return os;
+}
+
 template<typename _Trait>
 class GeneticAlgo : _Trait::Selection, _Trait::Crossover, _Trait::Mutation {
 	using Random = typename _Trait::Random;
@@ -388,13 +393,16 @@ public:
 	GeneticAlgo() : random(), population(), population2(), currentIterationCount(0), bestFitness(_Trait::MAX_ERROR), stagnation(0) {
 		for (int i = 0; i < _Trait::POP_SIZE; ++i)
 		{
-			population.push_back(Chromosome<_Trait>(random));
+			population.emplace_back(random);
 		}
 		population2.reserve(_Trait::POP_SIZE);
 	};
 	GeneticAlgo(int i) : population(_Trait::POP_SIZE), population2(), random() {
 		population2.reserve(_Trait::POP_SIZE);
 	};
+	//    ~GeneticAlgo(){
+	//        delete(population);
+	//    }
 	void start() {
 		evaluate();
 		sort();
