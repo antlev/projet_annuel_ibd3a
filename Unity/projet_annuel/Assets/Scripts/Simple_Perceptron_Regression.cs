@@ -2,24 +2,13 @@
 using System.Runtime.InteropServices;
 using System.Threading;
 
-public class Rbf : MonoBehaviour {
+public class Simple_Perceptron_Regression : MonoBehaviour {
 
 	public static System.IntPtr model;
 	public static int inputSize = 2;
-	public static int nbRepresentatives;
-	public static float refGamma = 0.1f;
-	public static double[] gammas;
 
     public Transform[] baseApprentissage;
     public Transform[] baseTest;
-
-	public Color blue = Color.blue;
-	public Color red = Color.red;
-	public Color green = Color.green;
-	public static int colorBlue = 0;
-	public static int colorRed = 1;
-	public static int colorGreen = 2;
-	public int nbColor;
 
 	public static bool transformInput = false;
 	public static string transformButtonString = "Use Transformation";
@@ -30,7 +19,6 @@ public class Rbf : MonoBehaviour {
 	private bool _isRunning = false;
 
 	public void Start(){
-		setGammas();
 	}
 	/// <summary>
 	/// Méthode utilisée pour gérer les informations et 
@@ -40,57 +28,23 @@ public class Rbf : MonoBehaviour {
 	{
 		// Démarrage d'une liste de composants visuels verticale
 		GUILayout.BeginVertical();
-		refGamma = GUI.VerticalScrollbar(new Rect(1025, 25, 250, 500), refGamma, 0.01F, 1F, 0.01F);
-		nbRepresentatives = (int) GUI.VerticalScrollbar(new Rect(1000, 25, 10, 500), nbRepresentatives, 1, 100, 1);
 
-        if (GUILayout.Button("Create Rbf Model"))
+        if (GUILayout.Button("Create Model and fit regression"))
         {
             if (!_isRunning)
             {
-                createRbf();
-            }
-        }
-        if (GUILayout.Button("Classify Test Set"))
-        {
-            if (!_isRunning)
-            {
-                classifyTestSet();
+                linearCreateAndFitRegression();
             }
         }
         if (GUILayout.Button("Predict Test Set"))
         {
             if (!_isRunning)
             {
-                predictTestSet();
+                linearPredictTestSet();
             }
         }
-        if (GUILayout.Button("Set gammas"))
-        {
-            if (!_isRunning)
-            {
-                setGammas();
-            }
-        }
-		if (GUILayout.Button(transformButtonString))
-        {
-            if (!_isRunning)
-            {
-				if (transformInput)
-				{
-					transformInput = false;
-					transformButtonString = "Use Transformation";
-				}
-				else
-				{
-					transformInput = true;
-					transformButtonString = "Don't Use Transformation";
-				}            }
-        }
-		GUILayout.TextArea ("     size of input >" + inputSize + "<");
-		GUILayout.TextArea ("     size of output >" + nbColor + "<");
-		GUILayout.TextArea ("     gamma >" + refGamma + "<");
-		GUILayout.TextArea ("     representatives >" + nbRepresentatives + "<");
 
+		GUILayout.TextArea ("     size of input >" + inputSize + "<");
 
 		// Fin de la liste de composants visuels verticale
 		GUILayout.EndVertical();
@@ -100,79 +54,38 @@ public class Rbf : MonoBehaviour {
 			data.position = new Vector3(data.position.x, 5, data.position.z);
 		}
 	}
-	public void createRbf(){
+	public void linearCreateAndFitRegression(){
 		_isRunning = true;
 		if (model == System.IntPtr.Zero) {
-			double[] gamma = new double[baseApprentissage.Length];
-			for(int i=0;i<baseApprentissage.Length;i++){
-				gamma[i] = 0.1;
-			}
 			double[] inputs = new double[baseApprentissage.Length*inputSize];
 			double[] expectedOutputs = new double[baseApprentissage.Length];
 			getInputsOutputs(baseApprentissage, inputs, expectedOutputs);
-			model = LibWrapperMachineLearning.createRbfModel (baseApprentissage.Length, gamma, inputs, inputSize, expectedOutputs, nbRepresentatives);
-			Debug.Log ("Model created !");
+			model = LibWrapperMachineLearning.linearCreateAndFitRegression (inputs, baseApprentissage.Length, inputSize, expectedOutputs, 1);
+			Debug.Log ("Model created and fit !");
 		} else {
 			Debug.Log ("A model has been created, please delete it if you want to create another one ");
 		}
 		_isRunning = false;
 	}	
-	public void classifyTestSet(){
+
+	public void linearPredictTestSet(){
 		_isRunning = true;
 		if (model != System.IntPtr.Zero) {
 			generateBaseTest (baseTest, 15);
-			Debug.Log ("Classification with a test base of " + baseTest.Length + " marbles");
+			Debug.Log ("Predict with a test base of " + baseTest.Length + " marbles");
 			double[] input = new double[inputSize];
-			double output;
+			double[] output = new double[1];
+			System.IntPtr pRes;
 			foreach(var unityObject in baseTest){
-				getInput(unityObject, input);
-				output = LibWrapperMachineLearning.getRbfResponseClassif (model, input);
-				if(output == 1){
-					unityObject.GetComponent<Renderer>().material.color = UnityEngine.Color.red;
-				}else{
-					unityObject.GetComponent<Renderer>().material.color = UnityEngine.Color.blue;
-				}						
-				// Just to position the balls somewhere we can see them
-                unityObject.position = new Vector3(unityObject.position.x, 0, unityObject.position.z);
-			}
-
-		} else {
-			Debug.Log ("There is no model in memory");
-		}
-		_isRunning = false;
-	}
-
-	public void predictTestSet(){
-		_isRunning = true;
-		if (model != System.IntPtr.Zero) {
-			generateBaseTest (baseTest, 15);
-			Debug.Log ("Classification with a test base of " + baseTest.Length + " marbles");
-			double[] input = new double[inputSize];
-			double output;
-			foreach(var unityObject in baseTest){
-				getInput(unityObject, input);
-				output = LibWrapperMachineLearning.getRbfResponseClassif (model, input);
-				if(output > 0){
-					unityObject.GetComponent<Renderer>().material.color = UnityEngine.Color.red;
-				}else{
-					unityObject.GetComponent<Renderer>().material.color = UnityEngine.Color.blue;
-				}						
-				// Just to position the balls somewhere we can see them
-                unityObject.position = new Vector3(unityObject.position.x, 0, unityObject.position.z);
+				getInput (unityObject, input);
+				pRes = LibWrapperMachineLearning.linearPredict (model, input);
+    			Marshal.Copy (pRes, output, 0, 1);
+                unityObject.position = new Vector3(unityObject.position.x, (float) output[0] , unityObject.position.z);
 			}
 		} else {
-			Debug.Log ("There is no model in memory");
+			Debug.Log ("Aucun modèle en mémoire");
 		}
 		_isRunning = false;
-	}
-
-
-//------------------------------------------------------------------------------------------------------------------------------------------------------------------
-	private void setGammas(){
-		gammas = new double[nbRepresentatives];
-		for(int i=0;i<nbRepresentatives;i++){
-			gammas[i] = refGamma;
-		}
 	}
 
 	private void getInput(Transform objetUnity, double[] input){
@@ -182,8 +95,23 @@ public class Rbf : MonoBehaviour {
 			transformInputs (input);
 		}
 	}
-	// Rempli le tableau inputs passé en paramètre avec les coordonnées x et y du tableau d'objetsUnity
-	// ainsi que le tableau outputs avec les coordonées z du tableau d'objetsUnity
+	// Rempli le tableau input passé en paramètre avec les coordonnées x et y de l'objetsUnity
+	private void getInputs(Transform[] objetsUnity, double[] inputs){
+		if (inputs.Length < objetsUnity.Length * inputSize) {
+			Debug.Log ("Error : the array inputs given to the function isn't big enough");
+		} else {
+			int i;
+			for(i=0; i<objetsUnity.Length*2; i+=2) {
+				inputs [i] = objetsUnity[i/2].position.x;
+				inputs [i+1] = objetsUnity[i/2].position.z;
+			}
+		}
+		if (transformInput) {
+			transformInputs (inputs);
+		}
+	}
+//	// Rempli le tableau inputs passé en paramètre avec les coordonnées x et y du tableau d'objetsUnity
+//	// ainsi que le tableau outputs avec les coordonées z du tableau d'objetsUnity
 	private void getInputsOutputs(Transform[] objetsUnity, double[] inputs, double[] outputs){
 		int i = 0, j = 0;
 		foreach (var data in objetsUnity)
@@ -192,13 +120,7 @@ public class Rbf : MonoBehaviour {
 			i++;
 			inputs[i] = data.position.z;
 			i++;
-			if (data.GetComponent<Renderer> ().material.color == UnityEngine.Color.blue) {
-				outputs[j] = -1;
-			} else if(data.GetComponent<Renderer> ().material.color == UnityEngine.Color.red){
-				outputs[j] = 1;
-			} else{
-				Debug.Log("Naive Rbf can still only deal with 2 colors only");
-			}
+			outputs[j] = data.position.y;
 			j++;
 		}
 		if (transformInput) {
@@ -275,19 +197,6 @@ public class Rbf : MonoBehaviour {
 	System.Random rdm = new System.Random ();
 	private float generateRdm(double a, double b){
 		return (float) (a + rdm.NextDouble () * (b - a));
-	}
-
-	private void generateLinear(){
-		foreach (var data in baseApprentissage) {
-			var z = generateRdm (-1, 1);
-			if (z < 0) {
-				data.position = new Vector3(generateRdm(-1,1), -1, z);
-				data.GetComponent<Renderer> ().material.color = blue;
-			} else {
-				data.position = new Vector3(generateRdm(-1,1), 1, z);
-				data.GetComponent<Renderer> ().material.color = red;
-			}
-		}
 	}
 
 	private void generateRegression(){

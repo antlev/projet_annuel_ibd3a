@@ -51,13 +51,6 @@ public class Naive_Rbf : MonoBehaviour {
                 classifyTestSet();
             }
         }
-        if (GUILayout.Button("Predict Test Set"))
-        {
-            if (!_isRunning)
-            {
-                predictTestSet();
-            }
-        }
 		if (GUILayout.Button(transformButtonString))
         {
             if (!_isRunning)
@@ -127,29 +120,29 @@ public class Naive_Rbf : MonoBehaviour {
 		_isRunning = false;
 	}
 
-	public void predictTestSet(){
-		_isRunning = true;
-		if (model != System.IntPtr.Zero) {
-			generateBaseTest (baseTest, 15);
-			Debug.Log ("Classification with a test base of " + baseTest.Length + " marbles");
-			double[] input = new double[inputSize];
-			double output;
-			foreach(var unityObject in baseTest){
-				getInput(unityObject, input);
-				output = LibWrapperMachineLearning.getNaiveRbfResponseClassif (model, input);
-				if(output > 0){
-					unityObject.GetComponent<Renderer>().material.color = UnityEngine.Color.red;
-				}else{
-					unityObject.GetComponent<Renderer>().material.color = UnityEngine.Color.blue;
-				}						
-				// Just to position the balls somewhere we can see them
-                unityObject.position = new Vector3(unityObject.position.x, 0, unityObject.position.z);
-			}
-		} else {
-			Debug.Log ("There is no model in memory");
-		}
-		_isRunning = false;
-	}
+	// public void predictTestSet(){
+	// 	_isRunning = true;
+	// 	if (model != System.IntPtr.Zero) {
+	// 		generateBaseTest (baseTest, 15);
+	// 		Debug.Log ("Classification with a test base of " + baseTest.Length + " marbles");
+	// 		double[] input = new double[inputSize];
+	// 		double output;
+	// 		foreach(var unityObject in baseTest){
+	// 			getInput(unityObject, input);
+	// 			output = LibWrapperMachineLearning.getNaiveRbfResponseClassif (model, input);
+	// 			if(output > 0){
+	// 				unityObject.GetComponent<Renderer>().material.color = UnityEngine.Color.red;
+	// 			}else{
+	// 				unityObject.GetComponent<Renderer>().material.color = UnityEngine.Color.blue;
+	// 			}						
+	// 			// Just to position the balls somewhere we can see them
+ //                unityObject.position = new Vector3(unityObject.position.x, 0, unityObject.position.z);
+	// 		}
+	// 	} else {
+	// 		Debug.Log ("There is no model in memory");
+	// 	}
+	// 	_isRunning = false;
+	// }
 
 
 //------------------------------------------------------------------------------------------------------------------------------------------------------------------

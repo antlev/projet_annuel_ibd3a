@@ -534,9 +534,9 @@ public class TestScript : MonoBehaviour {
         naiveRbfRegressionTest_input[0] = 0;
         naiveRbfRegressionTest_input[1] = 0;
         naiveRbfRegressionTest_output = LibWrapperMachineLearning.getNaiveRbfResponseRegression(naiveRbfModelRegression, naiveRbfRegressionTest_input);
-        if((0.72 - naiveRbfRegressionTest_output) > 0.1){ 
+        if((0.99 - naiveRbfRegressionTest_output) > 0.1){ 
             if(debug == 1){
-            	Debug.Log("response for input ["+naiveRbfRegressionTest_input[0]+";"+naiveRbfRegressionTest_input[1]+"] = "+naiveRbfRegressionTest_output +"  expected 0.72...");
+            	Debug.Log("response for input ["+naiveRbfRegressionTest_input[0]+";"+naiveRbfRegressionTest_input[1]+"] = "+naiveRbfRegressionTest_output +"  expected 0.99...");
             	debugFailure=1;
             }else{
             	return 1; 
@@ -545,9 +545,9 @@ public class TestScript : MonoBehaviour {
         naiveRbfRegressionTest_input[0] = 0;
         naiveRbfRegressionTest_input[1] = 1;
         naiveRbfRegressionTest_output = LibWrapperMachineLearning.getNaiveRbfResponseRegression(naiveRbfModelRegression, naiveRbfRegressionTest_input);
-        if((0.36 - naiveRbfRegressionTest_output) > 0.1){ 
+        if((0.49 - naiveRbfRegressionTest_output) > 0.1){ 
             if(debug == 1){
-            	Debug.Log("response for input ["+naiveRbfRegressionTest_input[0]+";"+naiveRbfRegressionTest_input[1]+"] = "+naiveRbfRegressionTest_output +"  expected 0.36...");
+            	Debug.Log("response for input ["+naiveRbfRegressionTest_input[0]+";"+naiveRbfRegressionTest_input[1]+"] = "+naiveRbfRegressionTest_output +"  expected 0.49...");
             	debugFailure=1;
             }else{
             	return 2; 
@@ -556,9 +556,9 @@ public class TestScript : MonoBehaviour {
         naiveRbfRegressionTest_input[0] = 1;
         naiveRbfRegressionTest_input[1] = 1;
         naiveRbfRegressionTest_output = LibWrapperMachineLearning.getNaiveRbfResponseRegression(naiveRbfModelRegression, naiveRbfRegressionTest_input);
-        if((-0.72 - naiveRbfRegressionTest_output) > 0.1){ 
+        if((-0.99 - naiveRbfRegressionTest_output) > 0.1){ 
             if(debug == 1){
-            	Debug.Log("response for input ["+naiveRbfRegressionTest_input[0]+";"+naiveRbfRegressionTest_input[1]+"] = "+naiveRbfRegressionTest_output +"  expected -0.72...");
+            	Debug.Log("response for input ["+naiveRbfRegressionTest_input[0]+";"+naiveRbfRegressionTest_input[1]+"] = "+naiveRbfRegressionTest_output +"  expected -0.99...");
             	debugFailure=1;
             }else{
             	return 3; 
@@ -567,9 +567,9 @@ public class TestScript : MonoBehaviour {
         naiveRbfRegressionTest_input[0] = 1;
         naiveRbfRegressionTest_input[1] = 0;
         naiveRbfRegressionTest_output = LibWrapperMachineLearning.getNaiveRbfResponseRegression(naiveRbfModelRegression, naiveRbfRegressionTest_input);
-        if((-0.36 - naiveRbfRegressionTest_output) > 0.1){ 
+        if((-0.49 - naiveRbfRegressionTest_output) > 0.1){ 
             if(debug == 1){
-            	Debug.Log("response for input ["+naiveRbfRegressionTest_input[0]+";"+naiveRbfRegressionTest_input[1]+"] = "+naiveRbfRegressionTest_output +"  expected -0.36...");
+            	Debug.Log("response for input ["+naiveRbfRegressionTest_input[0]+";"+naiveRbfRegressionTest_input[1]+"] = "+naiveRbfRegressionTest_output +"  expected -0.49...");
             	debugFailure=1;
             }else{
             	return 4; 
@@ -621,7 +621,13 @@ public class TestScript : MonoBehaviour {
         rbfClassifTest_inputs[11] = 0.3;
         rbfClassifTest_outputs[5] = -1;
 
-        // System.IntPtr rbfClassifTest_Mode = LibWrapperMachineLearning.createRbfModel(rbfClassifTest_nbExamples, rbfClassifTest_gamma, rbfClassifTest_inputs, rbfClassifTest_inputSize, rbfClassifTest_outputs, rbfClassifTest_nbRepresentatives);
+        Debug.Log("rbfClassifTest_nbExamples >" + rbfClassifTest_nbExamples);
+        Debug.Log("rbfClassifTest_gamma[0] >" + rbfClassifTest_gamma[0]);
+        Debug.Log("rbfClassifTest_gamma[1] >" + rbfClassifTest_gamma[1]);
+        Debug.Log("rbfClassifTest_inputs[0] >" + rbfClassifTest_inputs[0]);
+        Debug.Log("rbfClassifTest_inputSize >" + rbfClassifTest_inputSize);
+        Debug.Log("rbfClassifTest_nbRepresentatives >" + rbfClassifTest_nbRepresentatives);
+        System.IntPtr rbfClassifTest_Mode = LibWrapperMachineLearning.createRbfModel(rbfClassifTest_nbExamples, rbfClassifTest_gamma, rbfClassifTest_inputs, rbfClassifTest_inputSize, rbfClassifTest_outputs, rbfClassifTest_nbRepresentatives);
         
 //             rbfClassifTest_input[0] = 0.15;
 //             rbfClassifTest_input[1] = 0.75;

@@ -25,14 +25,16 @@ public class Mlp : MonoBehaviour {
 	public static bool transformInput = false;
 	public static string transformButtonString = "Use Transformation";
 
-	private int[] structure = new int[] {2, 10, 10, 2} ;
-	private int nbLayer = 4;
+	private int[] structure = new int[] {2, 10,3,10, 3};
+	private int nbLayer;
 	/// <summary>
 	/// Indique si un algorithme est en cours d'exécution
 	/// </summary>
 	private bool _isRunning = false;
 
 	public void Start(){
+		nbLayer=structure.Length;
+		Debug.Log("test >" + nbLayer);
 	}
 	/// <summary>
 	/// Méthode utilisée pour gérer les informations et 
