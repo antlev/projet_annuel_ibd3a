@@ -45,14 +45,14 @@ public:
 	}
 	// MLP
 	__declspec(dllexport) MLP* createMlp(int *structure, int nbLayer) { return new MLP(structure, nbLayer); }
-	__declspec(dllexport) void classify(MLP* pMLP, double *oneInput) { pMLP->MLP::classify(oneInput); }
+	__declspec(dllexport) double* classify(MLP* pMLP, double *oneInput) { return pMLP->MLP::classify(oneInput); }
 	__declspec(dllexport) void fitClassification(MLP* pMLP, double *inputs, int nbData, double *expectedOutputs) {
 		pMLP->MLP::fitClassification(inputs, nbData, expectedOutputs);
 	}
 	__declspec(dllexport) void fitRegression(MLP* pMLP, double *inputs, int nbData, double *expectedOutputs) {
 		pMLP->MLP::fitRegression(inputs, nbData, expectedOutputs);
 	}
-	__declspec(dllexport) void predict(MLP* pMLP, double* oneInput) { pMLP->MLP::predict(oneInput); }
+	__declspec(dllexport) double* predict(MLP* pMLP, double* oneInput) { return pMLP->MLP::predict(oneInput); }
 	__declspec(dllexport) void eraseMlp(MLP* pMLP) { delete pMLP; }
 	// NAIVE RBF
 	__declspec(dllexport) NAIVE_RBF* createNaiveRbfModel(int nbExamples, double* gamma, double* X, int inputSize, double* Y) { return new NAIVE_RBF(nbExamples, gamma, X, inputSize, Y); }
