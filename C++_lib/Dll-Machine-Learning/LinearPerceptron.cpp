@@ -121,7 +121,7 @@ int LinearPerceptronClassif::linear_fit_classification_rosenblatt(double *inputs
 // @param nbData : number of data
 // @param expectedOutputs : array containing flatten outputs data
 // @param outputSize : size of output array
-LinearPerceptronRegression::LinearPerceptronRegression(double *inputs, int inputSize, int nbData, double *expectedOutputs, int outputSize){
+LinearPerceptronRegression::LinearPerceptronRegression(double *inputs, int inputSize, int nbData, double *expectedOutputs, int outputSize):inputSize(inputSize),outputSize(outputSize){
 	assert(inputSize > 0);
 	assert(outputSize > 0);
 	// Create the model
